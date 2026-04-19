@@ -1,13 +1,20 @@
 import { NavLink, Outlet } from "react-router-dom";
-import { LayoutGrid, Sparkles, Briefcase } from "lucide-react";
+import { LayoutGrid, Sparkles, Briefcase, BarChart3 } from "lucide-react";
 import { cn } from "@/lib/utils";
 
-const nav = [
-  { to: "/", label: "Tracker", icon: LayoutGrid, end: true },
-  { to: "/assistant", label: "AI Assistant", icon: Sparkles },
+const trackerNav = [
+  { to: "/", label: "Board", icon: LayoutGrid, end: true },
+  { to: "/analytics", label: "Analytics", icon: BarChart3, end: true },
 ];
 
 export default function AppLayout() {
+  const navItem =
+    "flex items-center gap-2.5 rounded-md px-3 py-2 text-sm transition-colors";
+  const navInactive =
+    "text-sidebar-foreground/80 hover:bg-sidebar-accent/60 hover:text-sidebar-foreground";
+  const navActive =
+    "bg-sidebar-accent text-sidebar-accent-foreground font-medium";
+
   return (
     <div className="flex h-full min-h-screen w-full bg-background">
       <aside className="hidden md:flex w-60 shrink-0 flex-col border-r border-sidebar-border bg-sidebar">
@@ -21,24 +28,30 @@ export default function AppLayout() {
           </div>
         </div>
         <nav className="flex-1 p-3 space-y-1">
-          {nav.map((n) => (
+          <div className="px-3 pt-1 pb-1 text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">
+            Tracker
+          </div>
+          {trackerNav.map((n) => (
             <NavLink
               key={n.to}
               to={n.to}
               end={n.end}
-              className={({ isActive }) =>
-                cn(
-                  "flex items-center gap-2.5 rounded-md px-3 py-2 text-sm transition-colors",
-                  isActive
-                    ? "bg-sidebar-accent text-sidebar-accent-foreground font-medium"
-                    : "text-sidebar-foreground/80 hover:bg-sidebar-accent/60 hover:text-sidebar-foreground"
-                )
-              }
+              className={({ isActive }) => cn(navItem, isActive ? navActive : navInactive)}
             >
               <n.icon className="h-4 w-4" />
               {n.label}
             </NavLink>
           ))}
+          <div className="px-3 pt-3 pb-1 text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">
+            Assistant
+          </div>
+          <NavLink
+            to="/assistant"
+            className={({ isActive }) => cn(navItem, isActive ? navActive : navInactive)}
+          >
+            <Sparkles className="h-4 w-4" />
+            AI Assistant
+          </NavLink>
         </nav>
         <div className="p-4 text-[11px] text-muted-foreground border-t border-sidebar-border">
           Local-first · Your data stays in this browser.
@@ -49,16 +62,13 @@ export default function AppLayout() {
         <header className="md:hidden flex items-center justify-between border-b border-border px-4 py-3 bg-card">
           <div className="font-semibold">CareerDesk</div>
           <nav className="flex gap-1">
-            {nav.map((n) => (
+            {[...trackerNav, { to: "/assistant", label: "Assistant", end: true }].map((n) => (
               <NavLink
                 key={n.to}
                 to={n.to}
-                end={n.end}
+                end={n.end as boolean}
                 className={({ isActive }) =>
-                  cn(
-                    "px-3 py-1.5 rounded-md text-xs",
-                    isActive ? "bg-secondary text-foreground" : "text-muted-foreground"
-                  )
+                  cn("px-3 py-1.5 rounded-md text-xs", isActive ? "bg-secondary text-foreground" : "text-muted-foreground")
                 }
               >
                 {n.label}
