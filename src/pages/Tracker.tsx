@@ -1,6 +1,6 @@
 import { useMemo, useState } from "react";
 import { DndContext, DragEndEvent, DragOverlay, DragStartEvent, PointerSensor, useSensor, useSensors } from "@dnd-kit/core";
-import { Filter, X, Sparkles } from "lucide-react";
+import { Filter, Sparkles } from "lucide-react";
 import { useJobs } from "@/lib/jobsStore";
 import { APPLICATION_TYPES, INDUSTRIES, STATUS_ORDER, type Job, type JobStatus } from "@/lib/types";
 import { KanbanColumn } from "@/components/kanban/KanbanColumn";
@@ -9,6 +9,9 @@ import { JobCard } from "@/components/kanban/JobCard";
 import { AutoAddDialog } from "@/components/kanban/AutoAddDialog";
 import { Button } from "@/components/ui/button";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+import { Label } from "@/components/ui/label";
+import { Badge } from "@/components/ui/badge";
 
 const ALL = "__all__";
 
@@ -59,6 +62,7 @@ export default function Tracker() {
     setDialog({ open: true, status: job.status, job, key: Date.now() });
 
   const filtersActive = appType !== ALL || industry !== ALL;
+  const activeCount = (appType !== ALL ? 1 : 0) + (industry !== ALL ? 1 : 0);
 
   return (
     <div className="flex h-full flex-col">
@@ -71,28 +75,49 @@ export default function Tracker() {
             </p>
           </div>
           <div className="flex flex-wrap items-center gap-2">
-            <div className="hidden sm:flex items-center gap-1.5 text-xs text-muted-foreground mr-1">
-              <Filter className="h-3.5 w-3.5" /> Filter
-            </div>
-            <Select value={appType} onValueChange={setAppType}>
-              <SelectTrigger className="h-9 w-[170px]"><SelectValue placeholder="Type" /></SelectTrigger>
-              <SelectContent>
-                <SelectItem value={ALL}>All types</SelectItem>
-                {APPLICATION_TYPES.map((t) => <SelectItem key={t} value={t}>{t}</SelectItem>)}
-              </SelectContent>
-            </Select>
-            <Select value={industry} onValueChange={setIndustry}>
-              <SelectTrigger className="h-9 w-[170px]"><SelectValue placeholder="Industry" /></SelectTrigger>
-              <SelectContent>
-                <SelectItem value={ALL}>All industries</SelectItem>
-                {INDUSTRIES.map((t) => <SelectItem key={t} value={t}>{t}</SelectItem>)}
-              </SelectContent>
-            </Select>
-            {filtersActive && (
-              <Button variant="ghost" size="sm" onClick={() => { setAppType(ALL); setIndustry(ALL); }}>
-                <X className="h-3.5 w-3.5 mr-1" /> Clear
-              </Button>
-            )}
+            <Popover>
+              <PopoverTrigger asChild>
+                <Button variant="outline" size="sm" className="h-9">
+                  <Filter className="h-3.5 w-3.5" />
+                  Filter
+                  {activeCount > 0 && (
+                    <Badge variant="secondary" className="ml-1 h-5 px-1.5 text-[10px]">{activeCount}</Badge>
+                  )}
+                </Button>
+              </PopoverTrigger>
+              <PopoverContent align="end" className="w-72 p-4 space-y-3">
+                <div className="grid gap-1.5">
+                  <Label className="text-xs">Application type</Label>
+                  <Select value={appType} onValueChange={setAppType}>
+                    <SelectTrigger className="h-9"><SelectValue /></SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value={ALL}>All types</SelectItem>
+                      {APPLICATION_TYPES.map((t) => <SelectItem key={t} value={t}>{t}</SelectItem>)}
+                    </SelectContent>
+                  </Select>
+                </div>
+                <div className="grid gap-1.5">
+                  <Label className="text-xs">Industry</Label>
+                  <Select value={industry} onValueChange={setIndustry}>
+                    <SelectTrigger className="h-9"><SelectValue /></SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value={ALL}>All industries</SelectItem>
+                      {INDUSTRIES.map((t) => <SelectItem key={t} value={t}>{t}</SelectItem>)}
+                    </SelectContent>
+                  </Select>
+                </div>
+                {filtersActive && (
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    className="w-full"
+                    onClick={() => { setAppType(ALL); setIndustry(ALL); }}
+                  >
+                    Clear filters
+                  </Button>
+                )}
+              </PopoverContent>
+            </Popover>
             <Button variant="ai" onClick={() => setAutoOpen(true)} className="group">
               <Sparkles className="h-4 w-4 transition-transform group-hover:rotate-12" />
               Auto-add with AI

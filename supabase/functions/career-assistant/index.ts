@@ -10,11 +10,11 @@ type Tool = "tone" | "translate" | "polish" | "extract";
 
 const SYSTEM: Record<Tool, string> = {
   tone:
-    "You are an expert career coach and corporate communications analyst. Given a cover letter draft and a target company, infer the company's likely culture (traditional/enterprise, agile/startup, consulting/formal, creative, etc.) from public reputation. Evaluate whether the draft's tone matches that culture. Be specific. Output strict markdown with these sections: ## Inferred Culture, ## Tone Match (give a verdict + 1-10 score and 2-3 reasons), ## Issues (bulleted), ## Suggested Edits (3-6 concrete rewrites with before → after).",
+    "You are an expert career coach and corporate communications analyst. Given a cover letter draft and a target company, infer the company's likely culture and evaluate whether the draft's tone matches it. Always call the report_tone function with structured fields. Be specific and concrete.",
   translate:
-    "You are an expert resume writer specializing in translating unconventional experience into the precise corporate language of a target role. Given the user's past experience and the target job description, return STRICT markdown: a single section ## Resume Bullets followed by 3-5 bullet points. Each bullet must be a single line starting with a strong action verb, quantified where possible, using terminology mirrored from the job description. No preamble, no closing remarks.",
+    "You are an expert resume writer specializing in translating unconventional experience into precise corporate language. Given the user's experience and a target job description, return STRICT markdown with ONLY a single top-level section header `## Resume Bullets` followed by 3-5 unordered list items prefixed with `- `. Each bullet: one line, starts with a strong action verb, quantified where possible, mirrors JD vocabulary. No preamble, no closing remarks, no other sections.",
   polish:
-    "You are a professional editor. Improve the user's text for grammar, clarity, conciseness, and professional business tone in the requested language. Preserve meaning and intent. Return strict markdown with: ## Polished Version (the rewritten text only) then ## Key Changes (bulleted, brief).",
+    "You are a professional editor. Improve the user's text for grammar, clarity, conciseness, and professional business tone in the requested language. Preserve meaning. Always call the report_polish function with structured fields.",
   extract:
     "You extract structured job posting metadata. From the provided text (and optional URL), call the save_job function with your best inference. Always pick the closest enum value for applicationType and industry. If a field is truly unknown leave it empty. Keep notes to 1-2 short sentences summarizing key requirements.",
 };
@@ -27,8 +27,8 @@ const EXTRACT_TOOL = {
     parameters: {
       type: "object",
       properties: {
-        company: { type: "string", description: "Company / employer name" },
-        role: { type: "string", description: "Job title / role" },
+        company: { type: "string" },
+        role: { type: "string" },
         applicationType: {
           type: "string",
           enum: ["Working Student", "Internship", "Full-time", "Part-time", "Contract", "Freelance", ""],
@@ -37,9 +37,82 @@ const EXTRACT_TOOL = {
           type: "string",
           enum: ["Tech", "Automotive", "Consulting", "Finance", "Healthcare", "E-commerce", "Manufacturing", "Media", "Education", "Other", ""],
         },
-        notes: { type: "string", description: "Brief 1-2 sentence summary of key requirements/responsibilities" },
+        notes: { type: "string" },
       },
       required: ["company", "role", "applicationType", "industry", "notes"],
+      additionalProperties: false,
+    },
+  },
+};
+
+const TONE_TOOL = {
+  type: "function",
+  function: {
+    name: "report_tone",
+    description: "Return a structured tone analysis.",
+    parameters: {
+      type: "object",
+      properties: {
+        culture: {
+          type: "string",
+          description: "1-2 sentence inference of the company's culture and communication style.",
+        },
+        toneVerdict: {
+          type: "string",
+          description: "Short verdict, e.g. 'Strong match', 'Partial match', 'Mismatch'.",
+        },
+        toneScore: {
+          type: "integer",
+          minimum: 1,
+          maximum: 10,
+          description: "Tone match score from 1 to 10.",
+        },
+        toneReasoning: {
+          type: "string",
+          description: "1-2 sentences explaining the score.",
+        },
+        issues: {
+          type: "array",
+          items: { type: "string" },
+          description: "Concrete issues with the draft (each <= 1 sentence).",
+        },
+        edits: {
+          type: "array",
+          description: "3-6 concrete rewrites with before/after.",
+          items: {
+            type: "object",
+            properties: {
+              before: { type: "string" },
+              after: { type: "string" },
+              reason: { type: "string", description: "Why this edit improves the draft." },
+            },
+            required: ["before", "after", "reason"],
+            additionalProperties: false,
+          },
+        },
+      },
+      required: ["culture", "toneVerdict", "toneScore", "toneReasoning", "issues", "edits"],
+      additionalProperties: false,
+    },
+  },
+};
+
+const POLISH_TOOL = {
+  type: "function",
+  function: {
+    name: "report_polish",
+    description: "Return polished version + key changes.",
+    parameters: {
+      type: "object",
+      properties: {
+        polished: { type: "string", description: "The fully rewritten text only." },
+        changes: {
+          type: "array",
+          items: { type: "string" },
+          description: "Brief bullet points describing what was changed and why.",
+        },
+      },
+      required: ["polished", "changes"],
       additionalProperties: false,
     },
   },
@@ -80,6 +153,12 @@ serve(async (req) => {
     if (tool === "extract") {
       body.tools = [EXTRACT_TOOL];
       body.tool_choice = { type: "function", function: { name: "save_job" } };
+    } else if (tool === "tone") {
+      body.tools = [TONE_TOOL];
+      body.tool_choice = { type: "function", function: { name: "report_tone" } };
+    } else if (tool === "polish") {
+      body.tools = [POLISH_TOOL];
+      body.tool_choice = { type: "function", function: { name: "report_polish" } };
     }
 
     const resp = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
@@ -111,21 +190,23 @@ serve(async (req) => {
 
     const data = await resp.json();
 
-    if (tool === "extract") {
+    // Tool-call responses
+    if (tool === "extract" || tool === "tone" || tool === "polish") {
       const call = data.choices?.[0]?.message?.tool_calls?.[0];
       if (!call?.function?.arguments) {
         return new Response(JSON.stringify({ error: "AI did not return structured data" }), {
           status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" },
         });
       }
-      let parsed: Record<string, string> = {};
+      let parsed: Record<string, unknown> = {};
       try { parsed = JSON.parse(call.function.arguments); }
       catch {
         return new Response(JSON.stringify({ error: "Failed to parse AI response" }), {
           status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" },
         });
       }
-      return new Response(JSON.stringify({ extracted: parsed }), {
+      const key = tool === "extract" ? "extracted" : "structured";
+      return new Response(JSON.stringify({ [key]: parsed }), {
         headers: { ...corsHeaders, "Content-Type": "application/json" },
       });
     }

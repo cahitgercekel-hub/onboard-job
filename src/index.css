@@ -49,6 +49,13 @@
     --col-offer: 142 55% 45%;
     --col-rejected: 0 65% 55%;
 
+    /* Soft tinted header backgrounds per column (HSL components) */
+    --col-saved-soft: 220 35% 92%;
+    --col-applied-soft: 215 75% 92%;
+    --col-interviewing-soft: 42 90% 88%;
+    --col-offer-soft: 142 50% 88%;
+    --col-rejected-soft: 0 70% 93%;
+
     --shadow-sm: 0 1px 2px hsl(30 10% 15% / 0.04), 0 1px 3px hsl(30 10% 15% / 0.06);
     --shadow-md: 0 4px 12px hsl(30 10% 15% / 0.06), 0 2px 4px hsl(30 10% 15% / 0.04);
     --shadow-lg: 0 12px 32px hsl(30 10% 15% / 0.10);
@@ -115,4 +122,9 @@
   .surface-card {
     @apply bg-card border border-border rounded-lg shadow-sm;
   }
+  .col-header-saved { background-color: hsl(var(--col-saved-soft)); }
+  .col-header-applied { background-color: hsl(var(--col-applied-soft)); }
+  .col-header-interviewing { background-color: hsl(var(--col-interviewing-soft)); }
+  .col-header-offer { background-color: hsl(var(--col-offer-soft)); }
+  .col-header-rejected { background-color: hsl(var(--col-rejected-soft)); }
 }

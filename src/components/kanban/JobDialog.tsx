@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -35,8 +35,19 @@ export function JobDialog({ open, onOpenChange, initialStatus = "saved", job, on
   const [industry, setIndustry] = useState<Industry | "">((job?.industry as Industry) ?? "");
   const [notes, setNotes] = useState(job?.notes ?? "");
 
-  // reset when reopened with new job
-  // (simple guard: when dialog closes, parent will unmount via key)
+  // Reset form whenever the dialog opens (clears stale state on reopen).
+  useEffect(() => {
+    if (!open) return;
+    setCompany(job?.company ?? "");
+    setRole(job?.role ?? "");
+    setUrl(job?.url ?? "");
+    setDateApplied(job?.dateApplied?.slice(0, 10) ?? "");
+    setStatus(job?.status ?? initialStatus);
+    setAppType((job?.applicationType as ApplicationType) ?? "");
+    setIndustry((job?.industry as Industry) ?? "");
+    setNotes(job?.notes ?? "");
+  }, [open, job, initialStatus]);
+
   const submit = () => {
     if (!company.trim() || !role.trim()) return;
     onSave({
