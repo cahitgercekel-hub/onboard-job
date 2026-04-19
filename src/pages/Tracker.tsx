@@ -1,10 +1,11 @@
 import { useMemo, useState } from "react";
 import { DndContext, DragEndEvent, PointerSensor, useSensor, useSensors } from "@dnd-kit/core";
-import { Filter, X } from "lucide-react";
+import { Filter, X, Sparkles } from "lucide-react";
 import { useJobs } from "@/lib/jobsStore";
 import { APPLICATION_TYPES, INDUSTRIES, STATUS_ORDER, type Job, type JobStatus } from "@/lib/types";
 import { KanbanColumn } from "@/components/kanban/KanbanColumn";
 import { JobDialog } from "@/components/kanban/JobDialog";
+import { AutoAddDialog } from "@/components/kanban/AutoAddDialog";
 import { Button } from "@/components/ui/button";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 
@@ -19,6 +20,7 @@ export default function Tracker() {
     status: "saved",
     key: 0,
   });
+  const [autoOpen, setAutoOpen] = useState(false);
 
   const sensors = useSensors(useSensor(PointerSensor, { activationConstraint: { distance: 4 } }));
 
@@ -86,7 +88,11 @@ export default function Tracker() {
                 <X className="h-3.5 w-3.5 mr-1" /> Clear
               </Button>
             )}
-            <Button onClick={() => openAdd("saved")}>+ Add job</Button>
+            <Button variant="ai" onClick={() => setAutoOpen(true)} className="group">
+              <Sparkles className="h-4 w-4 transition-transform group-hover:rotate-12" />
+              Auto-add with AI
+            </Button>
+            <Button variant="outline" onClick={() => openAdd("saved")}>+ Add job</Button>
           </div>
         </div>
       </div>
@@ -121,6 +127,15 @@ export default function Tracker() {
           onDelete={dialog.job ? () => removeJob(dialog.job!.id) : undefined}
         />
       )}
+
+      <AutoAddDialog
+        open={autoOpen}
+        onOpenChange={setAutoOpen}
+        onExtracted={(data) => {
+          const newJob = addJob(data);
+          setDialog({ open: true, status: newJob.status, job: newJob, key: Date.now() });
+        }}
+      />
     </div>
   );
 }

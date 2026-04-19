@@ -31,7 +31,7 @@ export function useJobs() {
     };
   }, []);
 
-  const addJob = useCallback((data: Omit<Job, "id" | "createdAt" | "updatedAt">) => {
+  const addJob = useCallback((data: Omit<Job, "id" | "createdAt" | "updatedAt">): Job => {
     const now = new Date().toISOString();
     const job: Job = {
       ...data,
@@ -40,6 +40,7 @@ export function useJobs() {
       updatedAt: now,
     };
     write([job, ...read()]);
+    return job;
   }, []);
 
   const updateJob = useCallback((id: string, patch: Partial<Job>) => {
