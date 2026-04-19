@@ -47,6 +47,21 @@ export default {
           DEFAULT: "hsl(var(--card))",
           foreground: "hsl(var(--card-foreground))",
         },
+        warning: {
+          DEFAULT: "hsl(var(--warning))",
+          foreground: "hsl(var(--warning-foreground))",
+        },
+        success: {
+          DEFAULT: "hsl(var(--success))",
+          foreground: "hsl(var(--success-foreground))",
+        },
+        column: {
+          saved: "hsl(var(--col-saved))",
+          applied: "hsl(var(--col-applied))",
+          interviewing: "hsl(var(--col-interviewing))",
+          offer: "hsl(var(--col-offer))",
+          rejected: "hsl(var(--col-rejected))",
+        },
         sidebar: {
           DEFAULT: "hsl(var(--sidebar-background))",
           foreground: "hsl(var(--sidebar-foreground))",
