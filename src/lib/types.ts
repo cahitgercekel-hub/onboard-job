@@ -32,8 +32,11 @@ export const INDUSTRIES = [
   "Other",
 ] as const;
 
+export const WORK_MODELS = ["Remote", "Hybrid", "On-site"] as const;
+
 export type ApplicationType = (typeof APPLICATION_TYPES)[number];
 export type Industry = (typeof INDUSTRIES)[number];
+export type WorkModel = (typeof WORK_MODELS)[number];
 
 export interface Job {
   id: string;
@@ -44,6 +47,9 @@ export interface Job {
   status: JobStatus;
   applicationType?: ApplicationType;
   industry?: Industry;
+  workModel?: WorkModel;
+  location?: string;
+  jobDescription?: string;
   notes?: string;
   createdAt: string;
   updatedAt: string; // bumped when status changes
