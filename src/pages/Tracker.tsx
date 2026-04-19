@@ -1,10 +1,11 @@
 import { useMemo, useState } from "react";
-import { DndContext, DragEndEvent, PointerSensor, useSensor, useSensors } from "@dnd-kit/core";
+import { DndContext, DragEndEvent, DragOverlay, DragStartEvent, PointerSensor, useSensor, useSensors } from "@dnd-kit/core";
 import { Filter, X, Sparkles } from "lucide-react";
 import { useJobs } from "@/lib/jobsStore";
 import { APPLICATION_TYPES, INDUSTRIES, STATUS_ORDER, type Job, type JobStatus } from "@/lib/types";
 import { KanbanColumn } from "@/components/kanban/KanbanColumn";
 import { JobDialog } from "@/components/kanban/JobDialog";
+import { JobCard } from "@/components/kanban/JobCard";
 import { AutoAddDialog } from "@/components/kanban/AutoAddDialog";
 import { Button } from "@/components/ui/button";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
@@ -21,6 +22,8 @@ export default function Tracker() {
     key: 0,
   });
   const [autoOpen, setAutoOpen] = useState(false);
+  const [activeId, setActiveId] = useState<string | null>(null);
+  const activeJob = useMemo(() => jobs.find((j) => j.id === activeId) ?? null, [jobs, activeId]);
 
   const sensors = useSensors(useSensor(PointerSensor, { activationConstraint: { distance: 4 } }));
 
@@ -40,7 +43,9 @@ export default function Tracker() {
     return m;
   }, [filtered]);
 
+  const onDragStart = (e: DragStartEvent) => setActiveId(String(e.active.id));
   const onDragEnd = (e: DragEndEvent) => {
+    setActiveId(null);
     const { active, over } = e;
     if (!over) return;
     const newStatus = over.id as JobStatus;
