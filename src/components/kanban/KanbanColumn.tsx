@@ -36,7 +36,7 @@ export function KanbanColumn({ status, jobs, onAdd, onCardClick, hiddenId }: Pro
     <div
       ref={setNodeRef}
       className={cn(
-        "flex w-72 shrink-0 flex-col rounded-lg border border-border bg-muted/40 transition-colors",
+        "flex w-[85vw] sm:w-72 shrink-0 flex-col rounded-lg border border-border bg-muted/40 transition-colors snap-start",
         isOver && "bg-accent/10 border-accent/50"
       )}
     >

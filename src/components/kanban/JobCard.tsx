@@ -40,7 +40,9 @@ export function JobCard({ job, onClick, overlay = false }: Props) {
       onClick={handleClick}
       className={cn(
         "group surface-card p-3 transition-shadow hover:shadow-md select-none",
-        overlay ? "cursor-grabbing" : "cursor-grab active:cursor-grabbing",
+        // On mobile, prefer horizontal panning for scroll-snap; only drag on md+
+        "touch-pan-x md:touch-none",
+        overlay ? "cursor-grabbing" : "cursor-pointer md:cursor-grab md:active:cursor-grabbing",
         alarm === "warn" && "ring-1 ring-warning/50",
         alarm === "danger" && "ring-1 ring-destructive/60",
         overlay && "shadow-lg ring-1 ring-accent/40"

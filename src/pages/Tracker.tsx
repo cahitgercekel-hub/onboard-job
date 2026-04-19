@@ -107,18 +107,19 @@ export default function Tracker() {
 
   return (
     <div className="flex h-full flex-col">
-      <div className="border-b border-border bg-card/60 backdrop-blur px-6 py-4">
-        <div className="flex flex-wrap items-end justify-between gap-4">
-          <div>
-            <h1 className="text-2xl font-semibold tracking-tight">{t("tracker.title")}</h1>
-            <p className="text-sm text-muted-foreground mt-0.5">
-              {t("tracker.jobs", { count: jobs.length })} · {t("common.dragHint")}
+      <div className="border-b border-border bg-card/60 backdrop-blur px-4 md:px-6 py-3 md:py-4">
+        <div className="flex flex-wrap items-end justify-between gap-3">
+          <div className="min-w-0">
+            <h1 className="text-xl md:text-2xl font-semibold tracking-tight">{t("tracker.title")}</h1>
+            <p className="text-xs md:text-sm text-muted-foreground mt-0.5">
+              <span>{t("tracker.jobs", { count: jobs.length })}</span>
+              <span className="hidden md:inline"> · {t("common.dragHint")}</span>
             </p>
           </div>
           <div className="flex flex-wrap items-center gap-2">
             <Popover>
               <PopoverTrigger asChild>
-                <Button variant="outline" size="sm" className="h-9">
+                <Button variant="outline" size="sm" className="h-11 md:h-9">
                   <Filter className="h-3.5 w-3.5" />
                   {t("common.filter")}
                   {activeCount > 0 && (
@@ -126,12 +127,12 @@ export default function Tracker() {
                   )}
                 </Button>
               </PopoverTrigger>
-              <PopoverContent align="end" className="w-[340px] p-4 space-y-4">
+              <PopoverContent align="end" className="w-[calc(100vw-2rem)] sm:w-[340px] p-4 space-y-4">
                 <div className="grid grid-cols-2 gap-3">
                   <div className="grid gap-1.5">
                     <Label className="text-xs">{t("filters.appType")}</Label>
                     <Select value={appType} onValueChange={setAppType}>
-                      <SelectTrigger className="h-9"><SelectValue /></SelectTrigger>
+                      <SelectTrigger className="h-11 md:h-9"><SelectValue /></SelectTrigger>
                       <SelectContent>
                         <SelectItem value={ALL}>{t("filters.allTypes")}</SelectItem>
                         {APPLICATION_TYPES.map((tp) => <SelectItem key={tp} value={tp}>{tp}</SelectItem>)}
@@ -141,7 +142,7 @@ export default function Tracker() {
                   <div className="grid gap-1.5">
                     <Label className="text-xs">{t("filters.industry")}</Label>
                     <Select value={industry} onValueChange={setIndustry}>
-                      <SelectTrigger className="h-9"><SelectValue /></SelectTrigger>
+                      <SelectTrigger className="h-11 md:h-9"><SelectValue /></SelectTrigger>
                       <SelectContent>
                         <SelectItem value={ALL}>{t("filters.allIndustries")}</SelectItem>
                         {INDUSTRIES.map((tp) => <SelectItem key={tp} value={tp}>{tp}</SelectItem>)}
@@ -152,7 +153,7 @@ export default function Tracker() {
                 <div className="grid gap-1.5">
                   <Label className="text-xs">{t("filters.workModel")}</Label>
                   <Select value={workModel} onValueChange={setWorkModel}>
-                    <SelectTrigger className="h-9"><SelectValue /></SelectTrigger>
+                    <SelectTrigger className="h-11 md:h-9"><SelectValue /></SelectTrigger>
                     <SelectContent>
                       <SelectItem value={ALL}>{t("filters.allModels")}</SelectItem>
                       {WORK_MODELS.map((m) => <SelectItem key={m} value={m}>{m}</SelectItem>)}
@@ -166,7 +167,7 @@ export default function Tracker() {
                     <button
                       onClick={() => { setDateChip("any"); setCustomFrom(undefined); setCustomTo(undefined); }}
                       className={cn(
-                        "text-[11px] px-2 py-1 rounded-md border transition",
+                        "text-xs px-2.5 py-1.5 rounded-md border transition min-h-[32px]",
                         dateChip === "any" ? "bg-accent text-accent-foreground border-accent" : "border-border bg-background hover:bg-muted"
                       )}
                     >
@@ -177,7 +178,7 @@ export default function Tracker() {
                         key={c.id}
                         onClick={() => { setDateChip(c.id); setCustomFrom(undefined); setCustomTo(undefined); }}
                         className={cn(
-                          "text-[11px] px-2 py-1 rounded-md border transition",
+                          "text-xs px-2.5 py-1.5 rounded-md border transition min-h-[32px]",
                           dateChip === c.id ? "bg-accent text-accent-foreground border-accent" : "border-border bg-background hover:bg-muted"
                         )}
                       >
@@ -196,24 +197,28 @@ export default function Tracker() {
                 </div>
 
                 {activeCount > 0 && (
-                  <Button variant="ghost" size="sm" className="w-full" onClick={clearAll}>
+                  <Button variant="ghost" size="sm" className="w-full min-h-[44px]" onClick={clearAll}>
                     {t("common.clear")}
                   </Button>
                 )}
               </PopoverContent>
             </Popover>
-            <Button variant="ai" onClick={() => setAutoOpen(true)} className="group">
+            <Button variant="ai" onClick={() => setAutoOpen(true)} className="group h-11 md:h-9 px-3">
               <Sparkles className="h-4 w-4 transition-transform group-hover:rotate-12" />
-              {t("tracker.autoAdd")}
+              <span className="hidden sm:inline">{t("tracker.autoAdd")}</span>
+              <span className="sm:hidden">AI</span>
             </Button>
-            <Button variant="outline" onClick={() => openAdd("saved")}>+ {t("tracker.addJob")}</Button>
+            <Button variant="outline" onClick={() => openAdd("saved")} className="h-11 md:h-9 px-3">
+              <span className="hidden sm:inline">+ {t("tracker.addJob")}</span>
+              <span className="sm:hidden">+ Add</span>
+            </Button>
           </div>
         </div>
       </div>
 
-      <div className="flex-1 overflow-x-auto">
+      <div className="flex-1 overflow-x-auto snap-x snap-mandatory md:snap-none">
         <DndContext sensors={sensors} onDragStart={onDragStart} onDragEnd={onDragEnd} onDragCancel={() => setActiveId(null)}>
-          <div className="flex gap-4 p-6 min-h-full">
+          <div className="flex gap-4 px-4 py-4 md:p-6 min-h-full">
             {STATUS_ORDER.map((status) => (
               <KanbanColumn
                 key={status}
