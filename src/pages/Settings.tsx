@@ -109,17 +109,31 @@ export default function Settings() {
         <div className="mb-5">
           <h2 className="text-base font-semibold text-foreground">{t("settings.data")}</h2>
         </div>
-        <div className="grid sm:grid-cols-[1fr_auto] gap-4 items-center">
-          <div>
-            <Label className="text-sm font-medium">{t("settings.export")}</Label>
-            <p className="text-xs text-muted-foreground mt-0.5">{t("settings.exportHint")}</p>
+        <div className="space-y-5">
+          <div className="grid sm:grid-cols-[1fr_auto] gap-4 items-center">
+            <div>
+              <Label className="text-sm font-medium">{t("settings.export")}</Label>
+              <p className="text-xs text-muted-foreground mt-0.5">{t("settings.exportHint")}</p>
+            </div>
+            <Button
+              variant="outline"
+              onClick={() => { downloadJobsCsv(); toast.success("CSV downloaded"); }}
+            >
+              <Download className="h-4 w-4" /> {t("settings.export")}
+            </Button>
           </div>
-          <Button
-            variant="outline"
-            onClick={() => { downloadJobsCsv(); toast.success("CSV downloaded"); }}
-          >
-            <Download className="h-4 w-4" /> {t("settings.export")}
-          </Button>
+
+          <div className="grid sm:grid-cols-[1fr_auto] gap-4 items-center border-t border-border pt-5">
+            <div>
+              <Label className="text-sm font-medium">Import data from CSV</Label>
+              <p className="text-xs text-muted-foreground mt-0.5">
+                Add jobs from a CSV file matching the export format. You'll preview rows before they're saved.
+              </p>
+            </div>
+            <Button variant="outline" onClick={() => setImportOpen(true)}>
+              <Upload className="h-4 w-4" /> Import CSV
+            </Button>
+          </div>
         </div>
       </section>
 
