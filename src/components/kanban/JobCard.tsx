@@ -1,5 +1,4 @@
 import { useDraggable } from "@dnd-kit/core";
-import { CSS } from "@dnd-kit/utilities";
 import { format } from "date-fns";
 import { AlertTriangle, ExternalLink, GripVertical } from "lucide-react";
 import { alarmFor, daysSince } from "@/lib/jobsStore";
@@ -10,25 +9,27 @@ import { Badge } from "@/components/ui/badge";
 interface Props {
   job: Job;
   onClick: () => void;
+  overlay?: boolean;
 }
 
-export function JobCard({ job, onClick }: Props) {
-  const { attributes, listeners, setNodeRef, transform, isDragging } = useDraggable({ id: job.id });
+export function JobCard({ job, onClick, overlay = false }: Props) {
+  const { attributes, listeners, setNodeRef, isDragging } = useDraggable({ id: job.id });
   const alarm = alarmFor(job);
 
-  const style = {
-    transform: CSS.Translate.toString(transform),
-    opacity: isDragging ? 0.4 : 1,
-  };
+  // When overlay=true we render inside DragOverlay (no transform, full opacity, lifted shadow).
+  const style = overlay
+    ? undefined
+    : { opacity: isDragging ? 0 : 1 };
 
   return (
     <div
-      ref={setNodeRef}
+      ref={overlay ? undefined : setNodeRef}
       style={style}
       className={cn(
         "group surface-card p-3 cursor-pointer transition-shadow hover:shadow-md",
         alarm === "warn" && "ring-1 ring-warning/50",
-        alarm === "danger" && "ring-1 ring-destructive/60"
+        alarm === "danger" && "ring-1 ring-destructive/60",
+        overlay && "shadow-lg ring-1 ring-accent/40 cursor-grabbing"
       )}
       onClick={onClick}
     >
