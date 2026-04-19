@@ -1,5 +1,6 @@
 import { useEffect, useState, useCallback } from "react";
-import type { Job, JobStatus } from "./types";
+import type { Job, JobStatus, ApplicationType, Industry, WorkModel } from "./types";
+import { STATUS_ORDER, APPLICATION_TYPES, INDUSTRIES, WORK_MODELS } from "./types";
 
 const KEY = "jat.jobs.v1";
 
