@@ -609,16 +609,16 @@ function CvAnalyzer() {
 export default function Assistant() {
   const { t } = useTranslation();
   return (
-    <div className="px-6 py-6 max-w-6xl mx-auto">
-      <div className="mb-6">
-        <h1 className="text-2xl font-semibold tracking-tight flex items-center gap-2">
+    <div className="px-4 md:px-6 py-4 md:py-6 max-w-6xl mx-auto">
+      <div className="mb-5 md:mb-6">
+        <h1 className="text-xl md:text-2xl font-semibold tracking-tight flex items-center gap-2">
           <Sparkles className="h-5 w-5 text-accent" /> {t("assistant.title")}
         </h1>
-        <p className="text-sm text-muted-foreground mt-1">{t("assistant.subtitle")}</p>
+        <p className="text-xs md:text-sm text-muted-foreground mt-1">{t("assistant.subtitle")}</p>
       </div>
 
       <Tabs defaultValue="tone" className="w-full">
-        <TabsList className="mb-5 flex-wrap h-auto">
+        <TabsList className="mb-5 flex-wrap h-auto w-full md:w-auto justify-start">
           <TabsTrigger value="tone">{t("assistant.tabs.tone")}</TabsTrigger>
           <TabsTrigger value="translate">{t("assistant.tabs.translate")}</TabsTrigger>
           <TabsTrigger value="polish">{t("assistant.tabs.polish")}</TabsTrigger>

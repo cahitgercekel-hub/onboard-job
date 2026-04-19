@@ -33,36 +33,36 @@ export default function Analytics() {
   const total = jobs.length;
 
   return (
-    <div className="px-6 py-6 max-w-6xl mx-auto">
-      <div className="mb-6">
-        <h1 className="text-2xl font-semibold tracking-tight flex items-center gap-2">
+    <div className="px-4 md:px-6 py-4 md:py-6 max-w-6xl mx-auto">
+      <div className="mb-5 md:mb-6">
+        <h1 className="text-xl md:text-2xl font-semibold tracking-tight flex items-center gap-2">
           <BarChart3 className="h-5 w-5 text-accent" /> {t("analytics.title")}
         </h1>
-        <p className="text-sm text-muted-foreground mt-1">
+        <p className="text-xs md:text-sm text-muted-foreground mt-1">
           {t("analytics.subtitle", { count: total })}
         </p>
       </div>
 
-      <div className="grid grid-cols-2 md:grid-cols-5 gap-3 mb-6">
+      <div className="grid grid-cols-2 md:grid-cols-5 gap-3 mb-5 md:mb-6">
         {data.map((d) => (
-          <div key={d.key} className="surface-card p-4">
+          <div key={d.key} className="surface-card p-3 md:p-4">
             <div className="flex items-center gap-2 text-xs text-muted-foreground">
               <span className="h-2 w-2 rounded-full" style={{ background: d.color }} />
-              {d.name}
+              <span className="truncate">{d.name}</span>
             </div>
-            <div className="mt-1 text-2xl font-semibold text-foreground">{d.count}</div>
+            <div className="mt-1 text-xl md:text-2xl font-semibold text-foreground">{d.count}</div>
           </div>
         ))}
       </div>
 
-      <div className="surface-card p-5">
+      <div className="surface-card p-3 md:p-5 overflow-hidden">
         <h2 className="text-sm font-medium text-foreground mb-4">{t("analytics.chartTitle")}</h2>
-        <div className="w-full h-[360px]">
+        <div className="w-full h-[260px] md:h-[360px]">
           <ResponsiveContainer width="100%" height="100%">
-            <BarChart data={data} margin={{ top: 8, right: 16, left: 0, bottom: 8 }}>
+            <BarChart data={data} margin={{ top: 8, right: 8, left: 0, bottom: 8 }}>
               <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" vertical={false} />
-              <XAxis dataKey="name" tick={{ fill: "hsl(var(--muted-foreground))", fontSize: 12 }} axisLine={{ stroke: "hsl(var(--border))" }} tickLine={false} />
-              <YAxis allowDecimals={false} tick={{ fill: "hsl(var(--muted-foreground))", fontSize: 12 }} axisLine={{ stroke: "hsl(var(--border))" }} tickLine={false} />
+              <XAxis dataKey="name" tick={{ fill: "hsl(var(--muted-foreground))", fontSize: 11 }} axisLine={{ stroke: "hsl(var(--border))" }} tickLine={false} interval={0} />
+              <YAxis allowDecimals={false} width={28} tick={{ fill: "hsl(var(--muted-foreground))", fontSize: 11 }} axisLine={{ stroke: "hsl(var(--border))" }} tickLine={false} />
               <Tooltip
                 cursor={{ fill: "hsl(var(--muted))", opacity: 0.5 }}
                 contentStyle={{
