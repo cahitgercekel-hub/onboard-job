@@ -18,9 +18,10 @@ interface Props {
   jobs: Job[];
   onAdd: () => void;
   onCardClick: (job: Job) => void;
+  hiddenId?: string | null;
 }
 
-export function KanbanColumn({ status, jobs, onAdd, onCardClick }: Props) {
+export function KanbanColumn({ status, jobs, onAdd, onCardClick, hiddenId }: Props) {
   const { isOver, setNodeRef } = useDroppable({ id: status });
 
   return (
@@ -46,9 +47,13 @@ export function KanbanColumn({ status, jobs, onAdd, onCardClick }: Props) {
         </button>
       </div>
       <div className="flex-1 p-2 space-y-2 overflow-y-auto min-h-[120px]">
-        {jobs.map((j) => (
-          <JobCard key={j.id} job={j} onClick={() => onCardClick(j)} />
-        ))}
+        {jobs.map((j) =>
+          j.id === hiddenId ? (
+            <div key={j.id} className="h-[92px] rounded-lg border border-dashed border-accent/40 bg-accent/5" />
+          ) : (
+            <JobCard key={j.id} job={j} onClick={() => onCardClick(j)} />
+          )
+        )}
         {jobs.length === 0 && (
           <button
             onClick={onAdd}
