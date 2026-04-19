@@ -153,6 +153,7 @@ export default function Settings() {
       </section>
 
       <ClearAllDialog open={confirmOpen} onOpenChange={setConfirmOpen} />
+      <ImportCsvDialog open={importOpen} onOpenChange={setImportOpen} />
     </div>
   );
 }
