@@ -79,28 +79,28 @@ export default function AppLayout() {
                         to={n.to}
                         end={n.end as boolean}
                         className={({ isActive }) =>
-                          cn(iconBtn, isActive ? navActive : navInactive)
+                          cn(iconBtn, isActive ? navActive : navInactive, "text-sidebar-foreground bg-sidebar-accent px-[16px] rounded-md py-[8px] my-[8px]")
                         }
                         aria-label={n.label}
                       >
-                        <n.icon className="h-4 w-4" />
+                        <n.icon className="my-[10px] w-[16px] h-[16px] text-inherit bg-inherit" />
                       </NavLink>
                     </TooltipTrigger>
                     <TooltipContent side="right">{n.label}</TooltipContent>
                   </Tooltip>
                 ))}
               </nav>
-              <div className="p-2 border-t border-sidebar-border flex justify-center">
+              <div className="p-2 border-t border-sidebar-border flex items-center justify-center py-[24px]">
                 <Tooltip>
                   <TooltipTrigger asChild>
                     <NavLink
                       to={settingsNav.to}
                       className={({ isActive }) =>
-                        cn(iconBtn, isActive ? navActive : navInactive)
+                        cn(iconBtn, isActive ? navActive : navInactive, "text-sidebar-foreground bg-sidebar-accent px-[16px] rounded-md py-[8px] my-[8px]")
                       }
                       aria-label={settingsNav.label}
                     >
-                      <settingsNav.icon className="h-4 w-4" />
+                      <settingsNav.icon className="my-[10px] w-[16px] h-[16px] text-inherit bg-inherit" />
                     </NavLink>
                   </TooltipTrigger>
                   <TooltipContent side="right">{settingsNav.label}</TooltipContent>
