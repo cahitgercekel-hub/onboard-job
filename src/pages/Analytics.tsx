@@ -1,4 +1,5 @@
 import { useMemo } from "react";
+import { useTranslation } from "react-i18next";
 import { BarChart, Bar, XAxis, YAxis, Tooltip, CartesianGrid, ResponsiveContainer, Cell } from "recharts";
 import { BarChart3 } from "lucide-react";
 import { useJobs } from "@/lib/jobsStore";
@@ -14,6 +15,7 @@ const COLOR_VAR: Record<JobStatus, string> = {
 
 export default function Analytics() {
   const { jobs } = useJobs();
+  const { t } = useTranslation();
 
   const data = useMemo(() => {
     const counts: Record<JobStatus, number> = {
@@ -34,10 +36,10 @@ export default function Analytics() {
     <div className="px-6 py-6 max-w-6xl mx-auto">
       <div className="mb-6">
         <h1 className="text-2xl font-semibold tracking-tight flex items-center gap-2">
-          <BarChart3 className="h-5 w-5 text-accent" /> Analytics
+          <BarChart3 className="h-5 w-5 text-accent" /> {t("analytics.title")}
         </h1>
         <p className="text-sm text-muted-foreground mt-1">
-          Distribution of {total} {total === 1 ? "application" : "applications"} across stages.
+          {t("analytics.subtitle", { count: total })}
         </p>
       </div>
 
@@ -54,7 +56,7 @@ export default function Analytics() {
       </div>
 
       <div className="surface-card p-5">
-        <h2 className="text-sm font-medium text-foreground mb-4">Applications by status</h2>
+        <h2 className="text-sm font-medium text-foreground mb-4">{t("analytics.chartTitle")}</h2>
         <div className="w-full h-[360px]">
           <ResponsiveContainer width="100%" height="100%">
             <BarChart data={data} margin={{ top: 8, right: 16, left: 0, bottom: 8 }}>
