@@ -10,8 +10,10 @@ import { supabase } from "@/integrations/supabase/client";
 import {
   APPLICATION_TYPES,
   INDUSTRIES,
+  WORK_MODELS,
   type ApplicationType,
   type Industry,
+  type WorkModel,
   type Job,
 } from "@/lib/types";
 
