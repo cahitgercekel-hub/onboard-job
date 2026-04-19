@@ -5,8 +5,8 @@ import LanguageDetector from "i18next-browser-languagedetector";
 const resources = {
   en: {
     translation: {
-      app: { name: "CareerDesk", tagline: "Track + Assist" },
-      nav: { tracker: "Tracker", board: "Board", analytics: "Analytics", assistant: "Assistant", aiAssistant: "AI Assistant", settings: "Settings" },
+      app: { name: "JobFlow.ai", tagline: "Track Job & CV Assist" },
+      nav: { tracker: "Tracker", board: "Job Board", analytics: "Analytics", assistant: "Assistant", aiAssistant: "AI Assistant", settings: "Settings" },
       common: {
         save: "Save", cancel: "Cancel", delete: "Delete", add: "Add", edit: "Edit",
         filter: "Filter", clear: "Clear filters", all: "All",
@@ -15,7 +15,7 @@ const resources = {
         location: "Location", notes: "Notes", jobDescription: "Job description",
         dragHint: "drag cards between columns",
       },
-      tracker: { title: "Application Tracker", addJob: "Add job", autoAdd: "Auto-add with AI", jobs_one: "{{count}} job", jobs_other: "{{count}} jobs" },
+      tracker: { title: "Job Tracker", addJob: "Add job", autoAdd: "Auto-add with AI", jobs_one: "{{count}} job", jobs_other: "{{count}} jobs" },
       analytics: { title: "Analytics", subtitle: "Distribution of {{count}} applications across stages.", chartTitle: "Applications by status" },
       filters: {
         appType: "Application type", industry: "Industry", workModel: "Work model", dateApplied: "Date applied",

@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { NavLink, Outlet } from "react-router-dom";
-import { LayoutGrid, Sparkles, Briefcase, BarChart3, Settings as SettingsIcon, Menu } from "lucide-react";
+import { LayoutGrid, Sparkles, BriefcaseBusiness, BarChart3, Settings as SettingsIcon, Menu } from "lucide-react";
 import { useTranslation } from "react-i18next";
 import { cn } from "@/lib/utils";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
@@ -57,8 +57,8 @@ export default function AppLayout() {
               toggleBtn
             ) : (
               <>
-                <div className="flex h-8 w-8 items-center justify-center rounded-md bg-primary text-primary-foreground shrink-0">
-                  <Briefcase className="h-4 w-4" />
+                <div className="flex h-8 w-8 items-center justify-center rounded-md text-primary-foreground shrink-0 bg-cyan-500">
+                  <BriefcaseBusiness className="h-4 w-4 text-primary-foreground" />
                 </div>
                 <div className="leading-tight min-w-0 flex-1">
                   <div className="text-sm font-semibold text-sidebar-foreground truncate">{t("app.name")}</div>
@@ -155,8 +155,8 @@ export default function AppLayout() {
           {/* Mobile top header — logo only */}
           <header className="md:hidden flex items-center border-b border-border px-4 h-12 bg-card">
             <div className="flex items-center gap-2">
-              <div className="flex h-7 w-7 items-center justify-center rounded-md bg-primary text-primary-foreground">
-                <Briefcase className="h-3.5 w-3.5" />
+              <div className="flex h-7 w-7 items-center justify-center rounded-md bg-cyan-500 text-primary-foreground">
+                <BriefcaseBusiness className="h-3.5 w-3.5 text-primary-foreground" />
               </div>
               <div className="text-sm font-semibold">{t("app.name")}</div>
             </div>
