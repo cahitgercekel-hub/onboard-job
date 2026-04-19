@@ -39,7 +39,7 @@ export function ImportCsvDialog({ open, onOpenChange }: Props) {
 
   return (
     <Dialog open={open} onOpenChange={(v) => { onOpenChange(v); if (!v) reset(); }}>
-      <DialogContent className="max-w-3xl">
+      <DialogContent className="max-w-[95vw] sm:max-w-3xl w-full max-h-[90vh] overflow-hidden flex flex-col">
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2">
             <Upload className="h-4 w-4 text-accent" /> Import jobs from CSV
