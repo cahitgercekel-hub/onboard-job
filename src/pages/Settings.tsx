@@ -25,6 +25,7 @@ export default function Settings() {
   const { t } = useTranslation();
   const { theme, setTheme, language, setLanguage, dateFormat, setDateFormat } = usePrefs();
   const [confirmOpen, setConfirmOpen] = useState(false);
+  const [importOpen, setImportOpen] = useState(false);
 
   return (
     <div className="px-6 py-6 max-w-4xl mx-auto space-y-8">
