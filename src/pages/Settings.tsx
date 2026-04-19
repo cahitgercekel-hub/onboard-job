@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { useTranslation } from "react-i18next";
-import { Settings as SettingsIcon, Download, Trash2, Sun, Moon, Monitor, Languages, Calendar as CalendarIcon } from "lucide-react";
+import { Settings as SettingsIcon, Download, Upload, Trash2, Sun, Moon, Monitor, Languages, Calendar as CalendarIcon } from "lucide-react";
 import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
@@ -11,6 +11,7 @@ import {
 import { usePrefs, type Theme, type DateFormat } from "@/lib/preferences";
 import { LANGUAGES } from "@/lib/i18n";
 import { downloadJobsCsv, clearAllJobs } from "@/lib/jobsStore";
+import { ImportCsvDialog } from "@/components/settings/ImportCsvDialog";
 import { toast } from "sonner";
 import { cn } from "@/lib/utils";
 
