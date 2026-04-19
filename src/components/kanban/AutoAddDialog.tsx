@@ -45,6 +45,9 @@ export function AutoAddDialog({ open, onOpenChange, onExtracted }: Props) {
         role?: string;
         applicationType?: string;
         industry?: string;
+        workModel?: string;
+        location?: string;
+        jobDescription?: string;
         notes?: string;
       };
 
@@ -54,6 +57,9 @@ export function AutoAddDialog({ open, onOpenChange, onExtracted }: Props) {
       const industry = INDUSTRIES.includes(ex.industry as Industry)
         ? (ex.industry as Industry)
         : undefined;
+      const workModel = WORK_MODELS.includes(ex.workModel as WorkModel)
+        ? (ex.workModel as WorkModel)
+        : undefined;
 
       onExtracted({
         company: ex.company?.trim() || "Unknown company",
@@ -62,6 +68,9 @@ export function AutoAddDialog({ open, onOpenChange, onExtracted }: Props) {
         status: "saved",
         applicationType: appType,
         industry,
+        workModel,
+        location: ex.location?.trim() || undefined,
+        jobDescription: ex.jobDescription?.trim() || undefined,
         notes: ex.notes?.trim() || undefined,
       });
       toast.success("Job auto-filled — review and save.");
