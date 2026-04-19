@@ -16,7 +16,7 @@ const SYSTEM: Record<Tool, string> = {
   polish:
     "You are a professional editor. Improve the user's text for grammar, clarity, conciseness, and professional business tone in the requested language. Preserve meaning. Always call the report_polish function with structured fields.",
   extract:
-    "You extract structured job posting metadata. From the provided text (and optional URL), call the save_job function with your best inference. Always pick the closest enum value for applicationType and industry. If a field is truly unknown leave it empty. Keep notes to 1-2 short sentences summarizing key requirements.",
+    "You extract structured job posting metadata. From the provided text (and optional URL), call the save_job function with your best inference. Always pick the closest enum value for applicationType, industry, and workModel. Extract the location (city, country, or 'Remote') if present. For jobDescription, return a clean, condensed version of the core posting (responsibilities + requirements), 80-200 words, plain text. If a field is truly unknown leave it empty. Keep notes to 1-2 short sentences summarizing key highlights.",
   interview:
     "You are an interview coach. Given a role, company, and job description, generate exactly 5 highly probable interview questions tailored to the role. For each, provide a suggested answer structure using the STAR method (Situation, Task, Action, Result) — each section a short sentence. Always call the report_interview function.",
   cv:
@@ -35,9 +35,12 @@ const EXTRACT_TOOL = {
         role: { type: "string" },
         applicationType: { type: "string", enum: ["Working Student", "Internship", "Full-time", "Part-time", "Contract", "Freelance", ""] },
         industry: { type: "string", enum: ["Tech", "Automotive", "Consulting", "Finance", "Healthcare", "E-commerce", "Manufacturing", "Media", "Education", "Other", ""] },
+        workModel: { type: "string", enum: ["Remote", "Hybrid", "On-site", ""] },
+        location: { type: "string" },
+        jobDescription: { type: "string" },
         notes: { type: "string" },
       },
-      required: ["company", "role", "applicationType", "industry", "notes"],
+      required: ["company", "role", "applicationType", "industry", "workModel", "location", "jobDescription", "notes"],
       additionalProperties: false,
     },
   },
