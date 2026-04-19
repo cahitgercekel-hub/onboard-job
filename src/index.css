@@ -94,6 +94,14 @@
     --border: 30 6% 22%;
     --input: 30 6% 22%;
     --ring: 36 50% 60%;
+
+    /* Soft tinted header backgrounds for dark mode (deeper, lower-saturation) */
+    --col-saved-soft: 220 18% 22%;
+    --col-applied-soft: 215 35% 22%;
+    --col-interviewing-soft: 38 35% 22%;
+    --col-offer-soft: 142 25% 20%;
+    --col-rejected-soft: 0 30% 22%;
+
     --sidebar-background: 30 8% 12%;
     --sidebar-foreground: 40 15% 85%;
     --sidebar-primary: 36 50% 70%;

@@ -1,10 +1,10 @@
 import { useDraggable } from "@dnd-kit/core";
-import { format } from "date-fns";
-import { AlertTriangle, ExternalLink } from "lucide-react";
+import { AlertTriangle, ExternalLink, MapPin } from "lucide-react";
 import { alarmFor, daysSince } from "@/lib/jobsStore";
-import type { Job } from "@/lib/types";
+import type { Job, WorkModel } from "@/lib/types";
 import { cn } from "@/lib/utils";
 import { Badge } from "@/components/ui/badge";
+import { usePrefs } from "@/lib/preferences";
 
 interface Props {
   job: Job;
@@ -12,16 +12,20 @@ interface Props {
   overlay?: boolean;
 }
 
+const WORK_MODEL_STYLES: Record<WorkModel, string> = {
+  Remote: "bg-success/10 text-success border-success/30",
+  Hybrid: "bg-accent/10 text-accent border-accent/30",
+  "On-site": "bg-muted text-foreground/80 border-border",
+};
+
 export function JobCard({ job, onClick, overlay = false }: Props) {
   const { attributes, listeners, setNodeRef, isDragging } = useDraggable({ id: job.id });
+  const { formatDate } = usePrefs();
   const alarm = alarmFor(job);
-
   const style = overlay ? undefined : { opacity: isDragging ? 0 : 1 };
 
-  // Open the edit dialog only on a clean click (not after a drag).
   const handleClick = (e: React.MouseEvent) => {
     if (isDragging) return;
-    // ignore clicks on links/buttons inside the card
     const target = e.target as HTMLElement;
     if (target.closest("a,button")) return;
     onClick();
@@ -60,8 +64,13 @@ export function JobCard({ job, onClick, overlay = false }: Props) {
         </div>
         <div className="text-xs text-muted-foreground truncate">{job.company}</div>
 
-        {(job.applicationType || job.industry) && (
+        {(job.applicationType || job.industry || job.workModel) && (
           <div className="mt-2 flex flex-wrap gap-1">
+            {job.workModel && (
+              <Badge variant="outline" className={cn("text-[10px] font-medium", WORK_MODEL_STYLES[job.workModel])}>
+                {job.workModel}
+              </Badge>
+            )}
             {job.applicationType && (
               <Badge variant="secondary" className="text-[10px] font-normal">{job.applicationType}</Badge>
             )}
@@ -71,9 +80,15 @@ export function JobCard({ job, onClick, overlay = false }: Props) {
           </div>
         )}
 
+        {job.location && (
+          <div className="mt-1.5 inline-flex items-center gap-1 text-[11px] text-muted-foreground">
+            <MapPin className="h-3 w-3" /> {job.location}
+          </div>
+        )}
+
         <div className="mt-2 flex items-center justify-between text-[11px] text-muted-foreground">
           <span>
-            {job.dateApplied ? `Applied ${format(new Date(job.dateApplied), "MMM d")}` : "—"}
+            {job.dateApplied ? `Applied ${formatDate(job.dateApplied)}` : "—"}
           </span>
           {job.url && (
             <a
