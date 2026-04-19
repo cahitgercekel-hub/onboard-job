@@ -6,6 +6,7 @@ import { TooltipProvider } from "@/components/ui/tooltip";
 import AppLayout from "./components/AppLayout";
 import Tracker from "./pages/Tracker";
 import Assistant from "./pages/Assistant";
+import Analytics from "./pages/Analytics";
 import NotFound from "./pages/NotFound.tsx";
 
 const queryClient = new QueryClient();
@@ -19,6 +20,7 @@ const App = () => (
         <Routes>
           <Route element={<AppLayout />}>
             <Route path="/" element={<Tracker />} />
+            <Route path="/analytics" element={<Analytics />} />
             <Route path="/assistant" element={<Assistant />} />
           </Route>
           <Route path="*" element={<NotFound />} />
