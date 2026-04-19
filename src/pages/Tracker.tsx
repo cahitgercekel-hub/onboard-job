@@ -20,6 +20,7 @@ export default function Tracker() {
     status: "saved",
     key: 0,
   });
+  const [autoOpen, setAutoOpen] = useState(false);
 
   const sensors = useSensors(useSensor(PointerSensor, { activationConstraint: { distance: 4 } }));
 
