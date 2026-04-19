@@ -1,13 +1,15 @@
 import { NavLink, Outlet } from "react-router-dom";
-import { LayoutGrid, Sparkles, Briefcase, BarChart3 } from "lucide-react";
+import { LayoutGrid, Sparkles, Briefcase, BarChart3, Settings as SettingsIcon } from "lucide-react";
+import { useTranslation } from "react-i18next";
 import { cn } from "@/lib/utils";
 
-const trackerNav = [
-  { to: "/", label: "Board", icon: LayoutGrid, end: true },
-  { to: "/analytics", label: "Analytics", icon: BarChart3, end: true },
-];
-
 export default function AppLayout() {
+  const { t } = useTranslation();
+  const trackerNav = [
+    { to: "/", label: t("nav.board"), icon: LayoutGrid, end: true },
+    { to: "/analytics", label: t("nav.analytics"), icon: BarChart3, end: true },
+  ];
+
   const navItem =
     "flex items-center gap-2.5 rounded-md px-3 py-2 text-sm transition-colors";
   const navInactive =
@@ -23,13 +25,13 @@ export default function AppLayout() {
             <Briefcase className="h-4 w-4" />
           </div>
           <div className="leading-tight">
-            <div className="text-sm font-semibold text-sidebar-foreground">CareerDesk</div>
-            <div className="text-[11px] text-muted-foreground">Track + Assist</div>
+            <div className="text-sm font-semibold text-sidebar-foreground">{t("app.name")}</div>
+            <div className="text-[11px] text-muted-foreground">{t("app.tagline")}</div>
           </div>
         </div>
         <nav className="flex-1 p-3 space-y-1">
           <div className="px-3 pt-1 pb-1 text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">
-            Tracker
+            {t("nav.tracker")}
           </div>
           {trackerNav.map((n) => (
             <NavLink
@@ -43,26 +45,40 @@ export default function AppLayout() {
             </NavLink>
           ))}
           <div className="px-3 pt-3 pb-1 text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">
-            Assistant
+            {t("nav.assistant")}
           </div>
           <NavLink
             to="/assistant"
             className={({ isActive }) => cn(navItem, isActive ? navActive : navInactive)}
           >
             <Sparkles className="h-4 w-4" />
-            AI Assistant
+            {t("nav.aiAssistant")}
           </NavLink>
         </nav>
-        <div className="p-4 text-[11px] text-muted-foreground border-t border-sidebar-border">
-          Local-first · Your data stays in this browser.
+        <div className="p-3 border-t border-sidebar-border">
+          <NavLink
+            to="/settings"
+            className={({ isActive }) => cn(navItem, isActive ? navActive : navInactive)}
+          >
+            <SettingsIcon className="h-4 w-4" />
+            {t("nav.settings")}
+          </NavLink>
+          <div className="px-3 pt-3 text-[11px] text-muted-foreground">
+            Local-first · Your data stays in this browser.
+          </div>
         </div>
       </aside>
 
       <div className="flex-1 flex flex-col min-w-0">
         <header className="md:hidden flex items-center justify-between border-b border-border px-4 py-3 bg-card">
-          <div className="font-semibold">CareerDesk</div>
+          <div className="font-semibold">{t("app.name")}</div>
           <nav className="flex gap-1">
-            {[...trackerNav, { to: "/assistant", label: "Assistant", end: true }].map((n) => (
+            {[
+              { to: "/", label: t("nav.board"), end: true },
+              { to: "/analytics", label: t("nav.analytics"), end: true },
+              { to: "/assistant", label: t("nav.assistant"), end: true },
+              { to: "/settings", label: t("nav.settings"), end: true },
+            ].map((n) => (
               <NavLink
                 key={n.to}
                 to={n.to}

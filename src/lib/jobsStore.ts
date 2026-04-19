@@ -18,6 +18,47 @@ function write(jobs: Job[]) {
   window.dispatchEvent(new CustomEvent("jat:jobs-changed"));
 }
 
+export function readAllJobs(): Job[] {
+  return read();
+}
+
+export function clearAllJobs() {
+  write([]);
+}
+
+function csvEscape(value: unknown): string {
+  if (value === undefined || value === null) return "";
+  const s = String(value).replace(/\r?\n/g, " ").trim();
+  if (/[",;]/.test(s)) return `"${s.replace(/"/g, '""')}"`;
+  return s;
+}
+
+export function exportJobsAsCsv(): string {
+  const headers = [
+    "Company", "Role", "Status", "Application Type", "Industry",
+    "Work Model", "Location", "Date Applied", "URL", "Notes", "Job Description",
+  ];
+  const rows = read().map((j) => [
+    j.company, j.role, j.status, j.applicationType ?? "", j.industry ?? "",
+    j.workModel ?? "", j.location ?? "", j.dateApplied ?? "", j.url ?? "",
+    j.notes ?? "", j.jobDescription ?? "",
+  ]);
+  return [headers, ...rows].map((r) => r.map(csvEscape).join(",")).join("\n");
+}
+
+export function downloadJobsCsv() {
+  const csv = exportJobsAsCsv();
+  const blob = new Blob([`\uFEFF${csv}`], { type: "text/csv;charset=utf-8;" });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement("a");
+  a.href = url;
+  a.download = `careerdesk-jobs-${new Date().toISOString().slice(0, 10)}.csv`;
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
+  URL.revokeObjectURL(url);
+}
+
 export function useJobs() {
   const [jobs, setJobs] = useState<Job[]>(() => read());
 
