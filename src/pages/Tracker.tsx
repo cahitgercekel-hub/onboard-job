@@ -132,12 +132,8 @@ export default function Tracker() {
         open={autoOpen}
         onOpenChange={setAutoOpen}
         onExtracted={(data) => {
-          // Add immediately, then open the edit dialog so the user can refine.
-          const now = new Date().toISOString();
-          const id = crypto.randomUUID();
-          const newJob: Job = { ...data, id, createdAt: now, updatedAt: now };
-          addJob(data);
-          setDialog({ open: true, status: data.status, job: newJob, key: Date.now() });
+          const newJob = addJob(data);
+          setDialog({ open: true, status: newJob.status, job: newJob, key: Date.now() });
         }}
       />
     </div>
