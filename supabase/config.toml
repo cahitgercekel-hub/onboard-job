@@ -1,1 +1,4 @@
 project_id = "hfbtzweutmfeupdqvmqb"
+
+[functions.career-assistant]
+verify_jwt = false
