@@ -13,6 +13,14 @@ const COLUMN_DOT: Record<JobStatus, string> = {
   rejected: "bg-column-rejected",
 };
 
+const COLUMN_HEADER: Record<JobStatus, string> = {
+  saved: "col-header-saved",
+  applied: "col-header-applied",
+  interviewing: "col-header-interviewing",
+  offer: "col-header-offer",
+  rejected: "col-header-rejected",
+};
+
 interface Props {
   status: JobStatus;
   jobs: Job[];
@@ -32,15 +40,15 @@ export function KanbanColumn({ status, jobs, onAdd, onCardClick, hiddenId }: Pro
         isOver && "bg-accent/10 border-accent/50"
       )}
     >
-      <div className="flex items-center justify-between px-3 py-2.5 border-b border-border">
+      <div className={cn("flex items-center justify-between px-3 py-2.5 border-b border-border rounded-t-lg", COLUMN_HEADER[status])}>
         <div className="flex items-center gap-2">
           <span className={cn("h-2 w-2 rounded-full", COLUMN_DOT[status])} />
           <span className="text-sm font-medium text-foreground">{STATUS_LABEL[status]}</span>
-          <span className="text-xs text-muted-foreground">{jobs.length}</span>
+          <span className="text-xs text-foreground/60">{jobs.length}</span>
         </div>
         <button
           onClick={onAdd}
-          className="text-muted-foreground hover:text-foreground rounded p-1 hover:bg-secondary"
+          className="text-foreground/60 hover:text-foreground rounded p-1 hover:bg-background/40"
           aria-label={`Add to ${STATUS_LABEL[status]}`}
         >
           <Plus className="h-4 w-4" />
