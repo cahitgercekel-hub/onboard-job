@@ -94,7 +94,7 @@ export function AutoAddDialog({ open, onOpenChange, onExtracted }: Props) {
               disabled={loading}
             />
           </div>
-          <div class-name="grid gap-1.5">
+          <div className="grid gap-1.5">
             <Label htmlFor="auto-text">Job description</Label>
             <Textarea
               id="auto-text"
