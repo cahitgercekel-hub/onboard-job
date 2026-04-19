@@ -88,7 +88,11 @@ export default function Tracker() {
                 <X className="h-3.5 w-3.5 mr-1" /> Clear
               </Button>
             )}
-            <Button onClick={() => openAdd("saved")}>+ Add job</Button>
+            <Button variant="ai" onClick={() => setAutoOpen(true)} className="group">
+              <Sparkles className="h-4 w-4 transition-transform group-hover:rotate-12" />
+              Auto-add with AI
+            </Button>
+            <Button variant="outline" onClick={() => openAdd("saved")}>+ Add job</Button>
           </div>
         </div>
       </div>
@@ -123,6 +127,19 @@ export default function Tracker() {
           onDelete={dialog.job ? () => removeJob(dialog.job!.id) : undefined}
         />
       )}
+
+      <AutoAddDialog
+        open={autoOpen}
+        onOpenChange={setAutoOpen}
+        onExtracted={(data) => {
+          // Add immediately, then open the edit dialog so the user can refine.
+          const now = new Date().toISOString();
+          const id = crypto.randomUUID();
+          const newJob: Job = { ...data, id, createdAt: now, updatedAt: now };
+          addJob(data);
+          setDialog({ open: true, status: data.status, job: newJob, key: Date.now() });
+        }}
+      />
     </div>
   );
 }
