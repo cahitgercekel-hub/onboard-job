@@ -103,7 +103,7 @@ export default function Tracker() {
       </div>
 
       <div className="flex-1 overflow-x-auto">
-        <DndContext sensors={sensors} onDragEnd={onDragEnd}>
+        <DndContext sensors={sensors} onDragStart={onDragStart} onDragEnd={onDragEnd} onDragCancel={() => setActiveId(null)}>
           <div className="flex gap-4 p-6 min-h-full">
             {STATUS_ORDER.map((status) => (
               <KanbanColumn
@@ -112,9 +112,17 @@ export default function Tracker() {
                 jobs={byStatus[status]}
                 onAdd={() => openAdd(status)}
                 onCardClick={openEdit}
+                hiddenId={activeId}
               />
             ))}
           </div>
+          <DragOverlay dropAnimation={null}>
+            {activeJob ? (
+              <div className="w-[260px] rotate-1">
+                <JobCard job={activeJob} onClick={() => {}} overlay />
+              </div>
+            ) : null}
+          </DragOverlay>
         </DndContext>
       </div>
 
