@@ -5,7 +5,7 @@ import LanguageDetector from "i18next-browser-languagedetector";
 const resources = {
   en: {
     translation: {
-      app: { name: "JobFlow.ai", tagline: "Track Job & CV Assist" },
+      app: { name: "JobFlow", tagline: "Track Job & CV Assist" },
       nav: { tracker: "Tracker", board: "Job Board", analytics: "Analytics", assistant: "Assistant", aiAssistant: "AI Assistant", settings: "Settings" },
       common: {
         save: "Save", cancel: "Cancel", delete: "Delete", add: "Add", edit: "Edit",
