@@ -1,8 +1,10 @@
 import { useMemo, useState } from "react";
+import { useTranslation } from "react-i18next";
 import { DndContext, DragEndEvent, DragOverlay, DragStartEvent, PointerSensor, useSensor, useSensors } from "@dnd-kit/core";
-import { Filter, Sparkles } from "lucide-react";
+import { Filter, Sparkles, Calendar as CalendarIcon } from "lucide-react";
+import { format } from "date-fns";
 import { useJobs } from "@/lib/jobsStore";
-import { APPLICATION_TYPES, INDUSTRIES, STATUS_ORDER, type Job, type JobStatus } from "@/lib/types";
+import { APPLICATION_TYPES, INDUSTRIES, STATUS_ORDER, WORK_MODELS, type Job, type JobStatus } from "@/lib/types";
 import { KanbanColumn } from "@/components/kanban/KanbanColumn";
 import { JobDialog } from "@/components/kanban/JobDialog";
 import { JobCard } from "@/components/kanban/JobCard";
@@ -12,17 +14,23 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Label } from "@/components/ui/label";
 import { Badge } from "@/components/ui/badge";
+import { Calendar } from "@/components/ui/calendar";
+import { cn } from "@/lib/utils";
 
 const ALL = "__all__";
+type DateChip = "any" | "3" | "7" | "30" | "older" | "custom";
 
 export default function Tracker() {
+  const { t } = useTranslation();
   const { jobs, addJob, updateJob, removeJob, moveJob } = useJobs();
   const [appType, setAppType] = useState<string>(ALL);
   const [industry, setIndustry] = useState<string>(ALL);
+  const [workModel, setWorkModel] = useState<string>(ALL);
+  const [dateChip, setDateChip] = useState<DateChip>("any");
+  const [customFrom, setCustomFrom] = useState<Date | undefined>();
+  const [customTo, setCustomTo] = useState<Date | undefined>();
   const [dialog, setDialog] = useState<{ open: boolean; status: JobStatus; job?: Job; key: number }>({
-    open: false,
-    status: "saved",
-    key: 0,
+    open: false, status: "saved", key: 0,
   });
   const [autoOpen, setAutoOpen] = useState(false);
   const [activeId, setActiveId] = useState<string | null>(null);
@@ -30,14 +38,34 @@ export default function Tracker() {
 
   const sensors = useSensors(useSensor(PointerSensor, { activationConstraint: { distance: 4 } }));
 
+  const dateMatches = (job: Job): boolean => {
+    if (dateChip === "any") return true;
+    if (!job.dateApplied) return false;
+    const applied = new Date(job.dateApplied).getTime();
+    const now = Date.now();
+    const days = (now - applied) / (1000 * 60 * 60 * 24);
+    if (dateChip === "3") return days <= 3;
+    if (dateChip === "7") return days <= 7;
+    if (dateChip === "30") return days <= 30;
+    if (dateChip === "older") return days > 30;
+    if (dateChip === "custom") {
+      if (customFrom && applied < customFrom.getTime()) return false;
+      if (customTo && applied > customTo.getTime() + 86400000) return false;
+      return true;
+    }
+    return true;
+  };
+
   const filtered = useMemo(
     () =>
       jobs.filter(
         (j) =>
           (appType === ALL || j.applicationType === appType) &&
-          (industry === ALL || j.industry === industry)
+          (industry === ALL || j.industry === industry) &&
+          (workModel === ALL || j.workModel === workModel) &&
+          dateMatches(j)
       ),
-    [jobs, appType, industry]
+    [jobs, appType, industry, workModel, dateChip, customFrom, customTo]
   );
 
   const byStatus = useMemo(() => {
@@ -56,22 +84,35 @@ export default function Tracker() {
     if (job && job.status !== newStatus) moveJob(job.id, newStatus);
   };
 
-  const openAdd = (status: JobStatus) =>
-    setDialog({ open: true, status, job: undefined, key: Date.now() });
-  const openEdit = (job: Job) =>
-    setDialog({ open: true, status: job.status, job, key: Date.now() });
+  const openAdd = (status: JobStatus) => setDialog({ open: true, status, job: undefined, key: Date.now() });
+  const openEdit = (job: Job) => setDialog({ open: true, status: job.status, job, key: Date.now() });
 
-  const filtersActive = appType !== ALL || industry !== ALL;
-  const activeCount = (appType !== ALL ? 1 : 0) + (industry !== ALL ? 1 : 0);
+  const activeCount =
+    (appType !== ALL ? 1 : 0) +
+    (industry !== ALL ? 1 : 0) +
+    (workModel !== ALL ? 1 : 0) +
+    (dateChip !== "any" ? 1 : 0);
+
+  const clearAll = () => {
+    setAppType(ALL); setIndustry(ALL); setWorkModel(ALL);
+    setDateChip("any"); setCustomFrom(undefined); setCustomTo(undefined);
+  };
+
+  const dateChips: { id: DateChip; label: string }[] = [
+    { id: "3", label: t("filters.last3") },
+    { id: "7", label: t("filters.last7") },
+    { id: "30", label: t("filters.last30") },
+    { id: "older", label: t("filters.older30") },
+  ];
 
   return (
     <div className="flex h-full flex-col">
       <div className="border-b border-border bg-card/60 backdrop-blur px-6 py-4">
         <div className="flex flex-wrap items-end justify-between gap-4">
           <div>
-            <h1 className="text-2xl font-semibold tracking-tight">Application Tracker</h1>
+            <h1 className="text-2xl font-semibold tracking-tight">{t("tracker.title")}</h1>
             <p className="text-sm text-muted-foreground mt-0.5">
-              {jobs.length} {jobs.length === 1 ? "job" : "jobs"} · drag cards between columns
+              {t("tracker.jobs", { count: jobs.length })} · {t("common.dragHint")}
             </p>
           </div>
           <div className="flex flex-wrap items-center gap-2">
@@ -79,50 +120,93 @@ export default function Tracker() {
               <PopoverTrigger asChild>
                 <Button variant="outline" size="sm" className="h-9">
                   <Filter className="h-3.5 w-3.5" />
-                  Filter
+                  {t("common.filter")}
                   {activeCount > 0 && (
                     <Badge variant="secondary" className="ml-1 h-5 px-1.5 text-[10px]">{activeCount}</Badge>
                   )}
                 </Button>
               </PopoverTrigger>
-              <PopoverContent align="end" className="w-72 p-4 space-y-3">
+              <PopoverContent align="end" className="w-[340px] p-4 space-y-4">
+                <div className="grid grid-cols-2 gap-3">
+                  <div className="grid gap-1.5">
+                    <Label className="text-xs">{t("filters.appType")}</Label>
+                    <Select value={appType} onValueChange={setAppType}>
+                      <SelectTrigger className="h-9"><SelectValue /></SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value={ALL}>{t("filters.allTypes")}</SelectItem>
+                        {APPLICATION_TYPES.map((tp) => <SelectItem key={tp} value={tp}>{tp}</SelectItem>)}
+                      </SelectContent>
+                    </Select>
+                  </div>
+                  <div className="grid gap-1.5">
+                    <Label className="text-xs">{t("filters.industry")}</Label>
+                    <Select value={industry} onValueChange={setIndustry}>
+                      <SelectTrigger className="h-9"><SelectValue /></SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value={ALL}>{t("filters.allIndustries")}</SelectItem>
+                        {INDUSTRIES.map((tp) => <SelectItem key={tp} value={tp}>{tp}</SelectItem>)}
+                      </SelectContent>
+                    </Select>
+                  </div>
+                </div>
                 <div className="grid gap-1.5">
-                  <Label className="text-xs">Application type</Label>
-                  <Select value={appType} onValueChange={setAppType}>
+                  <Label className="text-xs">{t("filters.workModel")}</Label>
+                  <Select value={workModel} onValueChange={setWorkModel}>
                     <SelectTrigger className="h-9"><SelectValue /></SelectTrigger>
                     <SelectContent>
-                      <SelectItem value={ALL}>All types</SelectItem>
-                      {APPLICATION_TYPES.map((t) => <SelectItem key={t} value={t}>{t}</SelectItem>)}
+                      <SelectItem value={ALL}>{t("filters.allModels")}</SelectItem>
+                      {WORK_MODELS.map((m) => <SelectItem key={m} value={m}>{m}</SelectItem>)}
                     </SelectContent>
                   </Select>
                 </div>
-                <div className="grid gap-1.5">
-                  <Label className="text-xs">Industry</Label>
-                  <Select value={industry} onValueChange={setIndustry}>
-                    <SelectTrigger className="h-9"><SelectValue /></SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value={ALL}>All industries</SelectItem>
-                      {INDUSTRIES.map((t) => <SelectItem key={t} value={t}>{t}</SelectItem>)}
-                    </SelectContent>
-                  </Select>
+
+                <div className="grid gap-2">
+                  <Label className="text-xs">{t("filters.dateApplied")}</Label>
+                  <div className="flex flex-wrap gap-1.5">
+                    <button
+                      onClick={() => { setDateChip("any"); setCustomFrom(undefined); setCustomTo(undefined); }}
+                      className={cn(
+                        "text-[11px] px-2 py-1 rounded-md border transition",
+                        dateChip === "any" ? "bg-accent text-accent-foreground border-accent" : "border-border bg-background hover:bg-muted"
+                      )}
+                    >
+                      {t("filters.anyDate")}
+                    </button>
+                    {dateChips.map((c) => (
+                      <button
+                        key={c.id}
+                        onClick={() => { setDateChip(c.id); setCustomFrom(undefined); setCustomTo(undefined); }}
+                        className={cn(
+                          "text-[11px] px-2 py-1 rounded-md border transition",
+                          dateChip === c.id ? "bg-accent text-accent-foreground border-accent" : "border-border bg-background hover:bg-muted"
+                        )}
+                      >
+                        {c.label}
+                      </button>
+                    ))}
+                  </div>
+
+                  <div className="border-t border-border pt-2 mt-1">
+                    <div className="text-[11px] text-muted-foreground mb-1.5">{t("filters.customRange")}</div>
+                    <div className="grid grid-cols-2 gap-2">
+                      <DateRangeField label={t("filters.from")} value={customFrom} onChange={(d) => { setCustomFrom(d); setDateChip("custom"); }} />
+                      <DateRangeField label={t("filters.to")} value={customTo} onChange={(d) => { setCustomTo(d); setDateChip("custom"); }} />
+                    </div>
+                  </div>
                 </div>
-                {filtersActive && (
-                  <Button
-                    variant="ghost"
-                    size="sm"
-                    className="w-full"
-                    onClick={() => { setAppType(ALL); setIndustry(ALL); }}
-                  >
-                    Clear filters
+
+                {activeCount > 0 && (
+                  <Button variant="ghost" size="sm" className="w-full" onClick={clearAll}>
+                    {t("common.clear")}
                   </Button>
                 )}
               </PopoverContent>
             </Popover>
             <Button variant="ai" onClick={() => setAutoOpen(true)} className="group">
               <Sparkles className="h-4 w-4 transition-transform group-hover:rotate-12" />
-              Auto-add with AI
+              {t("tracker.autoAdd")}
             </Button>
-            <Button variant="outline" onClick={() => openAdd("saved")}>+ Add job</Button>
+            <Button variant="outline" onClick={() => openAdd("saved")}>+ {t("tracker.addJob")}</Button>
           </div>
         </div>
       </div>
@@ -175,5 +259,21 @@ export default function Tracker() {
         }}
       />
     </div>
+  );
+}
+
+function DateRangeField({ label, value, onChange }: { label: string; value?: Date; onChange: (d: Date | undefined) => void }) {
+  return (
+    <Popover>
+      <PopoverTrigger asChild>
+        <Button variant="outline" size="sm" className={cn("h-9 justify-start font-normal", !value && "text-muted-foreground")}>
+          <CalendarIcon className="h-3.5 w-3.5" />
+          {value ? format(value, "MMM d, yyyy") : label}
+        </Button>
+      </PopoverTrigger>
+      <PopoverContent className="w-auto p-0" align="start">
+        <Calendar mode="single" selected={value} onSelect={onChange} initialFocus className={cn("p-3 pointer-events-auto")} />
+      </PopoverContent>
+    </Popover>
   );
 }
