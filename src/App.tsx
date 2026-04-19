@@ -7,6 +7,7 @@ import AppLayout from "./components/AppLayout";
 import Tracker from "./pages/Tracker";
 import Assistant from "./pages/Assistant";
 import Analytics from "./pages/Analytics";
+import Settings from "./pages/Settings";
 import NotFound from "./pages/NotFound.tsx";
 
 const queryClient = new QueryClient();
@@ -22,6 +23,7 @@ const App = () => (
             <Route path="/" element={<Tracker />} />
             <Route path="/analytics" element={<Analytics />} />
             <Route path="/assistant" element={<Assistant />} />
+            <Route path="/settings" element={<Settings />} />
           </Route>
           <Route path="*" element={<NotFound />} />
         </Routes>
