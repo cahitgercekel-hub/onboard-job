@@ -1,10 +1,11 @@
 import { useMemo, useState } from "react";
 import { DndContext, DragEndEvent, PointerSensor, useSensor, useSensors } from "@dnd-kit/core";
-import { Filter, X } from "lucide-react";
+import { Filter, X, Sparkles } from "lucide-react";
 import { useJobs } from "@/lib/jobsStore";
 import { APPLICATION_TYPES, INDUSTRIES, STATUS_ORDER, type Job, type JobStatus } from "@/lib/types";
 import { KanbanColumn } from "@/components/kanban/KanbanColumn";
 import { JobDialog } from "@/components/kanban/JobDialog";
+import { AutoAddDialog } from "@/components/kanban/AutoAddDialog";
 import { Button } from "@/components/ui/button";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 
