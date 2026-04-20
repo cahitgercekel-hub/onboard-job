@@ -14,16 +14,193 @@ export type Database = {
   }
   public: {
     Tables: {
-      [_ in never]: never
+      api_tokens: {
+        Row: {
+          created_at: string
+          id: string
+          last_used_at: string | null
+          name: string
+          token_hash: string
+          token_prefix: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          last_used_at?: string | null
+          name: string
+          token_hash: string
+          token_prefix: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          last_used_at?: string | null
+          name?: string
+          token_hash?: string
+          token_prefix?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      cv_baseline: {
+        Row: {
+          created_at: string
+          cv_text: string | null
+          file_name: string | null
+          file_path: string | null
+          id: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          cv_text?: string | null
+          file_name?: string | null
+          file_path?: string | null
+          id?: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          cv_text?: string | null
+          file_name?: string | null
+          file_path?: string | null
+          id?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      jobs: {
+        Row: {
+          application_type: string | null
+          company: string
+          created_at: string
+          date_applied: string | null
+          fitness_reasoning: string | null
+          fitness_score: number | null
+          id: string
+          industry: string | null
+          job_description: string | null
+          location: string | null
+          notes: string | null
+          role: string
+          source: string
+          status: Database["public"]["Enums"]["job_status"]
+          updated_at: string
+          url: string | null
+          user_id: string
+          work_model: string | null
+        }
+        Insert: {
+          application_type?: string | null
+          company: string
+          created_at?: string
+          date_applied?: string | null
+          fitness_reasoning?: string | null
+          fitness_score?: number | null
+          id?: string
+          industry?: string | null
+          job_description?: string | null
+          location?: string | null
+          notes?: string | null
+          role: string
+          source?: string
+          status?: Database["public"]["Enums"]["job_status"]
+          updated_at?: string
+          url?: string | null
+          user_id: string
+          work_model?: string | null
+        }
+        Update: {
+          application_type?: string | null
+          company?: string
+          created_at?: string
+          date_applied?: string | null
+          fitness_reasoning?: string | null
+          fitness_score?: number | null
+          id?: string
+          industry?: string | null
+          job_description?: string | null
+          location?: string | null
+          notes?: string | null
+          role?: string
+          source?: string
+          status?: Database["public"]["Enums"]["job_status"]
+          updated_at?: string
+          url?: string | null
+          user_id?: string
+          work_model?: string | null
+        }
+        Relationships: []
+      }
+      profiles: {
+        Row: {
+          avatar_url: string | null
+          created_at: string
+          display_name: string | null
+          id: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          avatar_url?: string | null
+          created_at?: string
+          display_name?: string | null
+          id?: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          avatar_url?: string | null
+          created_at?: string
+          display_name?: string | null
+          id?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      user_roles: {
+        Row: {
+          created_at: string
+          id: string
+          role: Database["public"]["Enums"]["app_role"]
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          role: Database["public"]["Enums"]["app_role"]
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          role?: Database["public"]["Enums"]["app_role"]
+          user_id?: string
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
     }
     Functions: {
-      [_ in never]: never
+      has_role: {
+        Args: {
+          _role: Database["public"]["Enums"]["app_role"]
+          _user_id: string
+        }
+        Returns: boolean
+      }
     }
     Enums: {
-      [_ in never]: never
+      app_role: "admin" | "user"
+      job_status: "saved" | "applied" | "interviewing" | "offer" | "rejected"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -150,6 +327,9 @@ export type CompositeTypes<
 
 export const Constants = {
   public: {
-    Enums: {},
+    Enums: {
+      app_role: ["admin", "user"],
+      job_status: ["saved", "applied", "interviewing", "offer", "rejected"],
+    },
   },
 } as const
