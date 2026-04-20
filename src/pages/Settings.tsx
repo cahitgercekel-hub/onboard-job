@@ -26,16 +26,23 @@ const themeOptions: { value: Theme; icon: typeof Sun }[] = [
 export default function Settings() {
   const { t } = useTranslation();
   const { theme, setTheme, language, setLanguage, dateFormat, setDateFormat } = usePrefs();
+  const { user, signOut } = useAuth();
   const [confirmOpen, setConfirmOpen] = useState(false);
   const [importOpen, setImportOpen] = useState(false);
 
   return (
     <div className="px-6 py-6 max-w-4xl mx-auto space-y-8">
-      <div>
-        <h1 className="text-2xl font-semibold tracking-tight flex items-center gap-2">
-          <SettingsIcon className="h-5 w-5 text-accent" /> {t("settings.title")}
-        </h1>
-        <p className="text-sm text-muted-foreground mt-1">{t("settings.subtitle")}</p>
+      <div className="flex items-start justify-between gap-3">
+        <div>
+          <h1 className="text-2xl font-semibold tracking-tight flex items-center gap-2">
+            <SettingsIcon className="h-5 w-5 text-accent" /> {t("settings.title")}
+          </h1>
+          <p className="text-sm text-muted-foreground mt-1">{t("settings.subtitle")}</p>
+          {user?.email && <p className="text-xs text-muted-foreground mt-1">Signed in as {user.email}</p>}
+        </div>
+        <Button variant="outline" size="sm" onClick={() => signOut()}>
+          <LogOut className="h-4 w-4" /> Sign out
+        </Button>
       </div>
 
       <section className="surface-card p-6">
