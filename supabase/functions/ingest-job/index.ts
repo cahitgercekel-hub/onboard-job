@@ -63,16 +63,7 @@ Deno.serve(async (req) => {
   const jobUrl = payload.jobUrl ?? payload.url ?? null;
   const jobDescription = payload.jobDescription ?? payload.description ?? null;
   const location = payload.location ?? null;
-
-  // Normalize work model to allowed values: Remote | Hybrid | On-site
-  const rawWorkModel = payload.workModel ?? payload.work_model ?? payload.workplace ?? null;
-  let workModel: string | null = null;
-  if (rawWorkModel) {
-    const v = String(rawWorkModel).trim().toLowerCase();
-    if (["remote", "fully remote", "work from home", "wfh"].includes(v)) workModel = "Remote";
-    else if (["hybrid", "flexible"].includes(v)) workModel = "Hybrid";
-    else if (["on-site", "onsite", "on site", "in-office", "office", "in office"].includes(v)) workModel = "On-site";
-  }
+  const workModel = payload.workModel ?? null;
 
   if (!company || !role) {
     return json({ error: "companyName and roleTitle are required" }, 400);

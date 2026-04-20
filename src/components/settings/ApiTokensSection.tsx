@@ -128,10 +128,8 @@ export function ApiTokensSection() {
         <Label className="text-xs text-muted-foreground">Ingestion endpoint</Label>
         <code className="block text-xs mt-1 break-all text-foreground">{ingestUrl}</code>
         <p className="text-[11px] text-muted-foreground mt-2">
-          POST JSON: <code>{`{ "companyName", "roleTitle", "jobUrl", "jobDescription", "location", "workModel" }`}</code>
-          {" "}with header <code>X-Api-Token: &lt;your token&gt;</code>
-          <br />
-          <span className="text-muted-foreground/80"><code>workModel</code> accepts: <code>Remote</code>, <code>Hybrid</code>, <code>On-site</code> (also matches "remote", "wfh", "onsite", "office", etc.)</span>
+          POST JSON: <code>{`{ "companyName", "roleTitle", "jobUrl", "jobDescription" }`}</code> with header{" "}
+          <code>X-Api-Token: &lt;your token&gt;</code>
         </p>
       </div>
 
