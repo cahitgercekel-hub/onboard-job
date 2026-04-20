@@ -13,6 +13,7 @@ import { LANGUAGES } from "@/lib/i18n";
 import { downloadJobsCsv, clearAllJobs } from "@/lib/jobsStore";
 import { ImportCsvDialog } from "@/components/settings/ImportCsvDialog";
 import { CvBaselineSection } from "@/components/settings/CvBaselineSection";
+import { ApiTokensSection } from "@/components/settings/ApiTokensSection";
 import { useAuth } from "@/lib/auth";
 import { toast } from "sonner";
 import { cn } from "@/lib/utils";
@@ -115,6 +116,8 @@ export default function Settings() {
       </section>
 
       <CvBaselineSection />
+
+      <ApiTokensSection />
 
       <section className="surface-card p-6">
         <div className="mb-5">
