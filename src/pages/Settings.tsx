@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { useTranslation } from "react-i18next";
-import { Settings as SettingsIcon, Download, Upload, Trash2, Sun, Moon, Monitor, Languages, Calendar as CalendarIcon } from "lucide-react";
+import { Settings as SettingsIcon, Download, Upload, Trash2, Sun, Moon, Monitor, Languages, Calendar as CalendarIcon, LogOut } from "lucide-react";
 import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
@@ -12,6 +12,8 @@ import { usePrefs, type Theme, type DateFormat } from "@/lib/preferences";
 import { LANGUAGES } from "@/lib/i18n";
 import { downloadJobsCsv, clearAllJobs } from "@/lib/jobsStore";
 import { ImportCsvDialog } from "@/components/settings/ImportCsvDialog";
+import { CvBaselineSection } from "@/components/settings/CvBaselineSection";
+import { useAuth } from "@/lib/auth";
 import { toast } from "sonner";
 import { cn } from "@/lib/utils";
 
@@ -24,16 +26,23 @@ const themeOptions: { value: Theme; icon: typeof Sun }[] = [
 export default function Settings() {
   const { t } = useTranslation();
   const { theme, setTheme, language, setLanguage, dateFormat, setDateFormat } = usePrefs();
+  const { user, signOut } = useAuth();
   const [confirmOpen, setConfirmOpen] = useState(false);
   const [importOpen, setImportOpen] = useState(false);
 
   return (
     <div className="px-6 py-6 max-w-4xl mx-auto space-y-8">
-      <div>
-        <h1 className="text-2xl font-semibold tracking-tight flex items-center gap-2">
-          <SettingsIcon className="h-5 w-5 text-accent" /> {t("settings.title")}
-        </h1>
-        <p className="text-sm text-muted-foreground mt-1">{t("settings.subtitle")}</p>
+      <div className="flex items-start justify-between gap-3">
+        <div>
+          <h1 className="text-2xl font-semibold tracking-tight flex items-center gap-2">
+            <SettingsIcon className="h-5 w-5 text-accent" /> {t("settings.title")}
+          </h1>
+          <p className="text-sm text-muted-foreground mt-1">{t("settings.subtitle")}</p>
+          {user?.email && <p className="text-xs text-muted-foreground mt-1">Signed in as {user.email}</p>}
+        </div>
+        <Button variant="outline" size="sm" onClick={() => signOut()}>
+          <LogOut className="h-4 w-4" /> Sign out
+        </Button>
       </div>
 
       <section className="surface-card p-6">
@@ -105,6 +114,8 @@ export default function Settings() {
         </div>
       </section>
 
+      <CvBaselineSection />
+
       <section className="surface-card p-6">
         <div className="mb-5">
           <h2 className="text-base font-semibold text-foreground">{t("settings.data")}</h2>
@@ -117,7 +128,10 @@ export default function Settings() {
             </div>
             <Button
               variant="outline"
-              onClick={() => { downloadJobsCsv(); toast.success("CSV downloaded"); }}
+              onClick={async () => {
+                try { await downloadJobsCsv(); toast.success("CSV downloaded"); }
+                catch (e: any) { toast.error(e?.message || "Export failed"); }
+              }}
             >
               <Download className="h-4 w-4" /> {t("settings.export")}
             </Button>
@@ -188,11 +202,15 @@ function ClearAllDialog({ open, onOpenChange }: { open: boolean; onOpenChange: (
           <Button
             variant="destructive"
             disabled={!ready}
-            onClick={() => {
-              clearAllJobs();
-              onOpenChange(false);
-              setText("");
-              toast.success("All data cleared");
+            onClick={async () => {
+              try {
+                await clearAllJobs();
+                onOpenChange(false);
+                setText("");
+                toast.success("All data cleared");
+              } catch (e: any) {
+                toast.error(e?.message || "Failed to clear");
+              }
             }}
           >
             {t("settings.confirmBtn")}

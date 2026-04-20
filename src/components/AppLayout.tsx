@@ -144,7 +144,7 @@ export default function AppLayout() {
                   {t("nav.settings")}
                 </NavLink>
                 <div className="px-3 pt-3 text-[11px] text-muted-foreground">
-                  Local-first · Your data stays in this browser.
+                  Synced to your account.
                 </div>
               </div>
             </>

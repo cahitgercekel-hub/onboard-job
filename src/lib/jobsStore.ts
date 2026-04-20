@@ -1,32 +1,119 @@
-import { useEffect, useState, useCallback } from "react";
+import { useEffect, useState, useCallback, useRef } from "react";
+import { supabase } from "@/integrations/supabase/client";
+import { useAuth } from "@/lib/auth";
 import type { Job, JobStatus, ApplicationType, Industry, WorkModel } from "./types";
 import { STATUS_ORDER, APPLICATION_TYPES, INDUSTRIES, WORK_MODELS } from "./types";
+import { toast } from "sonner";
 
-const KEY = "jat.jobs.v1";
+const LEGACY_KEY = "jat.jobs.v1";
+const MIGRATED_FLAG = "jat.migrated.v1";
 
-function read(): Job[] {
+// ----- Row <-> Job mapping -----
+type JobRow = {
+  id: string;
+  user_id: string;
+  company: string;
+  role: string;
+  url: string | null;
+  date_applied: string | null;
+  status: JobStatus;
+  application_type: string | null;
+  industry: string | null;
+  work_model: string | null;
+  location: string | null;
+  job_description: string | null;
+  notes: string | null;
+  fitness_score: number | null;
+  fitness_reasoning: string | null;
+  source: string;
+  created_at: string;
+  updated_at: string;
+};
+
+function rowToJob(r: JobRow): Job {
+  return {
+    id: r.id,
+    company: r.company,
+    role: r.role,
+    url: r.url ?? undefined,
+    dateApplied: r.date_applied ?? undefined,
+    status: r.status,
+    applicationType: (r.application_type as ApplicationType | null) ?? undefined,
+    industry: (r.industry as Industry | null) ?? undefined,
+    workModel: (r.work_model as WorkModel | null) ?? undefined,
+    location: r.location ?? undefined,
+    jobDescription: r.job_description ?? undefined,
+    notes: r.notes ?? undefined,
+    createdAt: r.created_at,
+    updatedAt: r.updated_at,
+  };
+}
+
+function jobToInsert(j: Omit<Job, "id" | "createdAt" | "updatedAt">, userId: string, source = "manual") {
+  return {
+    user_id: userId,
+    company: j.company,
+    role: j.role,
+    url: j.url ?? null,
+    date_applied: j.dateApplied ?? null,
+    status: j.status,
+    application_type: j.applicationType ?? null,
+    industry: j.industry ?? null,
+    work_model: j.workModel ?? null,
+    location: j.location ?? null,
+    job_description: j.jobDescription ?? null,
+    notes: j.notes ?? null,
+    source,
+  };
+}
+
+function patchToUpdate(p: Partial<Job>) {
+  const out: Record<string, unknown> = {};
+  if (p.company !== undefined) out.company = p.company;
+  if (p.role !== undefined) out.role = p.role;
+  if (p.url !== undefined) out.url = p.url ?? null;
+  if (p.dateApplied !== undefined) out.date_applied = p.dateApplied ?? null;
+  if (p.status !== undefined) out.status = p.status;
+  if (p.applicationType !== undefined) out.application_type = p.applicationType ?? null;
+  if (p.industry !== undefined) out.industry = p.industry ?? null;
+  if (p.workModel !== undefined) out.work_model = p.workModel ?? null;
+  if (p.location !== undefined) out.location = p.location ?? null;
+  if (p.jobDescription !== undefined) out.job_description = p.jobDescription ?? null;
+  if (p.notes !== undefined) out.notes = p.notes ?? null;
+  return out;
+}
+
+// ----- Legacy local store (still used by CSV preview) -----
+function readLocal(): Job[] {
   try {
-    const raw = localStorage.getItem(KEY);
-    if (!raw) return [];
-    return JSON.parse(raw) as Job[];
+    const raw = localStorage.getItem(LEGACY_KEY);
+    return raw ? (JSON.parse(raw) as Job[]) : [];
   } catch {
     return [];
   }
 }
 
-function write(jobs: Job[]) {
-  localStorage.setItem(KEY, JSON.stringify(jobs));
-  window.dispatchEvent(new CustomEvent("jat:jobs-changed"));
+// ----- Auto-migrate legacy localStorage jobs on first login -----
+async function migrateLegacyIfNeeded(userId: string) {
+  if (localStorage.getItem(`${MIGRATED_FLAG}.${userId}`)) return;
+  const local = readLocal();
+  if (local.length === 0) {
+    localStorage.setItem(`${MIGRATED_FLAG}.${userId}`, "1");
+    return;
+  }
+  const inserts = local.map((j) => jobToInsert(j, userId, "migrated"));
+  const { error } = await supabase.from("jobs").insert(inserts);
+  if (error) {
+    console.error("Legacy migration failed:", error);
+    toast.error("Couldn't import your local jobs — see console.");
+    return;
+  }
+  localStorage.removeItem(LEGACY_KEY);
+  localStorage.setItem(`${MIGRATED_FLAG}.${userId}`, "1");
+  toast.success(`Imported ${local.length} job${local.length === 1 ? "" : "s"} from your browser.`);
 }
 
-export function readAllJobs(): Job[] {
-  return read();
-}
-
-export function clearAllJobs() {
-  write([]);
-}
-
+// ----- CSV export / import (kept) -----
 function csvEscape(value: unknown): string {
   if (value === undefined || value === null) return "";
   const s = String(value).replace(/\r?\n/g, " ").trim();
@@ -34,12 +121,15 @@ function csvEscape(value: unknown): string {
   return s;
 }
 
-export function exportJobsAsCsv(): string {
+export async function exportJobsAsCsv(): Promise<string> {
   const headers = [
     "Company", "Role", "Status", "Application Type", "Industry",
     "Work Model", "Location", "Date Applied", "URL", "Notes", "Job Description",
   ];
-  const rows = read().map((j) => [
+  const { data, error } = await supabase.from("jobs").select("*").order("created_at", { ascending: false });
+  if (error) throw error;
+  const jobs = (data as JobRow[]).map(rowToJob);
+  const rows = jobs.map((j) => [
     j.company, j.role, j.status, j.applicationType ?? "", j.industry ?? "",
     j.workModel ?? "", j.location ?? "", j.dateApplied ?? "", j.url ?? "",
     j.notes ?? "", j.jobDescription ?? "",
@@ -47,20 +137,25 @@ export function exportJobsAsCsv(): string {
   return [headers, ...rows].map((r) => r.map(csvEscape).join(",")).join("\n");
 }
 
-export function downloadJobsCsv() {
-  const csv = exportJobsAsCsv();
+export async function downloadJobsCsv() {
+  const csv = await exportJobsAsCsv();
   const blob = new Blob([`\uFEFF${csv}`], { type: "text/csv;charset=utf-8;" });
   const url = URL.createObjectURL(blob);
   const a = document.createElement("a");
   a.href = url;
-  a.download = `careerdesk-jobs-${new Date().toISOString().slice(0, 10)}.csv`;
+  a.download = `jobflow-jobs-${new Date().toISOString().slice(0, 10)}.csv`;
   document.body.appendChild(a);
   a.click();
   document.body.removeChild(a);
   URL.revokeObjectURL(url);
 }
 
-// ---------- CSV Import ----------
+export async function clearAllJobs(): Promise<void> {
+  const { data: { user } } = await supabase.auth.getUser();
+  if (!user) return;
+  const { error } = await supabase.from("jobs").delete().eq("user_id", user.id);
+  if (error) throw error;
+}
 
 export interface ParsedImportRow {
   job: Omit<Job, "id" | "createdAt" | "updatedAt">;
@@ -162,13 +257,11 @@ export function previewCsvImport(text: string): ImportPreview {
     }
     rows.push({
       rowNumber: r + 1,
-      errors,
-      warnings,
+      errors, warnings,
       job: {
         company, role, status,
         applicationType: appType,
-        industry,
-        workModel,
+        industry, workModel,
         location: get("Location") || undefined,
         dateApplied,
         url: get("URL") || undefined,
@@ -181,68 +274,107 @@ export function previewCsvImport(text: string): ImportPreview {
   return { rows, validCount, invalidCount: rows.length - validCount, headerErrors: [] };
 }
 
-export function importJobs(rows: ParsedImportRow[]): number {
+export async function importJobs(rows: ParsedImportRow[]): Promise<number> {
+  const { data: { user } } = await supabase.auth.getUser();
+  if (!user) throw new Error("Not signed in");
   const valid = rows.filter((r) => r.errors.length === 0);
-  const now = new Date().toISOString();
-  const newJobs: Job[] = valid.map((r) => ({
-    ...r.job,
-    id: crypto.randomUUID(),
-    createdAt: now,
-    updatedAt: now,
-  }));
-  write([...newJobs, ...read()]);
-  return newJobs.length;
+  if (valid.length === 0) return 0;
+  const inserts = valid.map((r) => jobToInsert(r.job, user.id, "csv-import"));
+  const { error } = await supabase.from("jobs").insert(inserts);
+  if (error) throw error;
+  return valid.length;
 }
 
+// ----- Hook -----
 export function useJobs() {
-  const [jobs, setJobs] = useState<Job[]>(() => read());
+  const { user } = useAuth();
+  const [jobs, setJobs] = useState<Job[]>([]);
+  const userIdRef = useRef<string | null>(null);
+
+  const reload = useCallback(async (uid: string) => {
+    const { data, error } = await supabase
+      .from("jobs")
+      .select("*")
+      .eq("user_id", uid)
+      .order("created_at", { ascending: false });
+    if (error) {
+      console.error(error);
+      return;
+    }
+    setJobs((data as JobRow[]).map(rowToJob));
+  }, []);
 
   useEffect(() => {
-    const handler = () => setJobs(read());
-    window.addEventListener("jat:jobs-changed", handler);
-    window.addEventListener("storage", handler);
+    if (!user) {
+      setJobs([]);
+      userIdRef.current = null;
+      return;
+    }
+    userIdRef.current = user.id;
+
+    (async () => {
+      await migrateLegacyIfNeeded(user.id);
+      await reload(user.id);
+    })();
+
+    const channel = supabase
+      .channel(`jobs-${user.id}`)
+      .on(
+        "postgres_changes",
+        { event: "*", schema: "public", table: "jobs", filter: `user_id=eq.${user.id}` },
+        (payload) => {
+          if (payload.eventType === "INSERT") {
+            const j = rowToJob(payload.new as JobRow);
+            setJobs((prev) => (prev.some((x) => x.id === j.id) ? prev : [j, ...prev]));
+            if ((payload.new as JobRow).source === "extension") {
+              toast.success("New job captured from browser extension!");
+            }
+          } else if (payload.eventType === "UPDATE") {
+            const j = rowToJob(payload.new as JobRow);
+            setJobs((prev) => prev.map((x) => (x.id === j.id ? j : x)));
+          } else if (payload.eventType === "DELETE") {
+            const id = (payload.old as { id: string }).id;
+            setJobs((prev) => prev.filter((x) => x.id !== id));
+          }
+        }
+      )
+      .subscribe();
+
     return () => {
-      window.removeEventListener("jat:jobs-changed", handler);
-      window.removeEventListener("storage", handler);
+      supabase.removeChannel(channel);
     };
+  }, [user, reload]);
+
+  const addJob = useCallback(async (data: Omit<Job, "id" | "createdAt" | "updatedAt">): Promise<Job | null> => {
+    const uid = userIdRef.current;
+    if (!uid) return null;
+    const { data: row, error } = await supabase
+      .from("jobs")
+      .insert(jobToInsert(data, uid))
+      .select()
+      .single();
+    if (error) {
+      toast.error(error.message);
+      return null;
+    }
+    const j = rowToJob(row as JobRow);
+    setJobs((prev) => (prev.some((x) => x.id === j.id) ? prev : [j, ...prev]));
+    return j;
   }, []);
 
-  const addJob = useCallback((data: Omit<Job, "id" | "createdAt" | "updatedAt">): Job => {
-    const now = new Date().toISOString();
-    const job: Job = {
-      ...data,
-      id: crypto.randomUUID(),
-      createdAt: now,
-      updatedAt: now,
-    };
-    write([job, ...read()]);
-    return job;
+  const updateJob = useCallback(async (id: string, patch: Partial<Job>) => {
+    const { error } = await supabase.from("jobs").update(patchToUpdate(patch) as any).eq("id", id);
+    if (error) toast.error(error.message);
   }, []);
 
-  const updateJob = useCallback((id: string, patch: Partial<Job>) => {
-    const all = read();
-    const next = all.map((j) => {
-      if (j.id !== id) return j;
-      const statusChanged = patch.status && patch.status !== j.status;
-      return {
-        ...j,
-        ...patch,
-        updatedAt: statusChanged ? new Date().toISOString() : j.updatedAt,
-      };
-    });
-    write(next);
+  const removeJob = useCallback(async (id: string) => {
+    const { error } = await supabase.from("jobs").delete().eq("id", id);
+    if (error) toast.error(error.message);
   }, []);
 
-  const removeJob = useCallback((id: string) => {
-    write(read().filter((j) => j.id !== id));
-  }, []);
-
-  const moveJob = useCallback((id: string, status: JobStatus) => {
-    const all = read();
-    const next = all.map((j) =>
-      j.id === id ? { ...j, status, updatedAt: new Date().toISOString() } : j
-    );
-    write(next);
+  const moveJob = useCallback(async (id: string, status: JobStatus) => {
+    const { error } = await supabase.from("jobs").update({ status }).eq("id", id);
+    if (error) toast.error(error.message);
   }, []);
 
   return { jobs, addJob, updateJob, removeJob, moveJob };

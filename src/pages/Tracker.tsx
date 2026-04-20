@@ -258,9 +258,9 @@ export default function Tracker() {
       <AutoAddDialog
         open={autoOpen}
         onOpenChange={setAutoOpen}
-        onExtracted={(data) => {
-          const newJob = addJob(data);
-          setDialog({ open: true, status: newJob.status, job: newJob, key: Date.now() });
+        onExtracted={async (data) => {
+          const newJob = await addJob(data);
+          if (newJob) setDialog({ open: true, status: newJob.status, job: newJob, key: Date.now() });
         }}
       />
     </div>
