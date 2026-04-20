@@ -29,12 +29,16 @@ export function ImportCsvDialog({ open, onOpenChange }: Props) {
     setPreview(previewCsvImport(text));
   };
 
-  const onCommit = () => {
+  const onCommit = async () => {
     if (!preview) return;
-    const n = importJobs(preview.rows);
-    toast.success(`Imported ${n} job${n === 1 ? "" : "s"}`);
-    reset();
-    onOpenChange(false);
+    try {
+      const n = await importJobs(preview.rows);
+      toast.success(`Imported ${n} job${n === 1 ? "" : "s"}`);
+      reset();
+      onOpenChange(false);
+    } catch (e: any) {
+      toast.error(e?.message || "Import failed");
+    }
   };
 
   return (

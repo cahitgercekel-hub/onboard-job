@@ -363,7 +363,7 @@ export function useJobs() {
   }, []);
 
   const updateJob = useCallback(async (id: string, patch: Partial<Job>) => {
-    const { error } = await supabase.from("jobs").update(patchToUpdate(patch)).eq("id", id);
+    const { error } = await supabase.from("jobs").update(patchToUpdate(patch) as any).eq("id", id);
     if (error) toast.error(error.message);
   }, []);
 
