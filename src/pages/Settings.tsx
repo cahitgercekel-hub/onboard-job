@@ -114,6 +114,8 @@ export default function Settings() {
         </div>
       </section>
 
+      <CvBaselineSection />
+
       <section className="surface-card p-6">
         <div className="mb-5">
           <h2 className="text-base font-semibold text-foreground">{t("settings.data")}</h2>
@@ -126,7 +128,10 @@ export default function Settings() {
             </div>
             <Button
               variant="outline"
-              onClick={() => { downloadJobsCsv(); toast.success("CSV downloaded"); }}
+              onClick={async () => {
+                try { await downloadJobsCsv(); toast.success("CSV downloaded"); }
+                catch (e: any) { toast.error(e?.message || "Export failed"); }
+              }}
             >
               <Download className="h-4 w-4" /> {t("settings.export")}
             </Button>
@@ -197,11 +202,15 @@ function ClearAllDialog({ open, onOpenChange }: { open: boolean; onOpenChange: (
           <Button
             variant="destructive"
             disabled={!ready}
-            onClick={() => {
-              clearAllJobs();
-              onOpenChange(false);
-              setText("");
-              toast.success("All data cleared");
+            onClick={async () => {
+              try {
+                await clearAllJobs();
+                onOpenChange(false);
+                setText("");
+                toast.success("All data cleared");
+              } catch (e: any) {
+                toast.error(e?.message || "Failed to clear");
+              }
             }}
           >
             {t("settings.confirmBtn")}
