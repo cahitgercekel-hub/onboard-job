@@ -9,6 +9,7 @@
         "@dnd-kit/sortable": "^10.0.0",
         "@dnd-kit/utilities": "^3.2.2",
         "@hookform/resolvers": "^3.10.0",
+        "@lovable.dev/cloud-auth-js": "^1.1.1",
         "@radix-ui/react-accordion": "^1.2.11",
         "@radix-ui/react-alert-dialog": "^1.1.14",
         "@radix-ui/react-aspect-ratio": "^1.1.7",
@@ -206,6 +207,8 @@
     "@jridgewell/sourcemap-codec": ["@jridgewell/sourcemap-codec@1.5.5", "https://europe-west4-npm.pkg.dev/lovable-core-prod/sandbox-npm-cache/@jridgewell/sourcemap-codec/-/sourcemap-codec-1.5.5.tgz", {}, "sha512-cYQ9310grqxueWbl+WuIUIaiUaDcj7WOq5fVhEljNVgRfOUhY9fy2zTvfoqWsnebh8Sl70VScFbICvJnLKB0Og=="],
 
     "@jridgewell/trace-mapping": ["@jridgewell/trace-mapping@0.3.25", "", { "dependencies": { "@jridgewell/resolve-uri": "^3.1.0", "@jridgewell/sourcemap-codec": "^1.4.14" } }, "sha512-vNk6aEwybGtawWmy/PzwnGDOjCkLWSD2wqvjGGAgOAwCGWySYXfYoxt00IJkTF+8Lb57DwOb3Aa0o9CApepiYQ=="],
+
+    "@lovable.dev/cloud-auth-js": ["@lovable.dev/cloud-auth-js@1.1.1", "https://europe-west4-npm.pkg.dev/lovable-core-prod/sandbox-npm-cache/@lovable.dev/cloud-auth-js/-/cloud-auth-js-1.1.1.tgz", {}, "sha512-80elU8dSJG6bho0Xnfj2oy53wp883nYXrG1Wy948LC/ZUaUQ0i9EGXQFmwTLOBFrWqxb6aNaOlZUvQ8BVGhjMQ=="],
 
     "@napi-rs/canvas": ["@napi-rs/canvas@0.1.99", "https://europe-west4-npm.pkg.dev/lovable-core-prod/sandbox-npm-cache/@napi-rs/canvas/-/canvas-0.1.99.tgz", { "optionalDependencies": { "@napi-rs/canvas-android-arm64": "0.1.99", "@napi-rs/canvas-darwin-arm64": "0.1.99", "@napi-rs/canvas-darwin-x64": "0.1.99", "@napi-rs/canvas-linux-arm-gnueabihf": "0.1.99", "@napi-rs/canvas-linux-arm64-gnu": "0.1.99", "@napi-rs/canvas-linux-arm64-musl": "0.1.99", "@napi-rs/canvas-linux-riscv64-gnu": "0.1.99", "@napi-rs/canvas-linux-x64-gnu": "0.1.99", "@napi-rs/canvas-linux-x64-musl": "0.1.99", "@napi-rs/canvas-win32-arm64-msvc": "0.1.99", "@napi-rs/canvas-win32-x64-msvc": "0.1.99" } }, "sha512-zN4eQlK3eBf7aJBcTHZilpBH3tDekBzPMIWC8r0s94Ecl73XfOyFi4w7yKFMRVUT0lvNQjtOL8YSrwqQj6mZFg=="],
 
