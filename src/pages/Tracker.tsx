@@ -1,7 +1,8 @@
 import { useMemo, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { DndContext, DragEndEvent, DragOverlay, DragStartEvent, PointerSensor, useSensor, useSensors } from "@dnd-kit/core";
-import { Filter, Sparkles, Calendar as CalendarIcon, ArrowUpDown, Check } from "lucide-react";
+import { Filter, Sparkles, Calendar as CalendarIcon, ArrowUpDown, Check, Search, X } from "lucide-react";
+import { Input } from "@/components/ui/input";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuSeparator, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import { format } from "date-fns";
 import { useJobs } from "@/lib/jobsStore";
@@ -37,6 +38,8 @@ export default function Tracker() {
   const [autoOpen, setAutoOpen] = useState(false);
   const [activeId, setActiveId] = useState<string | null>(null);
   const [sortKey, setSortKey] = useState<SortKey>("default");
+  const [search, setSearch] = useState("");
+  const [searchOpen, setSearchOpen] = useState(false);
   const activeJob = useMemo(() => jobs.find((j) => j.id === activeId) ?? null, [jobs, activeId]);
 
   const sensors = useSensors(useSensor(PointerSensor, { activationConstraint: { distance: 4 } }));
@@ -59,17 +62,21 @@ export default function Tracker() {
     return true;
   };
 
-  const filtered = useMemo(
-    () =>
-      jobs.filter(
-        (j) =>
-          (appType === ALL || j.applicationType === appType) &&
-          (industry === ALL || j.industry === industry) &&
-          (workModel === ALL || j.workModel === workModel) &&
-          dateMatches(j)
-      ),
-    [jobs, appType, industry, workModel, dateChip, customFrom, customTo]
-  );
+  const filtered = useMemo(() => {
+    const q = search.trim().toLowerCase();
+    return jobs.filter(
+      (j) =>
+        (appType === ALL || j.applicationType === appType) &&
+        (industry === ALL || j.industry === industry) &&
+        (workModel === ALL || j.workModel === workModel) &&
+        dateMatches(j) &&
+        (q === "" ||
+          (j.company || "").toLowerCase().includes(q) ||
+          (j.role || "").toLowerCase().includes(q) ||
+          (j.location || "").toLowerCase().includes(q) ||
+          (j.notes || "").toLowerCase().includes(q))
+    );
+  }, [jobs, appType, industry, workModel, dateChip, customFrom, customTo, search]);
 
   const byStatus = useMemo(() => {
     const m: Record<JobStatus, Job[]> = { saved: [], applied: [], interviewing: [], offer: [], rejected: [] };
@@ -129,7 +136,31 @@ export default function Tracker() {
               <span className="hidden md:inline"> · {t("common.dragHint")}</span>
             </p>
           </div>
-          <div className="flex flex-wrap items-center gap-2">
+          <div className="flex flex-wrap items-center gap-2 w-full md:w-auto">
+            {searchOpen || search ? (
+              <div className="relative flex-1 md:flex-none md:w-64 order-first md:order-none">
+                <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground pointer-events-none" />
+                <Input
+                  autoFocus
+                  value={search}
+                  onChange={(e) => setSearch(e.target.value)}
+                  placeholder={t("tracker.searchPlaceholder", { defaultValue: "Search company or role…" })}
+                  className="h-11 md:h-9 pl-8 pr-9"
+                />
+                <button
+                  onClick={() => { setSearch(""); setSearchOpen(false); }}
+                  aria-label="Close search"
+                  className="absolute right-1.5 top-1/2 -translate-y-1/2 p-1.5 rounded-md text-muted-foreground hover:text-foreground hover:bg-muted"
+                >
+                  <X className="h-4 w-4" />
+                </button>
+              </div>
+            ) : (
+              <Button variant="outline" size="sm" className="h-11 md:h-9" onClick={() => setSearchOpen(true)} aria-label="Search jobs">
+                <Search className="h-3.5 w-3.5" />
+                <span className="hidden sm:inline">Search</span>
+              </Button>
+            )}
             <SortMenu sortKey={sortKey} onChange={setSortKey} />
             <Popover>
               <PopoverTrigger asChild>
