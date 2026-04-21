@@ -5,3 +5,6 @@ verify_jwt = false
 
 [functions.ingest-job]
 verify_jwt = false
+
+[functions.calculate-fitness]
+verify_jwt = false

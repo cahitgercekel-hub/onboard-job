@@ -51,6 +51,8 @@ export interface Job {
   location?: string;
   jobDescription?: string;
   notes?: string;
+  fitnessScore?: number | null;
+  fitnessReasoning?: string | null;
   createdAt: string;
   updatedAt: string; // bumped when status changes
 }
