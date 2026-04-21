@@ -296,3 +296,48 @@ function DateRangeField({ label, value, onChange }: { label: string; value?: Dat
     </Popover>
   );
 }
+
+function SortMenu({ sortKey, onChange }: { sortKey: SortKey; onChange: (k: SortKey) => void }) {
+  const options: { key: SortKey; label: string }[] = [
+    { key: "score-desc", label: "Match Score: High to Low" },
+    { key: "date-desc", label: "Date: Newest First" },
+    { key: "date-asc", label: "Date: Oldest First" },
+    { key: "company-asc", label: "Company: A–Z" },
+  ];
+  const active = options.find((o) => o.key === sortKey);
+  return (
+    <DropdownMenu>
+      <DropdownMenuTrigger asChild>
+        <Button variant="outline" size="sm" className="h-11 md:h-9">
+          <ArrowUpDown className="h-3.5 w-3.5" />
+          Sort
+          {active && (
+            <span className="ml-1 hidden sm:inline text-xs text-muted-foreground truncate max-w-[120px]">
+              · {active.label.split(":")[0]}
+            </span>
+          )}
+        </Button>
+      </DropdownMenuTrigger>
+      <DropdownMenuContent align="end" className="w-56">
+        {options.map((o) => (
+          <DropdownMenuItem
+            key={o.key}
+            onClick={() => onChange(o.key)}
+            className={cn("cursor-pointer", sortKey === o.key && "font-semibold")}
+          >
+            <Check className={cn("h-4 w-4 mr-2", sortKey === o.key ? "opacity-100" : "opacity-0")} />
+            {o.label}
+          </DropdownMenuItem>
+        ))}
+        <DropdownMenuSeparator />
+        <DropdownMenuItem
+          onClick={() => onChange("default")}
+          className={cn("cursor-pointer", sortKey === "default" && "font-semibold")}
+        >
+          <Check className={cn("h-4 w-4 mr-2", sortKey === "default" ? "opacity-100" : "opacity-0")} />
+          Default order
+        </DropdownMenuItem>
+      </DropdownMenuContent>
+    </DropdownMenu>
+  );
+}
