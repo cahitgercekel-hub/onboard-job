@@ -1,11 +1,15 @@
 import { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
+import { Sparkles, Loader2 } from "lucide-react";
+import { supabase } from "@/integrations/supabase/client";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Button } from "@/components/ui/button";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { FitnessRing } from "@/components/FitnessRing";
+import { toast } from "sonner";
 import {
   APPLICATION_TYPES,
   INDUSTRIES,
@@ -41,6 +45,7 @@ export function JobDialog({ open, onOpenChange, initialStatus = "saved", job, on
   const [location, setLocation] = useState(job?.location ?? "");
   const [jobDescription, setJobDescription] = useState(job?.jobDescription ?? "");
   const [notes, setNotes] = useState(job?.notes ?? "");
+  const [scoring, setScoring] = useState(false);
 
   useEffect(() => {
     if (!open) return;
@@ -56,6 +61,22 @@ export function JobDialog({ open, onOpenChange, initialStatus = "saved", job, on
     setJobDescription(job?.jobDescription ?? "");
     setNotes(job?.notes ?? "");
   }, [open, job, initialStatus]);
+
+  const calculateFitness = async () => {
+    if (!job?.id) return toast.error("Save the job first, then calculate fitness.");
+    if (!jobDescription.trim()) return toast.error("Add a job description first.");
+    setScoring(true);
+    try {
+      const { data, error } = await supabase.functions.invoke("calculate-fitness", { body: { jobId: job.id } });
+      if (error) throw error;
+      if ((data as any)?.error) throw new Error((data as any).error);
+      toast.success(`Fitness score: ${(data as any).score}`);
+    } catch (err: any) {
+      toast.error(err?.message || "Couldn't score this job");
+    } finally {
+      setScoring(false);
+    }
+  };
 
   const submit = () => {
     if (!company.trim() || !role.trim()) return;
@@ -149,8 +170,25 @@ export function JobDialog({ open, onOpenChange, initialStatus = "saved", job, on
             </div>
           </div>
           <div className="grid gap-1.5">
-            <Label htmlFor="jd">{t("common.jobDescription")}</Label>
-            <Textarea id="jd" rows={4} value={jobDescription} onChange={(e) => setJobDescription(e.target.value)} placeholder="Paste the JD here — used for AI Interview Prep…" />
+            <div className="flex items-center justify-between">
+              <Label htmlFor="jd">{t("common.jobDescription")}</Label>
+              {job && (
+                <Button type="button" variant="outline" size="sm" disabled={scoring || !jobDescription.trim()} onClick={calculateFitness}>
+                  {scoring ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <Sparkles className="h-3.5 w-3.5" />}
+                  {job.fitnessScore != null ? "Re-score fitness" : "Calculate fitness"}
+                </Button>
+              )}
+            </div>
+            <Textarea id="jd" rows={4} value={jobDescription} onChange={(e) => setJobDescription(e.target.value)} placeholder="Paste the JD here — used for AI Fitness Score & Interview Prep…" />
+            {job?.fitnessReasoning && (
+              <div className="mt-2 flex gap-3 rounded-md border border-border bg-muted/30 p-3">
+                <FitnessRing score={job.fitnessScore} size={44} stroke={5} />
+                <div className="min-w-0 flex-1">
+                  <div className="text-[11px] font-medium text-muted-foreground uppercase tracking-wide mb-0.5">AI Fitness reasoning</div>
+                  <p className="text-xs text-foreground leading-relaxed">{job.fitnessReasoning}</p>
+                </div>
+              </div>
+            )}
           </div>
           <div className="grid gap-1.5">
             <Label htmlFor="notes">{t("common.notes")}</Label>

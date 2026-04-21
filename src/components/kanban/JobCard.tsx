@@ -5,6 +5,7 @@ import type { Job, WorkModel } from "@/lib/types";
 import { cn } from "@/lib/utils";
 import { Badge } from "@/components/ui/badge";
 import { usePrefs } from "@/lib/preferences";
+import { FitnessRing } from "@/components/FitnessRing";
 
 interface Props {
   job: Job;
@@ -49,22 +50,27 @@ export function JobCard({ job, onClick, overlay = false }: Props) {
       )}
     >
       <div className="flex-1 min-w-0">
-        <div className="flex items-center justify-between gap-2">
-          <div className="text-sm font-semibold text-foreground truncate">{job.role}</div>
-          {alarm !== "none" && (
-            <span
-              className={cn(
-                "inline-flex items-center gap-1 text-[10px] font-medium px-1.5 py-0.5 rounded",
-                alarm === "warn" ? "bg-warning/15 text-warning-foreground/90" : "bg-destructive/15 text-destructive"
-              )}
-              title={`No update for ${daysSince(job.updatedAt)} days`}
-            >
-              <AlertTriangle className="h-3 w-3" />
-              {daysSince(job.updatedAt)}d
-            </span>
-          )}
+        <div className="flex items-start justify-between gap-2">
+          <div className="min-w-0 flex-1">
+            <div className="text-sm font-semibold text-foreground truncate">{job.role}</div>
+            <div className="text-xs text-muted-foreground truncate">{job.company}</div>
+          </div>
+          <div className="flex items-center gap-1.5 shrink-0">
+            {alarm !== "none" && (
+              <span
+                className={cn(
+                  "inline-flex items-center gap-1 text-[10px] font-medium px-1.5 py-0.5 rounded",
+                  alarm === "warn" ? "bg-warning/15 text-warning-foreground/90" : "bg-destructive/15 text-destructive"
+                )}
+                title={`No update for ${daysSince(job.updatedAt)} days`}
+              >
+                <AlertTriangle className="h-3 w-3" />
+                {daysSince(job.updatedAt)}d
+              </span>
+            )}
+            <FitnessRing score={job.fitnessScore} />
+          </div>
         </div>
-        <div className="text-xs text-muted-foreground truncate">{job.company}</div>
 
         {(job.applicationType || job.industry || job.workModel) && (
           <div className="mt-2 flex flex-wrap gap-1">

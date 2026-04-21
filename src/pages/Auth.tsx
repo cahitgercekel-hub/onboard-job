@@ -3,24 +3,23 @@ import { useNavigate, useLocation } from "react-router-dom";
 import { z } from "zod";
 import { BriefcaseBusiness } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
+import { lovable } from "@/integrations/lovable/index";
 import { useAuth } from "@/lib/auth";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
+import { PasswordStrength, getPasswordScore } from "@/components/PasswordStrength";
 import { toast } from "sonner";
 
-const credSchema = z.object({
-  email: z.string().trim().email({ message: "Enter a valid email" }).max(255),
-  password: z.string().min(6, { message: "Password must be at least 6 characters" }).max(72),
-});
+const emailSchema = z.string().trim().email({ message: "Enter a valid email" }).max(255);
 
 export default function AuthPage() {
   const { session, loading } = useAuth();
   const navigate = useNavigate();
   const location = useLocation();
   const from = (location.state as any)?.from || "/";
-  const [tab, setTab] = useState<"login" | "signup">("login");
+  const [tab, setTab] = useState<"login" | "signup" | "forgot">("login");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [displayName, setDisplayName] = useState("");
@@ -32,17 +31,27 @@ export default function AuthPage() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    const parsed = credSchema.safeParse({ email, password });
-    if (!parsed.success) {
-      toast.error(parsed.error.issues[0]?.message ?? "Invalid input");
+    const emailParsed = emailSchema.safeParse(email);
+    if (!emailParsed.success) {
+      toast.error(emailParsed.error.issues[0]?.message ?? "Invalid email");
       return;
     }
+
     setBusy(true);
     try {
-      if (tab === "signup") {
+      if (tab === "forgot") {
+        const { error } = await supabase.auth.resetPasswordForEmail(emailParsed.data, {
+          redirectTo: `${window.location.origin}/reset-password`,
+        });
+        if (error) throw error;
+        toast.success("Check your email for a reset link.");
+        setTab("login");
+      } else if (tab === "signup") {
+        if (password.length < 8) throw new Error("Password must be at least 8 characters");
+        if (getPasswordScore(password) < 2) throw new Error("Please choose a stronger password");
         const { error } = await supabase.auth.signUp({
-          email: parsed.data.email,
-          password: parsed.data.password,
+          email: emailParsed.data,
+          password,
           options: {
             emailRedirectTo: `${window.location.origin}/`,
             data: { display_name: displayName.trim() || undefined },
@@ -51,15 +60,31 @@ export default function AuthPage() {
         if (error) throw error;
         toast.success("Account created — you're signed in!");
       } else {
+        if (!password) throw new Error("Password is required");
         const { error } = await supabase.auth.signInWithPassword({
-          email: parsed.data.email,
-          password: parsed.data.password,
+          email: emailParsed.data,
+          password,
         });
         if (error) throw error;
         toast.success("Welcome back!");
       }
     } catch (err: any) {
       toast.error(err?.message || "Authentication failed");
+    } finally {
+      setBusy(false);
+    }
+  };
+
+  const signInWithGoogle = async () => {
+    setBusy(true);
+    try {
+      const result = await lovable.auth.signInWithOAuth("google", {
+        redirect_uri: window.location.origin,
+      });
+      if (result.error) throw new Error((result.error as any)?.message || "Google sign-in failed");
+      // If redirected, browser handles it; if tokens received, AuthProvider takes over
+    } catch (err: any) {
+      toast.error(err?.message || "Google sign-in failed");
     } finally {
       setBusy(false);
     }
@@ -78,25 +103,56 @@ export default function AuthPage() {
           </div>
         </div>
 
-        <Tabs value={tab} onValueChange={(v) => setTab(v as "login" | "signup")}>
+        <Button type="button" variant="outline" className="w-full mb-4" disabled={busy} onClick={signInWithGoogle}>
+          <GoogleIcon /> Continue with Google
+        </Button>
+
+        <div className="relative my-4">
+          <div className="absolute inset-0 flex items-center"><span className="w-full border-t border-border" /></div>
+          <div className="relative flex justify-center"><span className="bg-card px-2 text-[11px] uppercase tracking-wide text-muted-foreground">or with email</span></div>
+        </div>
+
+        <Tabs value={tab === "forgot" ? "login" : tab} onValueChange={(v) => setTab(v as "login" | "signup")}>
           <TabsList className="grid w-full grid-cols-2 mb-4">
             <TabsTrigger value="login">Log in</TabsTrigger>
             <TabsTrigger value="signup">Sign up</TabsTrigger>
           </TabsList>
+
           <TabsContent value="login" className="mt-0">
-            <form onSubmit={handleSubmit} className="space-y-3">
-              <Field id="login-email" label="Email" type="email" value={email} onChange={setEmail} />
-              <Field id="login-password" label="Password" type="password" value={password} onChange={setPassword} />
-              <Button type="submit" disabled={busy} className="w-full">
-                {busy ? "Signing in…" : "Log in"}
-              </Button>
-            </form>
+            {tab === "forgot" ? (
+              <form onSubmit={handleSubmit} className="space-y-3">
+                <p className="text-xs text-muted-foreground">Enter your email and we'll send a password reset link.</p>
+                <Field id="forgot-email" label="Email" type="email" value={email} onChange={setEmail} />
+                <Button type="submit" disabled={busy} className="w-full">
+                  {busy ? "Sending…" : "Send reset link"}
+                </Button>
+                <button type="button" onClick={() => setTab("login")} className="text-xs text-muted-foreground hover:text-foreground w-full text-center">
+                  Back to log in
+                </button>
+              </form>
+            ) : (
+              <form onSubmit={handleSubmit} className="space-y-3">
+                <Field id="login-email" label="Email" type="email" value={email} onChange={setEmail} />
+                <Field id="login-password" label="Password" type="password" value={password} onChange={setPassword} />
+                <Button type="submit" disabled={busy} className="w-full">
+                  {busy ? "Signing in…" : "Log in"}
+                </Button>
+                <button type="button" onClick={() => setTab("forgot")} className="text-xs text-muted-foreground hover:text-foreground w-full text-center">
+                  Forgot password?
+                </button>
+              </form>
+            )}
           </TabsContent>
+
           <TabsContent value="signup" className="mt-0">
             <form onSubmit={handleSubmit} className="space-y-3">
               <Field id="signup-name" label="Display name (optional)" type="text" value={displayName} onChange={setDisplayName} />
               <Field id="signup-email" label="Email" type="email" value={email} onChange={setEmail} />
-              <Field id="signup-password" label="Password" type="password" value={password} onChange={setPassword} />
+              <div className="grid gap-1.5">
+                <Label htmlFor="signup-password">Password</Label>
+                <Input id="signup-password" type="password" value={password} onChange={(e) => setPassword(e.target.value)} required />
+                <PasswordStrength password={password} />
+              </div>
               <Button type="submit" disabled={busy} className="w-full">
                 {busy ? "Creating account…" : "Create account"}
               </Button>
@@ -114,5 +170,16 @@ function Field({ id, label, type, value, onChange }: { id: string; label: string
       <Label htmlFor={id}>{label}</Label>
       <Input id={id} type={type} value={value} onChange={(e) => onChange(e.target.value)} required={type !== "text"} />
     </div>
+  );
+}
+
+function GoogleIcon() {
+  return (
+    <svg width="16" height="16" viewBox="0 0 48 48" aria-hidden="true">
+      <path fill="#FFC107" d="M43.6 20.5H42V20H24v8h11.3C33.7 32.9 29.3 36 24 36c-6.6 0-12-5.4-12-12s5.4-12 12-12c3.1 0 5.9 1.2 8 3.1l5.7-5.7C34.5 6.1 29.5 4 24 4 12.9 4 4 12.9 4 24s8.9 20 20 20 20-8.9 20-20c0-1.3-.1-2.3-.4-3.5z"/>
+      <path fill="#FF3D00" d="M6.3 14.7l6.6 4.8C14.7 16 19 13 24 13c3.1 0 5.9 1.2 8 3.1l5.7-5.7C34.5 7.1 29.5 5 24 5 16.3 5 9.7 9.3 6.3 14.7z"/>
+      <path fill="#4CAF50" d="M24 44c5.3 0 10.1-2 13.7-5.3l-6.3-5.3C29.3 35 26.8 36 24 36c-5.3 0-9.7-3.1-11.3-7.5l-6.5 5C9.5 39.6 16.2 44 24 44z"/>
+      <path fill="#1976D2" d="M43.6 20.5H42V20H24v8h11.3c-.8 2.2-2.2 4.1-4 5.4l6.3 5.3C41.6 35.5 44 30.2 44 24c0-1.3-.1-2.3-.4-3.5z"/>
+    </svg>
   );
 }

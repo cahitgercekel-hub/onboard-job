@@ -44,6 +44,8 @@ function rowToJob(r: JobRow): Job {
     location: r.location ?? undefined,
     jobDescription: r.job_description ?? undefined,
     notes: r.notes ?? undefined,
+    fitnessScore: r.fitness_score,
+    fitnessReasoning: r.fitness_reasoning,
     createdAt: r.created_at,
     updatedAt: r.updated_at,
   };
