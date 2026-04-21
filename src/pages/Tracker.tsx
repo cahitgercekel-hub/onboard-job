@@ -1,7 +1,8 @@
 import { useMemo, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { DndContext, DragEndEvent, DragOverlay, DragStartEvent, PointerSensor, useSensor, useSensors } from "@dnd-kit/core";
-import { Filter, Sparkles, Calendar as CalendarIcon } from "lucide-react";
+import { Filter, Sparkles, Calendar as CalendarIcon, ArrowUpDown, Check } from "lucide-react";
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuSeparator, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import { format } from "date-fns";
 import { useJobs } from "@/lib/jobsStore";
 import { APPLICATION_TYPES, INDUSTRIES, STATUS_ORDER, WORK_MODELS, type Job, type JobStatus } from "@/lib/types";
@@ -19,6 +20,7 @@ import { cn } from "@/lib/utils";
 
 const ALL = "__all__";
 type DateChip = "any" | "3" | "7" | "30" | "older" | "custom";
+type SortKey = "default" | "score-desc" | "date-desc" | "date-asc" | "company-asc";
 
 export default function Tracker() {
   const { t } = useTranslation();
@@ -34,6 +36,7 @@ export default function Tracker() {
   });
   const [autoOpen, setAutoOpen] = useState(false);
   const [activeId, setActiveId] = useState<string | null>(null);
+  const [sortKey, setSortKey] = useState<SortKey>("default");
   const activeJob = useMemo(() => jobs.find((j) => j.id === activeId) ?? null, [jobs, activeId]);
 
   const sensors = useSensors(useSensor(PointerSensor, { activationConstraint: { distance: 4 } }));
@@ -71,8 +74,18 @@ export default function Tracker() {
   const byStatus = useMemo(() => {
     const m: Record<JobStatus, Job[]> = { saved: [], applied: [], interviewing: [], offer: [], rejected: [] };
     for (const j of filtered) m[j.status].push(j);
+    if (sortKey !== "default") {
+      const cmp = (a: Job, b: Job): number => {
+        if (sortKey === "score-desc") return (b.fitnessScore ?? -1) - (a.fitnessScore ?? -1);
+        if (sortKey === "company-asc") return (a.company || "").localeCompare(b.company || "");
+        const aT = a.dateApplied ? new Date(a.dateApplied).getTime() : (a.createdAt ? new Date(a.createdAt).getTime() : 0);
+        const bT = b.dateApplied ? new Date(b.dateApplied).getTime() : (b.createdAt ? new Date(b.createdAt).getTime() : 0);
+        return sortKey === "date-desc" ? bT - aT : aT - bT;
+      };
+      for (const k of Object.keys(m) as JobStatus[]) m[k].sort(cmp);
+    }
     return m;
-  }, [filtered]);
+  }, [filtered, sortKey]);
 
   const onDragStart = (e: DragStartEvent) => setActiveId(String(e.active.id));
   const onDragEnd = (e: DragEndEvent) => {
@@ -117,6 +130,7 @@ export default function Tracker() {
             </p>
           </div>
           <div className="flex flex-wrap items-center gap-2">
+            <SortMenu sortKey={sortKey} onChange={setSortKey} />
             <Popover>
               <PopoverTrigger asChild>
                 <Button variant="outline" size="sm" className="h-11 md:h-9">
@@ -280,5 +294,50 @@ function DateRangeField({ label, value, onChange }: { label: string; value?: Dat
         <Calendar mode="single" selected={value} onSelect={onChange} initialFocus className={cn("p-3 pointer-events-auto")} />
       </PopoverContent>
     </Popover>
+  );
+}
+
+function SortMenu({ sortKey, onChange }: { sortKey: SortKey; onChange: (k: SortKey) => void }) {
+  const options: { key: SortKey; label: string }[] = [
+    { key: "score-desc", label: "Match Score: High to Low" },
+    { key: "date-desc", label: "Date: Newest First" },
+    { key: "date-asc", label: "Date: Oldest First" },
+    { key: "company-asc", label: "Company: A–Z" },
+  ];
+  const active = options.find((o) => o.key === sortKey);
+  return (
+    <DropdownMenu>
+      <DropdownMenuTrigger asChild>
+        <Button variant="outline" size="sm" className="h-11 md:h-9">
+          <ArrowUpDown className="h-3.5 w-3.5" />
+          Sort
+          {active && (
+            <span className="ml-1 hidden sm:inline text-xs text-muted-foreground truncate max-w-[120px]">
+              · {active.label.split(":")[0]}
+            </span>
+          )}
+        </Button>
+      </DropdownMenuTrigger>
+      <DropdownMenuContent align="end" className="w-56">
+        {options.map((o) => (
+          <DropdownMenuItem
+            key={o.key}
+            onClick={() => onChange(o.key)}
+            className={cn("cursor-pointer", sortKey === o.key && "font-semibold")}
+          >
+            <Check className={cn("h-4 w-4 mr-2", sortKey === o.key ? "opacity-100" : "opacity-0")} />
+            {o.label}
+          </DropdownMenuItem>
+        ))}
+        <DropdownMenuSeparator />
+        <DropdownMenuItem
+          onClick={() => onChange("default")}
+          className={cn("cursor-pointer", sortKey === "default" && "font-semibold")}
+        >
+          <Check className={cn("h-4 w-4 mr-2", sortKey === "default" ? "opacity-100" : "opacity-0")} />
+          Default order
+        </DropdownMenuItem>
+      </DropdownMenuContent>
+    </DropdownMenu>
   );
 }
