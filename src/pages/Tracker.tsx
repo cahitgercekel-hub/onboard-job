@@ -74,8 +74,18 @@ export default function Tracker() {
   const byStatus = useMemo(() => {
     const m: Record<JobStatus, Job[]> = { saved: [], applied: [], interviewing: [], offer: [], rejected: [] };
     for (const j of filtered) m[j.status].push(j);
+    if (sortKey !== "default") {
+      const cmp = (a: Job, b: Job): number => {
+        if (sortKey === "score-desc") return (b.fitnessScore ?? -1) - (a.fitnessScore ?? -1);
+        if (sortKey === "company-asc") return (a.company || "").localeCompare(b.company || "");
+        const aT = a.dateApplied ? new Date(a.dateApplied).getTime() : (a.createdAt ? new Date(a.createdAt).getTime() : 0);
+        const bT = b.dateApplied ? new Date(b.dateApplied).getTime() : (b.createdAt ? new Date(b.createdAt).getTime() : 0);
+        return sortKey === "date-desc" ? bT - aT : aT - bT;
+      };
+      for (const k of Object.keys(m) as JobStatus[]) m[k].sort(cmp);
+    }
     return m;
-  }, [filtered]);
+  }, [filtered, sortKey]);
 
   const onDragStart = (e: DragStartEvent) => setActiveId(String(e.active.id));
   const onDragEnd = (e: DragEndEvent) => {
