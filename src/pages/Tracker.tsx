@@ -42,7 +42,10 @@ export default function Tracker() {
   const [searchOpen, setSearchOpen] = useState(false);
   const activeJob = useMemo(() => jobs.find((j) => j.id === activeId) ?? null, [jobs, activeId]);
 
-  const sensors = useSensors(useSensor(PointerSensor, { activationConstraint: { distance: 4 } }));
+  const sensors = useSensors(
+    useSensor(PointerSensor, { activationConstraint: { distance: 4 } }),
+    useSensor(TouchSensor, { activationConstraint: { delay: 250, tolerance: 8 } }),
+  );
 
   const dateMatches = (job: Job): boolean => {
     if (dateChip === "any") return true;
