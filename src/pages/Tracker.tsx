@@ -1,7 +1,8 @@
 import { useMemo, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { DndContext, DragEndEvent, DragOverlay, DragStartEvent, PointerSensor, useSensor, useSensors } from "@dnd-kit/core";
-import { Filter, Sparkles, Calendar as CalendarIcon } from "lucide-react";
+import { Filter, Sparkles, Calendar as CalendarIcon, ArrowUpDown, Check } from "lucide-react";
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuSeparator, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import { format } from "date-fns";
 import { useJobs } from "@/lib/jobsStore";
 import { APPLICATION_TYPES, INDUSTRIES, STATUS_ORDER, WORK_MODELS, type Job, type JobStatus } from "@/lib/types";
