@@ -167,9 +167,9 @@ export default function Tracker() {
             <SortMenu sortKey={sortKey} onChange={setSortKey} />
             <Popover>
               <PopoverTrigger asChild>
-                <Button variant="outline" size="sm" className="h-11 md:h-9">
+                <Button variant="outline" size="sm" className="h-11 md:h-9" aria-label={t("common.filter")}>
                   <Filter className="h-3.5 w-3.5" />
-                  {t("common.filter")}
+                  <span className="hidden sm:inline">{t("common.filter")}</span>
                   {activeCount > 0 && (
                     <Badge variant="secondary" className="ml-1 h-5 px-1.5 text-[10px]">{activeCount}</Badge>
                   )}
