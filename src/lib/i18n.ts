@@ -6,16 +6,12 @@ const resources = {
   en: {
     translation: {
       app: { name: "JobFlow", tagline: "Track Job & CV Assist" },
-      nav: { tracker: "Tracker", board: "Job Tracking Dashboard", analytics: "Analytics", assistant: "Assistant", aiAssistant: "AI Assistant", settings: "Settings" },
+      nav: { tracker: "Job Tracker", board: "Dashboard", analytics: "Analytics", assistant: "Assistant", aiAssistant: "AI Assistant", settings: "Settings" },
       common: {
-        save: "Save", cancel: "Cancel", delete: "Delete", add: "Add", edit: "Edit",
-        filter: "Filter", clear: "Clear filters", all: "All",
-        company: "Company", role: "Role", url: "Job URL", date: "Date applied", status: "Status",
-        applicationType: "Application type", industry: "Industry", workModel: "Work model",
-        location: "Location", notes: "Notes", jobDescription: "Job description",
+...
         dragHint: "drag cards between columns",
       },
-      tracker: { title: "Job Tracking Dashboard", addJob: "Add job", autoAdd: "Auto-add with AI", jobs_one: "{{count}} job", jobs_other: "{{count}} jobs" },
+      tracker: { title: "Dashboard", addJob: "Add job", autoAdd: "Auto-add with AI", jobs_one: "{{count}} job", jobs_other: "{{count}} jobs" },
       analytics: { title: "Analytics", subtitle: "Distribution of {{count}} applications across stages.", chartTitle: "Applications by status" },
       filters: {
         appType: "Application type", industry: "Industry", workModel: "Work model", dateApplied: "Date applied",
