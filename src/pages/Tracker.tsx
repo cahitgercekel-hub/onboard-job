@@ -1,7 +1,7 @@
 import { useMemo, useState } from "react";
 import { useTranslation } from "react-i18next";
-import { DndContext, DragEndEvent, DragOverlay, DragStartEvent, PointerSensor, useSensor, useSensors } from "@dnd-kit/core";
-import { Filter, Sparkles, Calendar as CalendarIcon, ArrowUpDown, Check, Search, X } from "lucide-react";
+import { DndContext, DragEndEvent, DragOverlay, DragStartEvent, PointerSensor, TouchSensor, useSensor, useSensors } from "@dnd-kit/core";
+import { Filter, Sparkles, Calendar as CalendarIcon, ArrowUpDown, Check, Search, X, Plus } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuSeparator, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import { format } from "date-fns";
@@ -42,7 +42,10 @@ export default function Tracker() {
   const [searchOpen, setSearchOpen] = useState(false);
   const activeJob = useMemo(() => jobs.find((j) => j.id === activeId) ?? null, [jobs, activeId]);
 
-  const sensors = useSensors(useSensor(PointerSensor, { activationConstraint: { distance: 4 } }));
+  const sensors = useSensors(
+    useSensor(PointerSensor, { activationConstraint: { distance: 4 } }),
+    useSensor(TouchSensor, { activationConstraint: { delay: 250, tolerance: 8 } }),
+  );
 
   const dateMatches = (job: Job): boolean => {
     if (dateChip === "any") return true;
@@ -164,9 +167,9 @@ export default function Tracker() {
             <SortMenu sortKey={sortKey} onChange={setSortKey} />
             <Popover>
               <PopoverTrigger asChild>
-                <Button variant="outline" size="sm" className="h-11 md:h-9">
+                <Button variant="outline" size="sm" className="h-11 md:h-9" aria-label={t("common.filter")}>
                   <Filter className="h-3.5 w-3.5" />
-                  {t("common.filter")}
+                  <span className="hidden sm:inline">{t("common.filter")}</span>
                   {activeCount > 0 && (
                     <Badge variant="secondary" className="ml-1 h-5 px-1.5 text-[10px]">{activeCount}</Badge>
                   )}
@@ -248,14 +251,13 @@ export default function Tracker() {
                 )}
               </PopoverContent>
             </Popover>
-            <Button variant="ai" onClick={() => setAutoOpen(true)} className="group h-11 md:h-9 px-3">
+            <Button variant="ai" onClick={() => setAutoOpen(true)} className="group h-11 md:h-9 px-3" aria-label={t("tracker.autoAdd")}>
               <Sparkles className="h-4 w-4 transition-transform group-hover:rotate-12" />
               <span className="hidden sm:inline">{t("tracker.autoAdd")}</span>
-              <span className="sm:hidden">AI</span>
             </Button>
-            <Button variant="outline" onClick={() => openAdd("saved")} className="h-11 md:h-9 px-3">
-              <span className="hidden sm:inline">+ {t("tracker.addJob")}</span>
-              <span className="sm:hidden">+ Add</span>
+            <Button variant="outline" onClick={() => openAdd("saved")} className="h-11 md:h-9 px-3" aria-label={t("tracker.addJob")}>
+              <Plus className="h-4 w-4" />
+              <span className="hidden sm:inline">{t("tracker.addJob")}</span>
             </Button>
           </div>
         </div>
