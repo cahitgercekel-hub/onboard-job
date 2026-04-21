@@ -36,6 +36,7 @@ export default function Tracker() {
   });
   const [autoOpen, setAutoOpen] = useState(false);
   const [activeId, setActiveId] = useState<string | null>(null);
+  const [sortKey, setSortKey] = useState<SortKey>("default");
   const activeJob = useMemo(() => jobs.find((j) => j.id === activeId) ?? null, [jobs, activeId]);
 
   const sensors = useSensors(useSensor(PointerSensor, { activationConstraint: { distance: 4 } }));
