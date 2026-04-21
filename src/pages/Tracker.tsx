@@ -136,7 +136,31 @@ export default function Tracker() {
               <span className="hidden md:inline"> · {t("common.dragHint")}</span>
             </p>
           </div>
-          <div className="flex flex-wrap items-center gap-2">
+          <div className="flex flex-wrap items-center gap-2 w-full md:w-auto">
+            {searchOpen || search ? (
+              <div className="relative flex-1 md:flex-none md:w-64 order-first md:order-none">
+                <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground pointer-events-none" />
+                <Input
+                  autoFocus
+                  value={search}
+                  onChange={(e) => setSearch(e.target.value)}
+                  placeholder={t("tracker.searchPlaceholder", { defaultValue: "Search company or role…" })}
+                  className="h-11 md:h-9 pl-8 pr-9"
+                />
+                <button
+                  onClick={() => { setSearch(""); setSearchOpen(false); }}
+                  aria-label="Close search"
+                  className="absolute right-1.5 top-1/2 -translate-y-1/2 p-1.5 rounded-md text-muted-foreground hover:text-foreground hover:bg-muted"
+                >
+                  <X className="h-4 w-4" />
+                </button>
+              </div>
+            ) : (
+              <Button variant="outline" size="sm" className="h-11 md:h-9" onClick={() => setSearchOpen(true)} aria-label="Search jobs">
+                <Search className="h-3.5 w-3.5" />
+                <span className="hidden sm:inline">Search</span>
+              </Button>
+            )}
             <SortMenu sortKey={sortKey} onChange={setSortKey} />
             <Popover>
               <PopoverTrigger asChild>
