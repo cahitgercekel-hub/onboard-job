@@ -1,7 +1,8 @@
 import { useMemo, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { DndContext, DragEndEvent, DragOverlay, DragStartEvent, PointerSensor, useSensor, useSensors } from "@dnd-kit/core";
-import { Filter, Sparkles, Calendar as CalendarIcon, ArrowUpDown, Check } from "lucide-react";
+import { Filter, Sparkles, Calendar as CalendarIcon, ArrowUpDown, Check, Search, X } from "lucide-react";
+import { Input } from "@/components/ui/input";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuSeparator, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import { format } from "date-fns";
 import { useJobs } from "@/lib/jobsStore";
@@ -37,6 +38,8 @@ export default function Tracker() {
   const [autoOpen, setAutoOpen] = useState(false);
   const [activeId, setActiveId] = useState<string | null>(null);
   const [sortKey, setSortKey] = useState<SortKey>("default");
+  const [search, setSearch] = useState("");
+  const [searchOpen, setSearchOpen] = useState(false);
   const activeJob = useMemo(() => jobs.find((j) => j.id === activeId) ?? null, [jobs, activeId]);
 
   const sensors = useSensors(useSensor(PointerSensor, { activationConstraint: { distance: 4 } }));
@@ -59,17 +62,21 @@ export default function Tracker() {
     return true;
   };
 
-  const filtered = useMemo(
-    () =>
-      jobs.filter(
-        (j) =>
-          (appType === ALL || j.applicationType === appType) &&
-          (industry === ALL || j.industry === industry) &&
-          (workModel === ALL || j.workModel === workModel) &&
-          dateMatches(j)
-      ),
-    [jobs, appType, industry, workModel, dateChip, customFrom, customTo]
-  );
+  const filtered = useMemo(() => {
+    const q = search.trim().toLowerCase();
+    return jobs.filter(
+      (j) =>
+        (appType === ALL || j.applicationType === appType) &&
+        (industry === ALL || j.industry === industry) &&
+        (workModel === ALL || j.workModel === workModel) &&
+        dateMatches(j) &&
+        (q === "" ||
+          (j.company || "").toLowerCase().includes(q) ||
+          (j.role || "").toLowerCase().includes(q) ||
+          (j.location || "").toLowerCase().includes(q) ||
+          (j.notes || "").toLowerCase().includes(q))
+    );
+  }, [jobs, appType, industry, workModel, dateChip, customFrom, customTo, search]);
 
   const byStatus = useMemo(() => {
     const m: Record<JobStatus, Job[]> = { saved: [], applied: [], interviewing: [], offer: [], rejected: [] };
