@@ -20,6 +20,7 @@ import { cn } from "@/lib/utils";
 
 const ALL = "__all__";
 type DateChip = "any" | "3" | "7" | "30" | "older" | "custom";
+type SortKey = "default" | "score-desc" | "date-desc" | "date-asc" | "company-asc";
 
 export default function Tracker() {
   const { t } = useTranslation();
