@@ -130,6 +130,7 @@ export default function Tracker() {
             </p>
           </div>
           <div className="flex flex-wrap items-center gap-2">
+            <SortMenu sortKey={sortKey} onChange={setSortKey} />
             <Popover>
               <PopoverTrigger asChild>
                 <Button variant="outline" size="sm" className="h-11 md:h-9">
