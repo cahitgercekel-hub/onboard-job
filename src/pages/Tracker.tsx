@@ -251,14 +251,13 @@ export default function Tracker() {
                 )}
               </PopoverContent>
             </Popover>
-            <Button variant="ai" onClick={() => setAutoOpen(true)} className="group h-11 md:h-9 px-3">
+            <Button variant="ai" onClick={() => setAutoOpen(true)} className="group h-11 md:h-9 px-3" aria-label={t("tracker.autoAdd")}>
               <Sparkles className="h-4 w-4 transition-transform group-hover:rotate-12" />
               <span className="hidden sm:inline">{t("tracker.autoAdd")}</span>
-              <span className="sm:hidden">AI</span>
             </Button>
-            <Button variant="outline" onClick={() => openAdd("saved")} className="h-11 md:h-9 px-3">
-              <span className="hidden sm:inline">+ {t("tracker.addJob")}</span>
-              <span className="sm:hidden">+ Add</span>
+            <Button variant="outline" onClick={() => openAdd("saved")} className="h-11 md:h-9 px-3" aria-label={t("tracker.addJob")}>
+              <Plus className="h-4 w-4" />
+              <span className="hidden sm:inline">{t("tracker.addJob")}</span>
             </Button>
           </div>
         </div>
