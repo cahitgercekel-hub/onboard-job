@@ -1,5 +1,5 @@
 import { useDraggable } from "@dnd-kit/core";
-import { AlertTriangle, ExternalLink, MapPin } from "lucide-react";
+import { AlertTriangle, Archive, ExternalLink, MapPin } from "lucide-react";
 import { alarmFor, daysSince } from "@/lib/jobsStore";
 import type { Job, WorkModel } from "@/lib/types";
 import { cn } from "@/lib/utils";
@@ -10,6 +10,7 @@ import { FitnessRing } from "@/components/FitnessRing";
 interface Props {
   job: Job;
   onClick: () => void;
+  onArchive?: () => void;
   overlay?: boolean;
 }
 
@@ -19,7 +20,7 @@ const WORK_MODEL_STYLES: Record<WorkModel, string> = {
   "On-site": "bg-muted text-foreground/80 border-border",
 };
 
-export function JobCard({ job, onClick, overlay = false }: Props) {
+export function JobCard({ job, onClick, onArchive, overlay = false }: Props) {
   const { attributes, listeners, setNodeRef, isDragging } = useDraggable({ id: job.id });
   const { formatDate } = usePrefs();
   const alarm = alarmFor(job);

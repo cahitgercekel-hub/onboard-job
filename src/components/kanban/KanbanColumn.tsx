@@ -26,10 +26,11 @@ interface Props {
   jobs: Job[];
   onAdd: () => void;
   onCardClick: (job: Job) => void;
+  onArchiveCard?: (job: Job) => void;
   hiddenId?: string | null;
 }
 
-export function KanbanColumn({ status, jobs, onAdd, onCardClick, hiddenId }: Props) {
+export function KanbanColumn({ status, jobs, onAdd, onCardClick, onArchiveCard, hiddenId }: Props) {
   const { isOver, setNodeRef } = useDroppable({ id: status });
 
   return (
@@ -59,7 +60,12 @@ export function KanbanColumn({ status, jobs, onAdd, onCardClick, hiddenId }: Pro
           j.id === hiddenId ? (
             <div key={j.id} className="h-[92px] rounded-lg border border-dashed border-accent/40 bg-accent/5" />
           ) : (
-            <JobCard key={j.id} job={j} onClick={() => onCardClick(j)} />
+            <JobCard
+              key={j.id}
+              job={j}
+              onClick={() => onCardClick(j)}
+              onArchive={onArchiveCard ? () => onArchiveCard(j) : undefined}
+            />
           )
         )}
         {jobs.length === 0 && (

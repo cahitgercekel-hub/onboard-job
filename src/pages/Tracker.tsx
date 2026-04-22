@@ -347,8 +347,24 @@ export default function Tracker() {
             else addJob(data);
           }}
           onDelete={dialog.job ? () => removeJob(dialog.job!.id) : undefined}
+          onArchive={dialog.job ? () => { setArchiveTarget(dialog.job!); setDialog((d) => ({ ...d, open: false })); } : undefined}
         />
       )}
+
+      <ArchiveDialog
+        open={!!archiveTarget}
+        job={archiveTarget}
+        onOpenChange={(v) => { if (!v) setArchiveTarget(null); }}
+        onConfirm={(type, opts) => archiveTarget && archiveJob(archiveTarget.id, type, opts)}
+      />
+
+      <ArchiveView
+        open={archiveOpen}
+        onOpenChange={setArchiveOpen}
+        jobs={jobs}
+        onUnarchive={unarchiveJob}
+        onDelete={removeJob}
+      />
 
       <AutoAddDialog
         open={autoOpen}
