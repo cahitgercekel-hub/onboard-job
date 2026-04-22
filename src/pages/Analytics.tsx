@@ -1,12 +1,14 @@
-import { useMemo } from "react";
+import { useMemo, useRef } from "react";
 import { useTranslation } from "react-i18next";
 import {
   BarChart, Bar, XAxis, YAxis, Tooltip, CartesianGrid, ResponsiveContainer, Cell,
   ScatterChart, Scatter, ZAxis,
 } from "recharts";
-import { BarChart3, Sparkles } from "lucide-react";
+import { BarChart3, Sparkles, GitBranch } from "lucide-react";
 import { useJobs } from "@/lib/jobsStore";
 import { STATUS_LABEL, STATUS_ORDER, type JobStatus } from "@/lib/types";
+import { FunnelChart } from "@/components/analytics/FunnelChart";
+import { ShareProgress } from "@/components/analytics/ShareProgress";
 
 export const COLOR_VAR: Partial<Record<JobStatus, string>> = {
   saved: "var(--col-saved)",
