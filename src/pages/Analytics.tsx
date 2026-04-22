@@ -8,7 +8,7 @@ import { BarChart3, Sparkles } from "lucide-react";
 import { useJobs } from "@/lib/jobsStore";
 import { STATUS_LABEL, STATUS_ORDER, type JobStatus } from "@/lib/types";
 
-const COLOR_VAR: Record<JobStatus, string> = {
+export const COLOR_VAR: Partial<Record<JobStatus, string>> = {
   saved: "var(--col-saved)",
   applied: "var(--col-applied)",
   interviewing: "var(--col-interviewing)",
@@ -24,7 +24,7 @@ export default function Analytics() {
 
   const data = useMemo(() => {
     const counts: Record<JobStatus, number> = {
-      saved: 0, applied: 0, interviewing: 0, offer: 0, rejected: 0,
+      saved: 0, applied: 0, interviewing: 0, offer: 0, rejected: 0, archived: 0,
     };
     for (const j of jobs) counts[j.status]++;
     return STATUS_ORDER.map((s) => ({

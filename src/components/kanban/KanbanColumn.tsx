@@ -5,7 +5,7 @@ import { STATUS_LABEL } from "@/lib/types";
 import { JobCard } from "./JobCard";
 import { cn } from "@/lib/utils";
 
-const COLUMN_DOT: Record<JobStatus, string> = {
+const COLUMN_DOT: Partial<Record<JobStatus, string>> = {
   saved: "bg-column-saved",
   applied: "bg-column-applied",
   interviewing: "bg-column-interviewing",
@@ -13,7 +13,7 @@ const COLUMN_DOT: Record<JobStatus, string> = {
   rejected: "bg-column-rejected",
 };
 
-const COLUMN_HEADER: Record<JobStatus, string> = {
+const COLUMN_HEADER: Partial<Record<JobStatus, string>> = {
   saved: "col-header-saved",
   applied: "col-header-applied",
   interviewing: "col-header-interviewing",

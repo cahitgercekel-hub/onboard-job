@@ -379,7 +379,44 @@ export function useJobs() {
     if (error) toast.error(error.message);
   }, []);
 
-  return { jobs, addJob, updateJob, removeJob, moveJob };
+  const archiveJob = useCallback(async (
+    id: string,
+    archiveType: ArchiveType,
+    opts?: { rejectionTag?: string; rejectionReason?: string },
+  ) => {
+    const current = jobs.find((j) => j.id === id);
+    const previous = current?.status ?? null;
+    const { error } = await supabase
+      .from("jobs")
+      .update({
+        status: "archived",
+        archive_type: archiveType,
+        rejection_tag: opts?.rejectionTag ?? null,
+        rejection_reason: opts?.rejectionReason ?? null,
+        archived_at: new Date().toISOString(),
+        previous_status: previous && previous !== "archived" ? previous : null,
+      } as any)
+      .eq("id", id);
+    if (error) toast.error(error.message);
+  }, [jobs]);
+
+  const unarchiveJob = useCallback(async (id: string) => {
+    const current = jobs.find((j) => j.id === id);
+    const restoreTo: JobStatus = (current?.previousStatus as JobStatus | null) ?? "saved";
+    const { error } = await supabase
+      .from("jobs")
+      .update({
+        status: restoreTo,
+        archive_type: null,
+        rejection_tag: null,
+        rejection_reason: null,
+        archived_at: null,
+      } as any)
+      .eq("id", id);
+    if (error) toast.error(error.message);
+  }, [jobs]);
+
+  return { jobs, addJob, updateJob, removeJob, moveJob, archiveJob, unarchiveJob };
 }
 
 export function daysSince(iso: string): number {
@@ -394,4 +431,13 @@ export function alarmFor(job: Job): AlarmLevel {
   if (d >= 21) return "danger";
   if (d >= 14) return "warn";
   return "none";
+}
+
+// Find jobs that have been ghosted: in applied/interviewing for `thresholdDays`+ without status change
+export function findGhostingCandidates(jobs: Job[], thresholdDays: number): Job[] {
+  return jobs.filter(
+    (j) =>
+      (j.status === "applied" || j.status === "interviewing") &&
+      daysSince(j.updatedAt) >= thresholdDays
+  );
 }
