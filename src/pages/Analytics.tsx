@@ -23,6 +23,7 @@ const STATUS_AXIS: JobStatus[] = ["rejected", "saved", "applied", "interviewing"
 export default function Analytics() {
   const { jobs } = useJobs();
   const { t } = useTranslation();
+  const funnelRef = useRef<HTMLDivElement>(null);
 
   const data = useMemo(() => {
     const counts: Record<JobStatus, number> = {
