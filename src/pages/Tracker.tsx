@@ -76,6 +76,7 @@ export default function Tracker() {
     const q = search.trim().toLowerCase();
     return jobs.filter(
       (j) =>
+        j.status !== "archived" && // exclude archived from active board
         (appType === ALL || j.applicationType === appType) &&
         (industry === ALL || j.industry === industry) &&
         (workModel === ALL || j.workModel === workModel) &&
@@ -89,8 +90,10 @@ export default function Tracker() {
   }, [jobs, appType, industry, workModel, dateChip, customFrom, customTo, search]);
 
   const byStatus = useMemo(() => {
-    const m: Record<JobStatus, Job[]> = { saved: [], applied: [], interviewing: [], offer: [], rejected: [] };
-    for (const j of filtered) m[j.status].push(j);
+    const m: Record<JobStatus, Job[]> = { saved: [], applied: [], interviewing: [], offer: [], rejected: [], archived: [] };
+    for (const j of filtered) {
+      if (m[j.status]) m[j.status].push(j);
+    }
     if (sortKey !== "default") {
       const cmp = (a: Job, b: Job): number => {
         if (sortKey === "score-desc") return (b.fitnessScore ?? -1) - (a.fitnessScore ?? -1);
@@ -103,6 +106,30 @@ export default function Tracker() {
     }
     return m;
   }, [filtered, sortKey]);
+
+  const archivedCount = useMemo(() => jobs.filter((j) => j.status === "archived").length, [jobs]);
+
+  // Auto-ghosting: prompt once per session per ghosted job
+  useEffect(() => {
+    const candidates = findGhostingCandidates(jobs, ghostingDays);
+    if (candidates.length === 0) return;
+    const SESSION_KEY = "jat.ghost.notified.v1";
+    const notified = new Set<string>(JSON.parse(sessionStorage.getItem(SESSION_KEY) || "[]"));
+    const fresh = candidates.filter((c) => !notified.has(c.id));
+    if (fresh.length === 0) return;
+    const job = fresh[0];
+    notified.add(job.id);
+    sessionStorage.setItem(SESSION_KEY, JSON.stringify([...notified]));
+    toast(`No news from ${job.company}?`, {
+      description: `${job.role} has been in ${job.status} for ${ghostingDays}+ days. Mark as ghosted to clean up your board.`,
+      icon: <Ghost className="h-4 w-4" />,
+      duration: 8000,
+      action: {
+        label: "Archive as Ghosted",
+        onClick: () => archiveJob(job.id, "ghosted"),
+      },
+    });
+  }, [jobs, ghostingDays, archiveJob]);
 
   const onDragStart = (e: DragStartEvent) => setActiveId(String(e.active.id));
   const onDragEnd = (e: DragEndEvent) => {
