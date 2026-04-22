@@ -1,7 +1,7 @@
 import { useEffect, useState, useCallback, useRef } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/lib/auth";
-import type { Job, JobStatus, ApplicationType, Industry, WorkModel } from "./types";
+import type { Job, JobStatus, ApplicationType, Industry, WorkModel, ArchiveType } from "./types";
 import { STATUS_ORDER, APPLICATION_TYPES, INDUSTRIES, WORK_MODELS } from "./types";
 import { toast } from "sonner";
 
