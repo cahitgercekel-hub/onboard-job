@@ -1,16 +1,18 @@
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { DndContext, DragEndEvent, DragOverlay, DragStartEvent, PointerSensor, TouchSensor, useSensor, useSensors } from "@dnd-kit/core";
-import { Filter, Sparkles, Calendar as CalendarIcon, ArrowUpDown, Check, Search, X, Plus } from "lucide-react";
+import { Filter, Sparkles, Calendar as CalendarIcon, ArrowUpDown, Check, Search, X, Plus, Archive, Ghost } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuSeparator, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import { format } from "date-fns";
-import { useJobs } from "@/lib/jobsStore";
+import { useJobs, findGhostingCandidates } from "@/lib/jobsStore";
 import { APPLICATION_TYPES, INDUSTRIES, STATUS_ORDER, WORK_MODELS, type Job, type JobStatus } from "@/lib/types";
 import { KanbanColumn } from "@/components/kanban/KanbanColumn";
 import { JobDialog } from "@/components/kanban/JobDialog";
 import { JobCard } from "@/components/kanban/JobCard";
 import { AutoAddDialog } from "@/components/kanban/AutoAddDialog";
+import { ArchiveDialog } from "@/components/kanban/ArchiveDialog";
+import { ArchiveView } from "@/components/kanban/ArchiveView";
 import { Button } from "@/components/ui/button";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
@@ -18,6 +20,8 @@ import { Label } from "@/components/ui/label";
 import { Badge } from "@/components/ui/badge";
 import { Calendar } from "@/components/ui/calendar";
 import { cn } from "@/lib/utils";
+import { usePrefs } from "@/lib/preferences";
+import { toast } from "sonner";
 
 const ALL = "__all__";
 type DateChip = "any" | "3" | "7" | "30" | "older" | "custom";
@@ -25,7 +29,8 @@ type SortKey = "default" | "score-desc" | "date-desc" | "date-asc" | "company-as
 
 export default function Tracker() {
   const { t } = useTranslation();
-  const { jobs, addJob, updateJob, removeJob, moveJob } = useJobs();
+  const { jobs, addJob, updateJob, removeJob, moveJob, archiveJob, unarchiveJob } = useJobs();
+  const { ghostingDays } = usePrefs();
   const [appType, setAppType] = useState<string>(ALL);
   const [industry, setIndustry] = useState<string>(ALL);
   const [workModel, setWorkModel] = useState<string>(ALL);
@@ -36,6 +41,8 @@ export default function Tracker() {
     open: false, status: "saved", key: 0,
   });
   const [autoOpen, setAutoOpen] = useState(false);
+  const [archiveOpen, setArchiveOpen] = useState(false);
+  const [archiveTarget, setArchiveTarget] = useState<Job | null>(null);
   const [activeId, setActiveId] = useState<string | null>(null);
   const [sortKey, setSortKey] = useState<SortKey>("default");
   const [search, setSearch] = useState("");
