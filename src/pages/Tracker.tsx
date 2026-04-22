@@ -285,6 +285,19 @@ export default function Tracker() {
                 )}
               </PopoverContent>
             </Popover>
+            <Button
+              variant="outline"
+              size="sm"
+              className="h-11 md:h-9"
+              onClick={() => setArchiveOpen(true)}
+              aria-label="View archive"
+            >
+              <Archive className="h-3.5 w-3.5" />
+              <span className="hidden sm:inline">Archive</span>
+              {archivedCount > 0 && (
+                <Badge variant="secondary" className="ml-1 h-5 px-1.5 text-[10px]">{archivedCount}</Badge>
+              )}
+            </Button>
             <Button variant="ai" onClick={() => setAutoOpen(true)} className="group h-11 md:h-9 px-3" aria-label={t("tracker.autoAdd")}>
               <Sparkles className="h-4 w-4 transition-transform group-hover:rotate-12" />
               <span className="hidden sm:inline">{t("tracker.autoAdd")}</span>
@@ -307,6 +320,7 @@ export default function Tracker() {
                 jobs={byStatus[status]}
                 onAdd={() => openAdd(status)}
                 onCardClick={openEdit}
+                onArchiveCard={(j) => setArchiveTarget(j)}
                 hiddenId={activeId}
               />
             ))}
