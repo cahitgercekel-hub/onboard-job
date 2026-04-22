@@ -77,6 +77,8 @@ export type Database = {
       jobs: {
         Row: {
           application_type: string | null
+          archive_type: string | null
+          archived_at: string | null
           company: string
           created_at: string
           date_applied: string | null
@@ -87,6 +89,9 @@ export type Database = {
           job_description: string | null
           location: string | null
           notes: string | null
+          previous_status: Database["public"]["Enums"]["job_status"] | null
+          rejection_reason: string | null
+          rejection_tag: string | null
           role: string
           source: string
           status: Database["public"]["Enums"]["job_status"]
@@ -97,6 +102,8 @@ export type Database = {
         }
         Insert: {
           application_type?: string | null
+          archive_type?: string | null
+          archived_at?: string | null
           company: string
           created_at?: string
           date_applied?: string | null
@@ -107,6 +114,9 @@ export type Database = {
           job_description?: string | null
           location?: string | null
           notes?: string | null
+          previous_status?: Database["public"]["Enums"]["job_status"] | null
+          rejection_reason?: string | null
+          rejection_tag?: string | null
           role: string
           source?: string
           status?: Database["public"]["Enums"]["job_status"]
@@ -117,6 +127,8 @@ export type Database = {
         }
         Update: {
           application_type?: string | null
+          archive_type?: string | null
+          archived_at?: string | null
           company?: string
           created_at?: string
           date_applied?: string | null
@@ -127,6 +139,9 @@ export type Database = {
           job_description?: string | null
           location?: string | null
           notes?: string | null
+          previous_status?: Database["public"]["Enums"]["job_status"] | null
+          rejection_reason?: string | null
+          rejection_tag?: string | null
           role?: string
           source?: string
           status?: Database["public"]["Enums"]["job_status"]
@@ -200,7 +215,13 @@ export type Database = {
     }
     Enums: {
       app_role: "admin" | "user"
-      job_status: "saved" | "applied" | "interviewing" | "offer" | "rejected"
+      job_status:
+        | "saved"
+        | "applied"
+        | "interviewing"
+        | "offer"
+        | "rejected"
+        | "archived"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -329,7 +350,14 @@ export const Constants = {
   public: {
     Enums: {
       app_role: ["admin", "user"],
-      job_status: ["saved", "applied", "interviewing", "offer", "rejected"],
+      job_status: [
+        "saved",
+        "applied",
+        "interviewing",
+        "offer",
+        "rejected",
+        "archived",
+      ],
     },
   },
 } as const

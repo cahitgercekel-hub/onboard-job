@@ -1,5 +1,5 @@
 import { useDraggable } from "@dnd-kit/core";
-import { AlertTriangle, ExternalLink, MapPin } from "lucide-react";
+import { AlertTriangle, Archive, ExternalLink, MapPin } from "lucide-react";
 import { alarmFor, daysSince } from "@/lib/jobsStore";
 import type { Job, WorkModel } from "@/lib/types";
 import { cn } from "@/lib/utils";
@@ -10,6 +10,7 @@ import { FitnessRing } from "@/components/FitnessRing";
 interface Props {
   job: Job;
   onClick: () => void;
+  onArchive?: () => void;
   overlay?: boolean;
 }
 
@@ -19,7 +20,7 @@ const WORK_MODEL_STYLES: Record<WorkModel, string> = {
   "On-site": "bg-muted text-foreground/80 border-border",
 };
 
-export function JobCard({ job, onClick, overlay = false }: Props) {
+export function JobCard({ job, onClick, onArchive, overlay = false }: Props) {
   const { attributes, listeners, setNodeRef, isDragging } = useDraggable({ id: job.id });
   const { formatDate } = usePrefs();
   const alarm = alarmFor(job);
@@ -94,21 +95,33 @@ export function JobCard({ job, onClick, overlay = false }: Props) {
           </div>
         )}
 
-        <div className="mt-2 flex items-center justify-between text-[11px] text-muted-foreground">
-          <span>
+        <div className="mt-2 flex items-center justify-between text-[11px] text-muted-foreground gap-2">
+          <span className="truncate">
             {job.dateApplied ? `Applied ${formatDate(job.dateApplied)}` : "—"}
           </span>
-          {job.url && (
-            <a
-              href={job.url}
-              target="_blank"
-              rel="noreferrer"
-              onClick={(e) => e.stopPropagation()}
-              className="inline-flex items-center gap-0.5 hover:text-foreground"
-            >
-              Link <ExternalLink className="h-3 w-3" />
-            </a>
-          )}
+          <div className="flex items-center gap-1.5 shrink-0">
+            {job.url && (
+              <a
+                href={job.url}
+                target="_blank"
+                rel="noreferrer"
+                onClick={(e) => e.stopPropagation()}
+                className="inline-flex items-center gap-0.5 hover:text-foreground"
+              >
+                Link <ExternalLink className="h-3 w-3" />
+              </a>
+            )}
+            {onArchive && (
+              <button
+                onClick={(e) => { e.stopPropagation(); onArchive(); }}
+                className="inline-flex items-center gap-0.5 rounded p-0.5 hover:text-foreground hover:bg-background/40 opacity-60 hover:opacity-100 transition"
+                aria-label="Archive job"
+                title="Archive"
+              >
+                <Archive className="h-3.5 w-3.5" />
+              </button>
+            )}
+          </div>
         </div>
       </div>
     </div>

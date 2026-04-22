@@ -1,16 +1,18 @@
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { DndContext, DragEndEvent, DragOverlay, DragStartEvent, PointerSensor, TouchSensor, useSensor, useSensors } from "@dnd-kit/core";
-import { Filter, Sparkles, Calendar as CalendarIcon, ArrowUpDown, Check, Search, X, Plus } from "lucide-react";
+import { Filter, Sparkles, Calendar as CalendarIcon, ArrowUpDown, Check, Search, X, Plus, Archive, Ghost } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuSeparator, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import { format } from "date-fns";
-import { useJobs } from "@/lib/jobsStore";
+import { useJobs, findGhostingCandidates } from "@/lib/jobsStore";
 import { APPLICATION_TYPES, INDUSTRIES, STATUS_ORDER, WORK_MODELS, type Job, type JobStatus } from "@/lib/types";
 import { KanbanColumn } from "@/components/kanban/KanbanColumn";
 import { JobDialog } from "@/components/kanban/JobDialog";
 import { JobCard } from "@/components/kanban/JobCard";
 import { AutoAddDialog } from "@/components/kanban/AutoAddDialog";
+import { ArchiveDialog } from "@/components/kanban/ArchiveDialog";
+import { ArchiveView } from "@/components/kanban/ArchiveView";
 import { Button } from "@/components/ui/button";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
@@ -18,6 +20,8 @@ import { Label } from "@/components/ui/label";
 import { Badge } from "@/components/ui/badge";
 import { Calendar } from "@/components/ui/calendar";
 import { cn } from "@/lib/utils";
+import { usePrefs } from "@/lib/preferences";
+import { toast } from "sonner";
 
 const ALL = "__all__";
 type DateChip = "any" | "3" | "7" | "30" | "older" | "custom";
@@ -25,7 +29,8 @@ type SortKey = "default" | "score-desc" | "date-desc" | "date-asc" | "company-as
 
 export default function Tracker() {
   const { t } = useTranslation();
-  const { jobs, addJob, updateJob, removeJob, moveJob } = useJobs();
+  const { jobs, addJob, updateJob, removeJob, moveJob, archiveJob, unarchiveJob } = useJobs();
+  const { ghostingDays } = usePrefs();
   const [appType, setAppType] = useState<string>(ALL);
   const [industry, setIndustry] = useState<string>(ALL);
   const [workModel, setWorkModel] = useState<string>(ALL);
@@ -36,6 +41,8 @@ export default function Tracker() {
     open: false, status: "saved", key: 0,
   });
   const [autoOpen, setAutoOpen] = useState(false);
+  const [archiveOpen, setArchiveOpen] = useState(false);
+  const [archiveTarget, setArchiveTarget] = useState<Job | null>(null);
   const [activeId, setActiveId] = useState<string | null>(null);
   const [sortKey, setSortKey] = useState<SortKey>("default");
   const [search, setSearch] = useState("");
@@ -69,6 +76,7 @@ export default function Tracker() {
     const q = search.trim().toLowerCase();
     return jobs.filter(
       (j) =>
+        j.status !== "archived" && // exclude archived from active board
         (appType === ALL || j.applicationType === appType) &&
         (industry === ALL || j.industry === industry) &&
         (workModel === ALL || j.workModel === workModel) &&
@@ -82,8 +90,10 @@ export default function Tracker() {
   }, [jobs, appType, industry, workModel, dateChip, customFrom, customTo, search]);
 
   const byStatus = useMemo(() => {
-    const m: Record<JobStatus, Job[]> = { saved: [], applied: [], interviewing: [], offer: [], rejected: [] };
-    for (const j of filtered) m[j.status].push(j);
+    const m: Record<JobStatus, Job[]> = { saved: [], applied: [], interviewing: [], offer: [], rejected: [], archived: [] };
+    for (const j of filtered) {
+      if (m[j.status]) m[j.status].push(j);
+    }
     if (sortKey !== "default") {
       const cmp = (a: Job, b: Job): number => {
         if (sortKey === "score-desc") return (b.fitnessScore ?? -1) - (a.fitnessScore ?? -1);
@@ -96,6 +106,30 @@ export default function Tracker() {
     }
     return m;
   }, [filtered, sortKey]);
+
+  const archivedCount = useMemo(() => jobs.filter((j) => j.status === "archived").length, [jobs]);
+
+  // Auto-ghosting: prompt once per session per ghosted job
+  useEffect(() => {
+    const candidates = findGhostingCandidates(jobs, ghostingDays);
+    if (candidates.length === 0) return;
+    const SESSION_KEY = "jat.ghost.notified.v1";
+    const notified = new Set<string>(JSON.parse(sessionStorage.getItem(SESSION_KEY) || "[]"));
+    const fresh = candidates.filter((c) => !notified.has(c.id));
+    if (fresh.length === 0) return;
+    const job = fresh[0];
+    notified.add(job.id);
+    sessionStorage.setItem(SESSION_KEY, JSON.stringify([...notified]));
+    toast(`No news from ${job.company}?`, {
+      description: `${job.role} has been in ${job.status} for ${ghostingDays}+ days. Mark as ghosted to clean up your board.`,
+      icon: <Ghost className="h-4 w-4" />,
+      duration: 8000,
+      action: {
+        label: "Archive as Ghosted",
+        onClick: () => archiveJob(job.id, "ghosted"),
+      },
+    });
+  }, [jobs, ghostingDays, archiveJob]);
 
   const onDragStart = (e: DragStartEvent) => setActiveId(String(e.active.id));
   const onDragEnd = (e: DragEndEvent) => {
@@ -251,6 +285,19 @@ export default function Tracker() {
                 )}
               </PopoverContent>
             </Popover>
+            <Button
+              variant="outline"
+              size="sm"
+              className="h-11 md:h-9"
+              onClick={() => setArchiveOpen(true)}
+              aria-label="View archive"
+            >
+              <Archive className="h-3.5 w-3.5" />
+              <span className="hidden sm:inline">Archive</span>
+              {archivedCount > 0 && (
+                <Badge variant="secondary" className="ml-1 h-5 px-1.5 text-[10px]">{archivedCount}</Badge>
+              )}
+            </Button>
             <Button variant="ai" onClick={() => setAutoOpen(true)} className="group h-11 md:h-9 px-3" aria-label={t("tracker.autoAdd")}>
               <Sparkles className="h-4 w-4 transition-transform group-hover:rotate-12" />
               <span className="hidden sm:inline">{t("tracker.autoAdd")}</span>
@@ -273,6 +320,7 @@ export default function Tracker() {
                 jobs={byStatus[status]}
                 onAdd={() => openAdd(status)}
                 onCardClick={openEdit}
+                onArchiveCard={(j) => setArchiveTarget(j)}
                 hiddenId={activeId}
               />
             ))}
@@ -299,8 +347,24 @@ export default function Tracker() {
             else addJob(data);
           }}
           onDelete={dialog.job ? () => removeJob(dialog.job!.id) : undefined}
+          onArchive={dialog.job ? () => { setArchiveTarget(dialog.job!); setDialog((d) => ({ ...d, open: false })); } : undefined}
         />
       )}
+
+      <ArchiveDialog
+        open={!!archiveTarget}
+        job={archiveTarget}
+        onOpenChange={(v) => { if (!v) setArchiveTarget(null); }}
+        onConfirm={(type, opts) => archiveTarget && archiveJob(archiveTarget.id, type, opts)}
+      />
+
+      <ArchiveView
+        open={archiveOpen}
+        onOpenChange={setArchiveOpen}
+        jobs={jobs}
+        onUnarchive={unarchiveJob}
+        onDelete={removeJob}
+      />
 
       <AutoAddDialog
         open={autoOpen}

@@ -30,9 +30,10 @@ interface Props {
   job?: Job;
   onSave: (data: Omit<Job, "id" | "createdAt" | "updatedAt">) => void;
   onDelete?: () => void;
+  onArchive?: () => void;
 }
 
-export function JobDialog({ open, onOpenChange, initialStatus = "saved", job, onSave, onDelete }: Props) {
+export function JobDialog({ open, onOpenChange, initialStatus = "saved", job, onSave, onDelete, onArchive }: Props) {
   const { t } = useTranslation();
   const [company, setCompany] = useState(job?.company ?? "");
   const [role, setRole] = useState(job?.role ?? "");
@@ -196,10 +197,15 @@ export function JobDialog({ open, onOpenChange, initialStatus = "saved", job, on
           </div>
         </div>
         <DialogFooter className="gap-2 sm:justify-between">
-          <div>
+          <div className="flex gap-1">
             {job && onDelete && (
               <Button variant="ghost" className="text-destructive hover:text-destructive" onClick={() => { onDelete(); onOpenChange(false); }}>
                 {t("common.delete")}
+              </Button>
+            )}
+            {job && onArchive && (
+              <Button variant="ghost" onClick={onArchive}>
+                Archive
               </Button>
             )}
           </div>

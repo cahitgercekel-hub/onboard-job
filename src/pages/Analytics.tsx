@@ -1,14 +1,16 @@
-import { useMemo } from "react";
+import { useMemo, useRef } from "react";
 import { useTranslation } from "react-i18next";
 import {
   BarChart, Bar, XAxis, YAxis, Tooltip, CartesianGrid, ResponsiveContainer, Cell,
   ScatterChart, Scatter, ZAxis,
 } from "recharts";
-import { BarChart3, Sparkles } from "lucide-react";
+import { BarChart3, Sparkles, GitBranch } from "lucide-react";
 import { useJobs } from "@/lib/jobsStore";
 import { STATUS_LABEL, STATUS_ORDER, type JobStatus } from "@/lib/types";
+import { FunnelChart } from "@/components/analytics/FunnelChart";
+import { ShareProgress } from "@/components/analytics/ShareProgress";
 
-const COLOR_VAR: Record<JobStatus, string> = {
+export const COLOR_VAR: Partial<Record<JobStatus, string>> = {
   saved: "var(--col-saved)",
   applied: "var(--col-applied)",
   interviewing: "var(--col-interviewing)",
@@ -21,10 +23,11 @@ const STATUS_AXIS: JobStatus[] = ["rejected", "saved", "applied", "interviewing"
 export default function Analytics() {
   const { jobs } = useJobs();
   const { t } = useTranslation();
+  const funnelRef = useRef<HTMLDivElement>(null);
 
   const data = useMemo(() => {
     const counts: Record<JobStatus, number> = {
-      saved: 0, applied: 0, interviewing: 0, offer: 0, rejected: 0,
+      saved: 0, applied: 0, interviewing: 0, offer: 0, rejected: 0, archived: 0,
     };
     for (const j of jobs) counts[j.status]++;
     return STATUS_ORDER.map((s) => ({
@@ -100,6 +103,21 @@ export default function Analytics() {
             </BarChart>
           </ResponsiveContainer>
         </div>
+      </div>
+
+      <div className="surface-card p-3 md:p-5 overflow-hidden mb-5 md:mb-6">
+        <div className="flex items-center justify-between mb-4 gap-2 flex-wrap">
+          <h2 className="text-sm font-medium text-foreground flex items-center gap-2">
+            <GitBranch className="h-4 w-4 text-accent" /> Application Funnel
+          </h2>
+          <ShareProgress jobs={jobs} funnelRef={funnelRef} />
+        </div>
+        <div ref={funnelRef} className="bg-card rounded-md">
+          <FunnelChart jobs={jobs} />
+        </div>
+        <p className="text-[11px] text-muted-foreground mt-2">
+          Hover any flow to see exact counts and conversion rates. Archived jobs are routed by the highest stage they reached.
+        </p>
       </div>
 
       <div className="surface-card p-3 md:p-5 overflow-hidden">

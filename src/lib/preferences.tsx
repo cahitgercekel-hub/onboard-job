@@ -9,12 +9,14 @@ interface Prefs {
   theme: Theme;
   language: string;
   dateFormat: DateFormat;
+  ghostingDays: number;
 }
 
 interface Ctx extends Prefs {
   setTheme: (t: Theme) => void;
   setLanguage: (l: string) => void;
   setDateFormat: (d: DateFormat) => void;
+  setGhostingDays: (d: number) => void;
   formatDate: (iso: string) => string;
 }
 
@@ -24,9 +26,9 @@ const PreferencesContext = createContext<Ctx | null>(null);
 function readPrefs(): Prefs {
   try {
     const raw = localStorage.getItem(STORAGE);
-    if (raw) return { theme: "system", language: "en", dateFormat: "DD.MM.YYYY", ...JSON.parse(raw) };
+    if (raw) return { theme: "system", language: "en", dateFormat: "DD.MM.YYYY", ghostingDays: 30, ...JSON.parse(raw) };
   } catch {/* ignore */}
-  return { theme: "system", language: localStorage.getItem("jat.lang") || "en", dateFormat: "DD.MM.YYYY" };
+  return { theme: "system", language: localStorage.getItem("jat.lang") || "en", dateFormat: "DD.MM.YYYY", ghostingDays: 30 };
 }
 
 function applyTheme(theme: Theme) {
@@ -61,6 +63,7 @@ export function PreferencesProvider({ children }: { children: ReactNode }) {
   const setTheme = useCallback((theme: Theme) => persist({ ...readPrefs(), theme }), []);
   const setLanguage = useCallback((language: string) => persist({ ...readPrefs(), language }), []);
   const setDateFormat = useCallback((dateFormat: DateFormat) => persist({ ...readPrefs(), dateFormat }), []);
+  const setGhostingDays = useCallback((ghostingDays: number) => persist({ ...readPrefs(), ghostingDays }), []);
 
   const formatDate = useCallback(
     (iso: string) => {
@@ -75,8 +78,8 @@ export function PreferencesProvider({ children }: { children: ReactNode }) {
   );
 
   const value = useMemo<Ctx>(
-    () => ({ ...prefs, setTheme, setLanguage, setDateFormat, formatDate }),
-    [prefs, setTheme, setLanguage, setDateFormat, formatDate]
+    () => ({ ...prefs, setTheme, setLanguage, setDateFormat, setGhostingDays, formatDate }),
+    [prefs, setTheme, setLanguage, setDateFormat, setGhostingDays, formatDate]
   );
 
   return <PreferencesContext.Provider value={value}>{children}</PreferencesContext.Provider>;
