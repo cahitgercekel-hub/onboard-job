@@ -26,7 +26,7 @@ const themeOptions: { value: Theme; icon: typeof Sun }[] = [
 
 export default function Settings() {
   const { t } = useTranslation();
-  const { theme, setTheme, language, setLanguage, dateFormat, setDateFormat } = usePrefs();
+  const { theme, setTheme, language, setLanguage, dateFormat, setDateFormat, ghostingDays, setGhostingDays } = usePrefs();
   const { user, signOut } = useAuth();
   const [confirmOpen, setConfirmOpen] = useState(false);
   const [importOpen, setImportOpen] = useState(false);
@@ -109,6 +109,24 @@ export default function Settings() {
               <SelectContent>
                 <SelectItem value="DD.MM.YYYY">DD.MM.YYYY</SelectItem>
                 <SelectItem value="MM/DD/YYYY">MM/DD/YYYY</SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
+
+          {/* Ghosting threshold */}
+          <div className="grid sm:grid-cols-[1fr_auto] gap-4 items-start">
+            <div>
+              <Label className="text-sm font-medium">Ghosting threshold</Label>
+              <p className="text-xs text-muted-foreground mt-0.5">Show a "Mark as ghosted" prompt when a job sits in Applied/Interviewing this long without movement.</p>
+            </div>
+            <Select value={String(ghostingDays)} onValueChange={(v) => setGhostingDays(Number(v))}>
+              <SelectTrigger className="w-48"><SelectValue /></SelectTrigger>
+              <SelectContent>
+                <SelectItem value="14">14 days</SelectItem>
+                <SelectItem value="21">21 days</SelectItem>
+                <SelectItem value="30">30 days (default)</SelectItem>
+                <SelectItem value="45">45 days</SelectItem>
+                <SelectItem value="60">60 days</SelectItem>
               </SelectContent>
             </Select>
           </div>

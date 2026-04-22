@@ -105,6 +105,21 @@ export default function Analytics() {
         </div>
       </div>
 
+      <div className="surface-card p-3 md:p-5 overflow-hidden mb-5 md:mb-6">
+        <div className="flex items-center justify-between mb-4 gap-2 flex-wrap">
+          <h2 className="text-sm font-medium text-foreground flex items-center gap-2">
+            <GitBranch className="h-4 w-4 text-accent" /> Application Funnel
+          </h2>
+          <ShareProgress jobs={jobs} funnelRef={funnelRef} />
+        </div>
+        <div ref={funnelRef} className="bg-card rounded-md">
+          <FunnelChart jobs={jobs} />
+        </div>
+        <p className="text-[11px] text-muted-foreground mt-2">
+          Hover any flow to see exact counts and conversion rates. Archived jobs are routed by the highest stage they reached.
+        </p>
+      </div>
+
       <div className="surface-card p-3 md:p-5 overflow-hidden">
         <div className="flex items-center justify-between mb-4">
           <h2 className="text-sm font-medium text-foreground flex items-center gap-2">
