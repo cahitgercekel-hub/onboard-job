@@ -73,8 +73,13 @@ export function JobCard({ job, onClick, onArchive, overlay = false }: Props) {
           </div>
         </div>
 
-        {(job.applicationType || job.industry || job.workModel) && (
+        {(job.applicationType || job.industry || job.workModel || (job.status === "rejected" && job.rejectionTag)) && (
           <div className="mt-2 flex flex-wrap gap-1">
+            {job.status === "rejected" && job.rejectionTag && (
+              <Badge variant="outline" className="text-[10px] font-medium bg-destructive/10 text-destructive border-destructive/30">
+                {job.rejectionTag}
+              </Badge>
+            )}
             {job.workModel && (
               <Badge variant="outline" className={cn("text-[10px] font-medium", WORK_MODEL_STYLES[job.workModel])}>
                 {job.workModel}
