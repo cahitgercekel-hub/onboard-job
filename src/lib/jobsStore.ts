@@ -2,7 +2,6 @@ import { useEffect, useState, useCallback, useRef } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/lib/auth";
 import type { Job, JobStatus, ApplicationType, Industry, WorkModel, ArchiveType } from "./types";
-type ArchiveTypeRow = "closed" | "rejected" | "ghosted" | null;
 import { STATUS_ORDER, APPLICATION_TYPES, INDUSTRIES, WORK_MODELS } from "./types";
 import { toast } from "sonner";
 
@@ -394,7 +393,7 @@ export function useJobs() {
       patch.rejection_tag = null;
       patch.rejection_reason = null;
     }
-    const { error } = await supabase.from("jobs").update(patch).eq("id", id);
+    const { error } = await supabase.from("jobs").update(patch as any).eq("id", id);
     if (error) toast.error(error.message);
   }, []);
 
