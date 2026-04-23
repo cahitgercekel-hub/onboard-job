@@ -37,11 +37,20 @@ function pickMilestone(jobs: Job[]): Milestone {
 }
 
 async function captureNode(node: HTMLElement): Promise<Blob | null> {
+  // Use the node's actual layout size to keep typography 1:1 with the DOM.
+  // Forcing windowWidth/Height + foreignObjectRendering=false avoids
+  // html2canvas re-flowing the node at the live viewport width (which makes
+  // rem/vw text resize unpredictably during capture).
+  const rect = node.getBoundingClientRect();
   const canvas = await html2canvas(node, {
     backgroundColor: null,
     scale: 2,
     useCORS: true,
     logging: false,
+    width: rect.width,
+    height: rect.height,
+    windowWidth: rect.width,
+    windowHeight: rect.height,
   });
   return await new Promise((resolve) => canvas.toBlob((b) => resolve(b), "image/png", 0.95));
 }
