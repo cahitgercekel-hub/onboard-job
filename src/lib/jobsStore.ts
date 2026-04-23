@@ -388,7 +388,25 @@ export function useJobs() {
   }, []);
 
   const moveJob = useCallback(async (id: string, status: JobStatus) => {
-    const { error } = await supabase.from("jobs").update({ status }).eq("id", id);
+    const patch: Record<string, unknown> = { status };
+    // When leaving the Rejected column, wipe rejection metadata
+    if (status !== "rejected") {
+      patch.rejection_tag = null;
+      patch.rejection_reason = null;
+    }
+    const { error } = await supabase.from("jobs").update(patch).eq("id", id);
+    if (error) toast.error(error.message);
+  }, []);
+
+  const setRejection = useCallback(async (id: string, tag: string, reason?: string) => {
+    const { error } = await supabase
+      .from("jobs")
+      .update({
+        status: "rejected",
+        rejection_tag: tag,
+        rejection_reason: reason ?? null,
+      } as any)
+      .eq("id", id);
     if (error) toast.error(error.message);
   }, []);
 
@@ -429,7 +447,7 @@ export function useJobs() {
     if (error) toast.error(error.message);
   }, [jobs]);
 
-  return { jobs, addJob, updateJob, removeJob, moveJob, archiveJob, unarchiveJob };
+  return { jobs, addJob, updateJob, removeJob, moveJob, archiveJob, unarchiveJob, setRejection };
 }
 
 export function daysSince(iso: string): number {
