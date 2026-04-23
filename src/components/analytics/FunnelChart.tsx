@@ -19,10 +19,10 @@ export function FunnelChart({ jobs }: Props) {
   }
 
   return (
-    <div className="w-full h-[320px] md:h-[420px]">
+    <div className="w-full h-[320px] md:h-[440px]">
       <ResponsiveSankey
         data={data}
-        margin={{ top: 16, right: 110, bottom: 16, left: 90 }}
+        margin={{ top: 24, right: 130, bottom: 24, left: 110 }}
         align="start"
         sort="auto"
         colors={(node: any) => node.nodeColor || "hsl(var(--muted-foreground))"}
@@ -33,17 +33,26 @@ export function FunnelChart({ jobs }: Props) {
         nodeSpacing={24}
         nodeBorderWidth={0}
         nodeBorderRadius={4}
-        linkOpacity={0.5}
-        linkHoverOpacity={0.85}
+        linkOpacity={0.55}
+        linkHoverOpacity={0.9}
         linkContract={3}
         enableLinkGradient={true}
         linkBlendMode="normal"
         labelPosition="outside"
         labelOrientation="horizontal"
-        labelPadding={12}
+        labelPadding={14}
         labelTextColor="hsl(var(--foreground))"
+        // Custom label: render the value (count) above the stage name
+        label={(node: any) => `${Math.round(node.value || 0)}\n${node.id}`}
         animate
         theme={{
+          labels: {
+            text: {
+              fontSize: 11,
+              fontWeight: 500,
+              whiteSpace: "pre",
+            } as any,
+          },
           tooltip: {
             container: {
               background: "hsl(var(--popover))",
