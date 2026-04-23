@@ -363,6 +363,13 @@ export default function Tracker() {
         onConfirm={(type, opts) => archiveTarget && archiveJob(archiveTarget.id, type, opts)}
       />
 
+      <RejectionDialog
+        open={!!rejectionTarget}
+        job={rejectionTarget}
+        onOpenChange={(v) => { if (!v) setRejectionTarget(null); }}
+        onConfirm={(tag, reason) => rejectionTarget && setRejection(rejectionTarget.id, tag, reason)}
+      />
+
       <ArchiveView
         open={archiveOpen}
         onOpenChange={setArchiveOpen}
