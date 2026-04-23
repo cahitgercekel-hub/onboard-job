@@ -2,6 +2,7 @@ import { useEffect, useState, useCallback, useRef } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/lib/auth";
 import type { Job, JobStatus, ApplicationType, Industry, WorkModel, ArchiveType } from "./types";
+type ArchiveTypeRow = "closed" | "rejected" | "ghosted" | null;
 import { STATUS_ORDER, APPLICATION_TYPES, INDUSTRIES, WORK_MODELS } from "./types";
 import { toast } from "sonner";
 
@@ -28,6 +29,11 @@ type JobRow = {
   source: string;
   created_at: string;
   updated_at: string;
+  archive_type: string | null;
+  rejection_reason: string | null;
+  rejection_tag: string | null;
+  archived_at: string | null;
+  previous_status: JobStatus | null;
 };
 
 function rowToJob(r: JobRow): Job {
@@ -46,6 +52,11 @@ function rowToJob(r: JobRow): Job {
     notes: r.notes ?? undefined,
     fitnessScore: r.fitness_score,
     fitnessReasoning: r.fitness_reasoning,
+    archiveType: (r.archive_type as ArchiveType | null) ?? null,
+    rejectionReason: r.rejection_reason ?? null,
+    rejectionTag: r.rejection_tag ?? null,
+    archivedAt: r.archived_at ?? null,
+    previousStatus: r.previous_status ?? null,
     createdAt: r.created_at,
     updatedAt: r.updated_at,
   };
@@ -82,6 +93,8 @@ function patchToUpdate(p: Partial<Job>) {
   if (p.location !== undefined) out.location = p.location ?? null;
   if (p.jobDescription !== undefined) out.job_description = p.jobDescription ?? null;
   if (p.notes !== undefined) out.notes = p.notes ?? null;
+  if (p.rejectionTag !== undefined) out.rejection_tag = p.rejectionTag ?? null;
+  if (p.rejectionReason !== undefined) out.rejection_reason = p.rejectionReason ?? null;
   return out;
 }
 
