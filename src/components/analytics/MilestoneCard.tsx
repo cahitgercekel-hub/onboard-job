@@ -62,7 +62,7 @@ export const MilestoneCard = forwardRef<HTMLDivElement, Props>(({ milestone, sta
         style={{
           position: "relative",
           height: "100%",
-          padding: 48,
+          padding: 44,
           display: "flex",
           flexDirection: "column",
         }}
@@ -113,10 +113,14 @@ export const MilestoneCard = forwardRef<HTMLDivElement, Props>(({ milestone, sta
           </div>
           <div
             style={{
-              fontSize: 48,
+              fontSize: 38,
               fontWeight: 700,
-              lineHeight: 1.1,
+              lineHeight: 1.15,
               letterSpacing: "-0.02em",
+              wordBreak: "normal",
+              overflowWrap: "break-word",
+              hyphens: "none",
+              maxWidth: 480,
             }}
           >
             {milestone.emoji && <span style={{ marginRight: 8 }}>{milestone.emoji}</span>}
@@ -125,10 +129,10 @@ export const MilestoneCard = forwardRef<HTMLDivElement, Props>(({ milestone, sta
           <p
             style={{
               marginTop: 16,
-              fontSize: 18,
-              opacity: 0.9,
-              lineHeight: 1.35,
-              maxWidth: 440,
+              fontSize: 17,
+              opacity: 0.92,
+              lineHeight: 1.4,
+              maxWidth: 460,
             }}
           >
             {milestone.subline}
