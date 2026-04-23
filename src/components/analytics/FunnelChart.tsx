@@ -22,22 +22,25 @@ export function FunnelChart({ jobs }: Props) {
     <div className="w-full h-[320px] md:h-[420px]">
       <ResponsiveSankey
         data={data}
-        margin={{ top: 12, right: 100, bottom: 12, left: 80 }}
-        align="justify"
+        margin={{ top: 16, right: 110, bottom: 16, left: 90 }}
+        align="start"
+        sort="auto"
         colors={(node: any) => node.nodeColor || "hsl(var(--muted-foreground))"}
         nodeOpacity={1}
         nodeHoverOpacity={1}
-        nodeThickness={14}
-        nodeSpacing={18}
+        nodeThickness={18}
+        nodeInnerPadding={3}
+        nodeSpacing={24}
         nodeBorderWidth={0}
-        nodeBorderRadius={3}
-        linkOpacity={0.45}
-        linkHoverOpacity={0.75}
+        nodeBorderRadius={4}
+        linkOpacity={0.5}
+        linkHoverOpacity={0.85}
         linkContract={3}
-        enableLinkGradient
+        enableLinkGradient={true}
+        linkBlendMode="normal"
         labelPosition="outside"
         labelOrientation="horizontal"
-        labelPadding={10}
+        labelPadding={12}
         labelTextColor="hsl(var(--foreground))"
         animate
         theme={{

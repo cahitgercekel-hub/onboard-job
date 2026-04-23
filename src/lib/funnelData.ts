@@ -72,7 +72,7 @@ export function buildFunnelData(jobs: Job[]): SankeyData {
   const usedNodes = new Set<string>();
 
   const inc = (src: string, tgt: string) => {
-    if (src === tgt) return;
+    if (src === tgt) return; // prevent circular loops
     const k = `${src}→${tgt}`;
     linkMap.set(k, (linkMap.get(k) ?? 0) + 1);
     usedNodes.add(src);
@@ -83,9 +83,8 @@ export function buildFunnelData(jobs: Job[]): SankeyData {
     const peak = highestStage(j);
     const peakRank = RANK[peak];
 
-    // Build the progressive chain saved → applied → interviewing → offer up to peak
-    const chain: ("saved" | "applied" | "interviewing" | "offer")[] = [];
-    if (peakRank >= 1) chain.push("saved");
+    // Every job's journey starts at "Saved", then progresses up to its peak.
+    const chain: ("saved" | "applied" | "interviewing" | "offer")[] = ["saved"];
     if (peakRank >= 2) chain.push("applied");
     if (peakRank >= 3) chain.push("interviewing");
     if (peakRank >= 4) chain.push("offer");
@@ -96,7 +95,7 @@ export function buildFunnelData(jobs: Job[]): SankeyData {
 
     const term = terminalLabel(j);
     if (term) {
-      // Connect from the peak to the terminal node
+      // Drop-off connects from the peak stage directly to the terminal node.
       inc(STAGE_LABEL[peak], term);
     }
 
@@ -104,6 +103,7 @@ export function buildFunnelData(jobs: Job[]): SankeyData {
     usedNodes.add(STAGE_LABEL[peak]);
   }
 
+  // Order: positive funnel first (top), terminal drop-offs last (bottom).
   const orderedNodes = ["Saved", "Applied", "Interviewing", "Offer", "Rejected", "Ghosted", "Closed"]
     .filter((n) => usedNodes.has(n));
 
