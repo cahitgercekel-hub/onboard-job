@@ -7,6 +7,38 @@ interface Props {
   jobs: Job[];
 }
 
+// Custom layer that renders each node's label as two stacked lines:
+//   value (count) on top, stage name below — outside the node bar.
+function NodeLabelsLayer({ nodes }: any) {
+  return (
+    <g>
+      {nodes.map((node: any) => {
+        // Heuristic: nodes on the right half get labels to the right; otherwise left.
+        // Nivo passes node.x0/x1; align "start" pushes terminals near their source.
+        const padding = 10;
+        const isRightSide = node.x1 > node.layout?.width / 2 || node.depth > 0 && node.sourceLinks?.length === 0;
+        const x = isRightSide ? node.x1 + padding : node.x0 - padding;
+        const anchor = isRightSide ? "start" : "end";
+        const y = (node.y0 + node.y1) / 2;
+        const value = Math.round(node.value || 0);
+        return (
+          <text
+            key={node.id}
+            x={x}
+            y={y}
+            textAnchor={anchor}
+            dominantBaseline="middle"
+            style={{ fill: "hsl(var(--foreground))", fontSize: 11, fontWeight: 500, pointerEvents: "none" }}
+          >
+            <tspan x={x} dy="-0.5em" style={{ fontSize: 13, fontWeight: 700 }}>{value}</tspan>
+            <tspan x={x} dy="1.2em" style={{ fill: "hsl(var(--muted-foreground))" }}>{node.id}</tspan>
+          </text>
+        );
+      })}
+    </g>
+  );
+}
+
 export function FunnelChart({ jobs }: Props) {
   const data = useMemo(() => buildFunnelData(jobs), [jobs]);
 
@@ -22,7 +54,7 @@ export function FunnelChart({ jobs }: Props) {
     <div className="w-full h-[320px] md:h-[440px]">
       <ResponsiveSankey
         data={data}
-        margin={{ top: 24, right: 130, bottom: 24, left: 110 }}
+        margin={{ top: 28, right: 130, bottom: 28, left: 110 }}
         align="start"
         sort="auto"
         colors={(node: any) => node.nodeColor || "hsl(var(--muted-foreground))"}
@@ -38,21 +70,11 @@ export function FunnelChart({ jobs }: Props) {
         linkContract={3}
         enableLinkGradient={true}
         linkBlendMode="normal"
-        labelPosition="outside"
-        labelOrientation="horizontal"
-        labelPadding={14}
-        labelTextColor="hsl(var(--foreground))"
-        // Custom label: render the value (count) above the stage name
-        label={(node: any) => `${Math.round(node.value || 0)}\n${node.id}`}
+        // We render labels via a custom layer so we can stack value over name.
+        enableLabels={false}
+        layers={["links", "nodes", NodeLabelsLayer as any]}
         animate
         theme={{
-          labels: {
-            text: {
-              fontSize: 11,
-              fontWeight: 500,
-              whiteSpace: "pre",
-            } as any,
-          },
           tooltip: {
             container: {
               background: "hsl(var(--popover))",
