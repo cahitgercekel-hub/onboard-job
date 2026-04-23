@@ -13,6 +13,7 @@ import { JobCard } from "@/components/kanban/JobCard";
 import { AutoAddDialog } from "@/components/kanban/AutoAddDialog";
 import { ArchiveDialog } from "@/components/kanban/ArchiveDialog";
 import { ArchiveView } from "@/components/kanban/ArchiveView";
+import { RejectionDialog } from "@/components/kanban/RejectionDialog";
 import { Button } from "@/components/ui/button";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
@@ -29,7 +30,7 @@ type SortKey = "default" | "score-desc" | "date-desc" | "date-asc" | "company-as
 
 export default function Tracker() {
   const { t } = useTranslation();
-  const { jobs, addJob, updateJob, removeJob, moveJob, archiveJob, unarchiveJob } = useJobs();
+  const { jobs, addJob, updateJob, removeJob, moveJob, archiveJob, unarchiveJob, setRejection } = useJobs();
   const { ghostingDays } = usePrefs();
   const [appType, setAppType] = useState<string>(ALL);
   const [industry, setIndustry] = useState<string>(ALL);
@@ -43,6 +44,7 @@ export default function Tracker() {
   const [autoOpen, setAutoOpen] = useState(false);
   const [archiveOpen, setArchiveOpen] = useState(false);
   const [archiveTarget, setArchiveTarget] = useState<Job | null>(null);
+  const [rejectionTarget, setRejectionTarget] = useState<Job | null>(null);
   const [activeId, setActiveId] = useState<string | null>(null);
   const [sortKey, setSortKey] = useState<SortKey>("default");
   const [search, setSearch] = useState("");
@@ -107,7 +109,7 @@ export default function Tracker() {
     return m;
   }, [filtered, sortKey]);
 
-  const archivedCount = useMemo(() => jobs.filter((j) => j.status === "archived").length, [jobs]);
+  // Archive count badge intentionally removed per UX pivot.
 
   // Auto-ghosting: prompt once per session per ghosted job
   useEffect(() => {
@@ -138,7 +140,13 @@ export default function Tracker() {
     if (!over) return;
     const newStatus = over.id as JobStatus;
     const job = jobs.find((j) => j.id === active.id);
-    if (job && job.status !== newStatus) moveJob(job.id, newStatus);
+    if (!job || job.status === newStatus) return;
+    // Dropping into the Rejected column: prompt for rejection reason first.
+    if (newStatus === "rejected") {
+      setRejectionTarget(job);
+      return;
+    }
+    moveJob(job.id, newStatus);
   };
 
   const openAdd = (status: JobStatus) => setDialog({ open: true, status, job: undefined, key: Date.now() });
@@ -294,9 +302,6 @@ export default function Tracker() {
             >
               <Archive className="h-3.5 w-3.5" />
               <span className="hidden sm:inline">Archive</span>
-              {archivedCount > 0 && (
-                <Badge variant="secondary" className="ml-1 h-5 px-1.5 text-[10px]">{archivedCount}</Badge>
-              )}
             </Button>
             <Button variant="ai" onClick={() => setAutoOpen(true)} className="group h-11 md:h-9 px-3" aria-label={t("tracker.autoAdd")}>
               <Sparkles className="h-4 w-4 transition-transform group-hover:rotate-12" />
@@ -356,6 +361,13 @@ export default function Tracker() {
         job={archiveTarget}
         onOpenChange={(v) => { if (!v) setArchiveTarget(null); }}
         onConfirm={(type, opts) => archiveTarget && archiveJob(archiveTarget.id, type, opts)}
+      />
+
+      <RejectionDialog
+        open={!!rejectionTarget}
+        job={rejectionTarget}
+        onOpenChange={(v) => { if (!v) setRejectionTarget(null); }}
+        onConfirm={(tag, reason) => rejectionTarget && setRejection(rejectionTarget.id, tag, reason)}
       />
 
       <ArchiveView

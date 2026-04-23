@@ -28,6 +28,11 @@ type JobRow = {
   source: string;
   created_at: string;
   updated_at: string;
+  archive_type: string | null;
+  rejection_reason: string | null;
+  rejection_tag: string | null;
+  archived_at: string | null;
+  previous_status: JobStatus | null;
 };
 
 function rowToJob(r: JobRow): Job {
@@ -46,6 +51,11 @@ function rowToJob(r: JobRow): Job {
     notes: r.notes ?? undefined,
     fitnessScore: r.fitness_score,
     fitnessReasoning: r.fitness_reasoning,
+    archiveType: (r.archive_type as ArchiveType | null) ?? null,
+    rejectionReason: r.rejection_reason ?? null,
+    rejectionTag: r.rejection_tag ?? null,
+    archivedAt: r.archived_at ?? null,
+    previousStatus: r.previous_status ?? null,
     createdAt: r.created_at,
     updatedAt: r.updated_at,
   };
@@ -82,6 +92,8 @@ function patchToUpdate(p: Partial<Job>) {
   if (p.location !== undefined) out.location = p.location ?? null;
   if (p.jobDescription !== undefined) out.job_description = p.jobDescription ?? null;
   if (p.notes !== undefined) out.notes = p.notes ?? null;
+  if (p.rejectionTag !== undefined) out.rejection_tag = p.rejectionTag ?? null;
+  if (p.rejectionReason !== undefined) out.rejection_reason = p.rejectionReason ?? null;
   return out;
 }
 
@@ -375,7 +387,25 @@ export function useJobs() {
   }, []);
 
   const moveJob = useCallback(async (id: string, status: JobStatus) => {
-    const { error } = await supabase.from("jobs").update({ status }).eq("id", id);
+    const patch: Record<string, unknown> = { status };
+    // When leaving the Rejected column, wipe rejection metadata
+    if (status !== "rejected") {
+      patch.rejection_tag = null;
+      patch.rejection_reason = null;
+    }
+    const { error } = await supabase.from("jobs").update(patch as any).eq("id", id);
+    if (error) toast.error(error.message);
+  }, []);
+
+  const setRejection = useCallback(async (id: string, tag: string, reason?: string) => {
+    const { error } = await supabase
+      .from("jobs")
+      .update({
+        status: "rejected",
+        rejection_tag: tag,
+        rejection_reason: reason ?? null,
+      } as any)
+      .eq("id", id);
     if (error) toast.error(error.message);
   }, []);
 
@@ -416,7 +446,7 @@ export function useJobs() {
     if (error) toast.error(error.message);
   }, [jobs]);
 
-  return { jobs, addJob, updateJob, removeJob, moveJob, archiveJob, unarchiveJob };
+  return { jobs, addJob, updateJob, removeJob, moveJob, archiveJob, unarchiveJob, setRejection };
 }
 
 export function daysSince(iso: string): number {

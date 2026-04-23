@@ -37,11 +37,20 @@ function pickMilestone(jobs: Job[]): Milestone {
 }
 
 async function captureNode(node: HTMLElement): Promise<Blob | null> {
+  // Use the node's actual layout size to keep typography 1:1 with the DOM.
+  // Forcing windowWidth/Height + foreignObjectRendering=false avoids
+  // html2canvas re-flowing the node at the live viewport width (which makes
+  // rem/vw text resize unpredictably during capture).
+  const rect = node.getBoundingClientRect();
   const canvas = await html2canvas(node, {
     backgroundColor: null,
     scale: 2,
     useCORS: true,
     logging: false,
+    width: rect.width,
+    height: rect.height,
+    windowWidth: rect.width,
+    windowHeight: rect.height,
   });
   return await new Promise((resolve) => canvas.toBlob((b) => resolve(b), "image/png", 0.95));
 }
@@ -138,9 +147,23 @@ export function ShareProgress({ jobs, funnelRef }: Props) {
             <DialogDescription>JobFlow helps you track and AI-optimize — never auto-apply. This card celebrates your effort.</DialogDescription>
           </DialogHeader>
           <div className="overflow-auto max-h-[60vh] flex justify-center bg-muted/30 rounded-md py-4">
-            <div style={{ transform: "scale(0.55)", transformOrigin: "top center" }}>
-              <MilestoneCard ref={milestoneRef} milestone={milestone} stats={stats} />
+            {/* Visible preview — scaled down for display only */}
+            <div style={{ transform: "scale(0.55)", transformOrigin: "top center" }} aria-hidden="true">
+              <MilestoneCard milestone={milestone} stats={stats} />
             </div>
+          </div>
+          {/* Off-screen full-size capture node so html2canvas grabs true 600×600 layout */}
+          <div
+            style={{
+              position: "fixed",
+              top: 0,
+              left: -10000,
+              pointerEvents: "none",
+              opacity: 0,
+            }}
+            aria-hidden="true"
+          >
+            <MilestoneCard ref={milestoneRef} milestone={milestone} stats={stats} />
           </div>
           <DialogFooter>
             <Button variant="outline" onClick={() => setMilestoneOpen(false)}>Cancel</Button>

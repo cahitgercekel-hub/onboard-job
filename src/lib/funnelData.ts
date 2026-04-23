@@ -60,7 +60,7 @@ function highestStage(job: Job): "saved" | "applied" | "interviewing" | "offer" 
 function terminalLabel(job: Job): string | null {
   if (job.status === "archived") {
     if (job.archiveType === "ghosted") return "Ghosted";
-    if (job.archiveType === "closed") return "Closed";
+    if (job.archiveType === "closed") return null; // Closed jobs are excluded from the funnel
     return "Rejected";
   }
   if (job.status === "rejected") return "Rejected";
@@ -80,6 +80,8 @@ export function buildFunnelData(jobs: Job[]): SankeyData {
   };
 
   for (const j of jobs) {
+    // Phase 2: completely exclude "Closed" jobs from the funnel calculations
+    if (j.status === "archived" && j.archiveType === "closed") continue;
     const peak = highestStage(j);
     const peakRank = RANK[peak];
 
@@ -104,7 +106,7 @@ export function buildFunnelData(jobs: Job[]): SankeyData {
   }
 
   // Order: positive funnel first (top), terminal drop-offs last (bottom).
-  const orderedNodes = ["Saved", "Applied", "Interviewing", "Offer", "Rejected", "Ghosted", "Closed"]
+  const orderedNodes = ["Saved", "Applied", "Interviewing", "Offer", "Rejected", "Ghosted"]
     .filter((n) => usedNodes.has(n));
 
   const nodes: SankeyNode[] = orderedNodes.map((id) => ({
