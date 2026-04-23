@@ -36,14 +36,25 @@ function pickMilestone(jobs: Job[]): Milestone {
   return { emoji: "📈", headline: `Tracking ${total} opportunities`, subline: "Analyzing my way to my dream job with JobFlow." };
 }
 
-async function captureNode(node: HTMLElement): Promise<Blob | null> {
-  // Use the node's actual layout size to keep typography 1:1 with the DOM.
-  // Forcing windowWidth/Height + foreignObjectRendering=false avoids
-  // html2canvas re-flowing the node at the live viewport width (which makes
-  // rem/vw text resize unpredictably during capture).
+function resolveCssVar(name: string, fallback = "#ffffff"): string {
+  try {
+    const raw = getComputedStyle(document.documentElement).getPropertyValue(name).trim();
+    if (!raw) return fallback;
+    // Tailwind stores HSL triplets like "30 8% 13%" — wrap in hsl()
+    if (/^[\d.\s%-]+$/.test(raw)) return `hsl(${raw})`;
+    return raw;
+  } catch {
+    return fallback;
+  }
+}
+
+async function captureNode(
+  node: HTMLElement,
+  opts: { backgroundColor?: string | null } = {},
+): Promise<Blob | null> {
   const rect = node.getBoundingClientRect();
   const canvas = await html2canvas(node, {
-    backgroundColor: null,
+    backgroundColor: opts.backgroundColor === undefined ? null : opts.backgroundColor,
     scale: 2,
     useCORS: true,
     logging: false,
@@ -91,7 +102,9 @@ export function ShareProgress({ jobs, funnelRef }: Props) {
     if (!funnelRef.current) return toast.error("Funnel chart not ready yet.");
     setBusy(true);
     try {
-      const blob = await captureNode(funnelRef.current);
+      // Use the live --card color so the captured PNG matches the on-screen theme
+      const bg = resolveCssVar("--card");
+      const blob = await captureNode(funnelRef.current, { backgroundColor: bg });
       if (!blob) throw new Error("Couldn't capture image");
       await shareOrDownload(blob, `jobflow-funnel-${Date.now()}.png`, "My job-search funnel from JobFlow 📊");
     } catch (e: any) {
