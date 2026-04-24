@@ -55,8 +55,8 @@ export function useCvVersions() {
     }
     reload(user.id);
 
-    const channel = supabase
-      .channel(`cv-versions-${user.id}`)
+    const channel = supabase.channel(`cv-versions-${user.id}-${Math.random().toString(36).slice(2, 8)}`);
+    channel
       .on(
         "postgres_changes",
         { event: "*", schema: "public", table: "cv_versions", filter: `user_id=eq.${user.id}` },
