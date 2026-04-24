@@ -13,6 +13,7 @@ import { LANGUAGES } from "@/lib/i18n";
 import { downloadJobsCsv, clearAllJobs } from "@/lib/jobsStore";
 import { ImportCsvDialog } from "@/components/settings/ImportCsvDialog";
 import { CvBaselineSection } from "@/components/settings/CvBaselineSection";
+import { CvVersionsSection } from "@/components/settings/CvVersionsSection";
 import { ApiTokensSection } from "@/components/settings/ApiTokensSection";
 import { useAuth } from "@/lib/auth";
 import { toast } from "sonner";
@@ -134,6 +135,8 @@ export default function Settings() {
       </section>
 
       <CvBaselineSection />
+
+      <CvVersionsSection />
 
       <ApiTokensSection />
 
