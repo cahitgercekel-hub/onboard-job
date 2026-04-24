@@ -77,6 +77,7 @@ export interface Job {
   rejectionTag?: string | null;
   archivedAt?: string | null;
   previousStatus?: JobStatus | null;
+  cvVersionId?: string | null;
   createdAt: string;
   updatedAt: string; // bumped when status changes
 }
