@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
-import { Sparkles, Loader2 } from "lucide-react";
+import { Sparkles, Loader2, Mail } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
@@ -9,6 +9,8 @@ import { Textarea } from "@/components/ui/textarea";
 import { Button } from "@/components/ui/button";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { FitnessRing } from "@/components/FitnessRing";
+import { CoverLetterStudio } from "@/components/kanban/CoverLetterStudio";
+import { useCvVersions } from "@/lib/cvVersionsStore";
 import { toast } from "sonner";
 import {
   APPLICATION_TYPES,
@@ -35,6 +37,7 @@ interface Props {
 
 export function JobDialog({ open, onOpenChange, initialStatus = "saved", job, onSave, onDelete, onArchive }: Props) {
   const { t } = useTranslation();
+  const { versions } = useCvVersions();
   const [company, setCompany] = useState(job?.company ?? "");
   const [role, setRole] = useState(job?.role ?? "");
   const [url, setUrl] = useState(job?.url ?? "");
@@ -46,7 +49,9 @@ export function JobDialog({ open, onOpenChange, initialStatus = "saved", job, on
   const [location, setLocation] = useState(job?.location ?? "");
   const [jobDescription, setJobDescription] = useState(job?.jobDescription ?? "");
   const [notes, setNotes] = useState(job?.notes ?? "");
+  const [cvVersionId, setCvVersionId] = useState<string>(job?.cvVersionId ?? "");
   const [scoring, setScoring] = useState(false);
+  const [coverOpen, setCoverOpen] = useState(false);
 
   useEffect(() => {
     if (!open) return;
@@ -61,6 +66,7 @@ export function JobDialog({ open, onOpenChange, initialStatus = "saved", job, on
     setLocation(job?.location ?? "");
     setJobDescription(job?.jobDescription ?? "");
     setNotes(job?.notes ?? "");
+    setCvVersionId(job?.cvVersionId ?? "");
   }, [open, job, initialStatus]);
 
   const calculateFitness = async () => {
@@ -93,6 +99,7 @@ export function JobDialog({ open, onOpenChange, initialStatus = "saved", job, on
       location: location.trim() || undefined,
       jobDescription: jobDescription.trim() || undefined,
       notes: notes.trim() || undefined,
+      cvVersionId: cvVersionId || null,
     });
     onOpenChange(false);
   };
@@ -171,6 +178,23 @@ export function JobDialog({ open, onOpenChange, initialStatus = "saved", job, on
             </div>
           </div>
           <div className="grid gap-1.5">
+            <Label>CV version used</Label>
+            <Select
+              value={cvVersionId || "__none__"}
+              onValueChange={(v) => setCvVersionId(v === "__none__" ? "" : v)}
+            >
+              <SelectTrigger>
+                <SelectValue placeholder={versions.length === 0 ? "No CV versions yet — add one in Settings" : "Select a CV version…"} />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="__none__">None</SelectItem>
+                {versions.map((v) => (
+                  <SelectItem key={v.id} value={v.id}>{v.name}</SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
+          <div className="grid gap-1.5">
             <div className="flex items-center justify-between">
               <Label htmlFor="jd">{t("common.jobDescription")}</Label>
               {job && (
@@ -208,6 +232,11 @@ export function JobDialog({ open, onOpenChange, initialStatus = "saved", job, on
                 Archive
               </Button>
             )}
+            {job && (
+              <Button variant="ghost" onClick={() => setCoverOpen(true)}>
+                <Mail className="h-3.5 w-3.5" /> Cover letter
+              </Button>
+            )}
           </div>
           <div className="flex gap-2">
             <Button variant="outline" onClick={() => onOpenChange(false)}>{t("common.cancel")}</Button>
@@ -215,6 +244,7 @@ export function JobDialog({ open, onOpenChange, initialStatus = "saved", job, on
           </div>
         </DialogFooter>
       </DialogContent>
+      {job && <CoverLetterStudio open={coverOpen} onOpenChange={setCoverOpen} job={job} />}
     </Dialog>
   );
 }

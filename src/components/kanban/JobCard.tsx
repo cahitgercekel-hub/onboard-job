@@ -1,11 +1,12 @@
 import { useDraggable } from "@dnd-kit/core";
-import { AlertTriangle, Archive, ExternalLink, MapPin } from "lucide-react";
+import { AlertTriangle, Archive, ExternalLink, MapPin, Files } from "lucide-react";
 import { alarmFor, daysSince } from "@/lib/jobsStore";
 import type { Job, WorkModel } from "@/lib/types";
 import { cn } from "@/lib/utils";
 import { Badge } from "@/components/ui/badge";
 import { usePrefs } from "@/lib/preferences";
 import { FitnessRing } from "@/components/FitnessRing";
+import { useCvVersions } from "@/lib/cvVersionsStore";
 
 interface Props {
   job: Job;
@@ -23,6 +24,8 @@ const WORK_MODEL_STYLES: Record<WorkModel, string> = {
 export function JobCard({ job, onClick, onArchive, overlay = false }: Props) {
   const { attributes, listeners, setNodeRef, isDragging } = useDraggable({ id: job.id });
   const { formatDate } = usePrefs();
+  const { versions } = useCvVersions();
+  const cvVersionName = job.cvVersionId ? versions.find((v) => v.id === job.cvVersionId)?.name : null;
   const alarm = alarmFor(job);
   const style = overlay ? undefined : { opacity: isDragging ? 0 : 1 };
 
@@ -73,11 +76,16 @@ export function JobCard({ job, onClick, onArchive, overlay = false }: Props) {
           </div>
         </div>
 
-        {(job.applicationType || job.industry || job.workModel || (job.status === "rejected" && job.rejectionTag)) && (
+        {(job.applicationType || job.industry || job.workModel || cvVersionName || (job.status === "rejected" && job.rejectionTag)) && (
           <div className="mt-2 flex flex-wrap gap-1">
             {job.status === "rejected" && job.rejectionTag && (
               <Badge variant="outline" className="text-[10px] font-medium bg-destructive/10 text-destructive border-destructive/30">
                 {job.rejectionTag}
+              </Badge>
+            )}
+            {cvVersionName && (
+              <Badge variant="outline" className="text-[10px] font-medium bg-accent/10 text-accent border-accent/30 inline-flex items-center gap-1">
+                <Files className="h-2.5 w-2.5" /> {cvVersionName}
               </Badge>
             )}
             {job.workModel && (

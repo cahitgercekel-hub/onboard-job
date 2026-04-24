@@ -33,6 +33,7 @@ type JobRow = {
   rejection_tag: string | null;
   archived_at: string | null;
   previous_status: JobStatus | null;
+  cv_version_id: string | null;
 };
 
 function rowToJob(r: JobRow): Job {
@@ -56,6 +57,7 @@ function rowToJob(r: JobRow): Job {
     rejectionTag: r.rejection_tag ?? null,
     archivedAt: r.archived_at ?? null,
     previousStatus: r.previous_status ?? null,
+    cvVersionId: r.cv_version_id ?? null,
     createdAt: r.created_at,
     updatedAt: r.updated_at,
   };
@@ -75,6 +77,7 @@ function jobToInsert(j: Omit<Job, "id" | "createdAt" | "updatedAt">, userId: str
     location: j.location ?? null,
     job_description: j.jobDescription ?? null,
     notes: j.notes ?? null,
+    cv_version_id: j.cvVersionId ?? null,
     source,
   };
 }
@@ -94,6 +97,7 @@ function patchToUpdate(p: Partial<Job>) {
   if (p.notes !== undefined) out.notes = p.notes ?? null;
   if (p.rejectionTag !== undefined) out.rejection_tag = p.rejectionTag ?? null;
   if (p.rejectionReason !== undefined) out.rejection_reason = p.rejectionReason ?? null;
+  if (p.cvVersionId !== undefined) out.cv_version_id = p.cvVersionId ?? null;
   return out;
 }
 

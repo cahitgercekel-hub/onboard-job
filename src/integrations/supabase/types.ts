@@ -74,6 +74,33 @@ export type Database = {
         }
         Relationships: []
       }
+      cv_versions: {
+        Row: {
+          created_at: string
+          id: string
+          name: string
+          notes: string | null
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          name: string
+          notes?: string | null
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          name?: string
+          notes?: string | null
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       jobs: {
         Row: {
           application_type: string | null
@@ -81,6 +108,7 @@ export type Database = {
           archived_at: string | null
           company: string
           created_at: string
+          cv_version_id: string | null
           date_applied: string | null
           fitness_reasoning: string | null
           fitness_score: number | null
@@ -106,6 +134,7 @@ export type Database = {
           archived_at?: string | null
           company: string
           created_at?: string
+          cv_version_id?: string | null
           date_applied?: string | null
           fitness_reasoning?: string | null
           fitness_score?: number | null
@@ -131,6 +160,7 @@ export type Database = {
           archived_at?: string | null
           company?: string
           created_at?: string
+          cv_version_id?: string | null
           date_applied?: string | null
           fitness_reasoning?: string | null
           fitness_score?: number | null
@@ -150,7 +180,15 @@ export type Database = {
           user_id?: string
           work_model?: string | null
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "jobs_cv_version_id_fkey"
+            columns: ["cv_version_id"]
+            isOneToOne: false
+            referencedRelation: "cv_versions"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       profiles: {
         Row: {
