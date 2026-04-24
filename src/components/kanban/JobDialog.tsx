@@ -178,6 +178,23 @@ export function JobDialog({ open, onOpenChange, initialStatus = "saved", job, on
             </div>
           </div>
           <div className="grid gap-1.5">
+            <Label>CV version used</Label>
+            <Select
+              value={cvVersionId || "__none__"}
+              onValueChange={(v) => setCvVersionId(v === "__none__" ? "" : v)}
+            >
+              <SelectTrigger>
+                <SelectValue placeholder={versions.length === 0 ? "No CV versions yet — add one in Settings" : "Select a CV version…"} />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="__none__">None</SelectItem>
+                {versions.map((v) => (
+                  <SelectItem key={v.id} value={v.id}>{v.name}</SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
+          <div className="grid gap-1.5">
             <div className="flex items-center justify-between">
               <Label htmlFor="jd">{t("common.jobDescription")}</Label>
               {job && (
@@ -215,6 +232,11 @@ export function JobDialog({ open, onOpenChange, initialStatus = "saved", job, on
                 Archive
               </Button>
             )}
+            {job && (
+              <Button variant="ghost" onClick={() => setCoverOpen(true)}>
+                <Mail className="h-3.5 w-3.5" /> Cover letter
+              </Button>
+            )}
           </div>
           <div className="flex gap-2">
             <Button variant="outline" onClick={() => onOpenChange(false)}>{t("common.cancel")}</Button>
@@ -222,6 +244,7 @@ export function JobDialog({ open, onOpenChange, initialStatus = "saved", job, on
           </div>
         </DialogFooter>
       </DialogContent>
+      {job && <CoverLetterStudio open={coverOpen} onOpenChange={setCoverOpen} job={job} />}
     </Dialog>
   );
 }
