@@ -9,6 +9,8 @@ import { useJobs } from "@/lib/jobsStore";
 import { STATUS_LABEL, STATUS_ORDER, type JobStatus } from "@/lib/types";
 import { FunnelChart } from "@/components/analytics/FunnelChart";
 import { ShareProgress } from "@/components/analytics/ShareProgress";
+import { SkillHeatmap } from "@/components/analytics/SkillHeatmap";
+import { ABTestingLab } from "@/components/analytics/ABTestingLab";
 
 export const COLOR_VAR: Partial<Record<JobStatus, string>> = {
   saved: "var(--col-saved)",
@@ -118,6 +120,11 @@ export default function Analytics() {
         <p className="text-[11px] text-muted-foreground mt-2">
           Hover any flow to see exact counts and conversion rates. Archived jobs are routed by the highest stage they reached.
         </p>
+      </div>
+
+      <div className="grid lg:grid-cols-2 gap-5 md:gap-6 mb-5 md:mb-6">
+        <SkillHeatmap jobs={jobs} />
+        <ABTestingLab jobs={jobs} />
       </div>
 
       <div className="surface-card p-3 md:p-5 overflow-hidden">
