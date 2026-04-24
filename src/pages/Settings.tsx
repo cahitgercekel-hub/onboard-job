@@ -139,6 +139,8 @@ export default function Settings() {
 
       <CvVersionsSection />
 
+      <RecalculateFitnessSection />
+
       <ApiTokensSection />
 
       <section className="surface-card p-6">
