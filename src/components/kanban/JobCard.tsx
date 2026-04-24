@@ -117,8 +117,12 @@ export function JobCard({ job, onClick, onArchive, overlay = false }: Props) {
               <a
                 href={job.url}
                 target="_blank"
-                rel="noreferrer"
-                onClick={(e) => e.stopPropagation()}
+                rel="noopener noreferrer nofollow"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  e.preventDefault();
+                  window.open(job.url, "_blank", "noopener,noreferrer");
+                }}
                 className="inline-flex items-center gap-0.5 hover:text-foreground"
               >
                 Link <ExternalLink className="h-3 w-3" />

@@ -82,7 +82,16 @@ export function ArchiveView({ open, onOpenChange, jobs, onUnarchive, onDelete }:
                     {j.previousStatus && <span>From {STATUS_LABEL[j.previousStatus]}</span>}
                     {j.archivedAt && <span>· Archived {formatDate(j.archivedAt)}</span>}
                     {j.url && (
-                      <a href={j.url} target="_blank" rel="noreferrer" className="inline-flex items-center gap-0.5 hover:text-foreground">
+                      <a
+                        href={j.url}
+                        target="_blank"
+                        rel="noopener noreferrer nofollow"
+                        onClick={(e) => {
+                          e.preventDefault();
+                          window.open(j.url, "_blank", "noopener,noreferrer");
+                        }}
+                        className="inline-flex items-center gap-0.5 hover:text-foreground"
+                      >
                         Link <ExternalLink className="h-3 w-3" />
                       </a>
                     )}
