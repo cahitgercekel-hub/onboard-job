@@ -213,6 +213,8 @@ serve(async (req) => {
       userPrompt = `Company: ${payload.company}\nRole: ${payload.role}\n\nJob Description:\n"""\n${payload.jobDescription || payload.notes || "(no JD provided — infer from role/company)"}\n"""`;
     } else if (tool === "cv") {
       userPrompt = `CV text:\n"""\n${payload.cv}\n"""`;
+    } else if (tool === "optimize_cv") {
+      userPrompt = `Missing skills (high demand across the user's target jobs):\n${(payload.missingSkills || []).join(", ")}\n\nTop demanded skills overall (for context):\n${(payload.topSkills || []).join(", ")}\n\nUser's current CV:\n"""\n${payload.cv}\n"""`;
     } else {
       return new Response(JSON.stringify({ error: "Unknown tool" }), {
         status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" },
@@ -233,6 +235,7 @@ serve(async (req) => {
       polish: [POLISH_TOOL, "report_polish"],
       interview: [INTERVIEW_TOOL, "report_interview"],
       cv: [CV_TOOL, "report_cv"],
+      optimize_cv: [OPTIMIZE_TOOL, "report_optimize"],
     };
 
     if (toolMap[tool]) {
