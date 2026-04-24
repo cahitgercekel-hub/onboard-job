@@ -6,7 +6,7 @@ const corsHeaders = {
   "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
 };
 
-type Tool = "tone" | "translate" | "polish" | "extract" | "interview" | "cv";
+type Tool = "tone" | "translate" | "polish" | "extract" | "interview" | "cv" | "optimize_cv";
 
 const SYSTEM: Record<Tool, string> = {
   tone:
@@ -21,6 +21,8 @@ const SYSTEM: Record<Tool, string> = {
     "You are an interview coach. Given a role, company, and job description, generate exactly 5 highly probable interview questions tailored to the role. For each, provide a suggested answer structure using the STAR method (Situation, Task, Action, Result) — each section a short sentence. Always call the report_interview function.",
   cv:
     "You are a senior recruiter and CV reviewer. Holistically evaluate the user's CV across four dimensions on a 0-100 scale: 1) Professional Language (clarity, action verbs, no fluff), 2) Length & Formatting (appropriate length, structure, scannability), 3) ATS Appropriateness (parseable, no fancy graphics, standard headings), 4) Keyword Optimization (impactful nouns/verbs). Return scores plus 4-7 actionable tips and 4-8 strong/impactful keywords found. Always call the report_cv function.",
+  optimize_cv:
+    "You are a senior resume writer. The user's CV is missing several skills that are in high demand across the jobs they are targeting. Rewrite 5 resume bullet points that authentically incorporate the missing skills — never fabricate experience, but reframe and emphasize plausible adjacent work. Each bullet must start with a strong action verb, be one line, and include a metric where reasonable. Always call the report_optimize function.",
 };
 
 const EXTRACT_TOOL = {
@@ -149,6 +151,36 @@ const CV_TOOL = {
         strongKeywords: { type: "array", items: { type: "string" } },
       },
       required: ["scores", "tips", "strongKeywords"],
+      additionalProperties: false,
+    },
+  },
+};
+
+const OPTIMIZE_TOOL = {
+  type: "function",
+  function: {
+    name: "report_optimize",
+    description: "Return rewritten resume bullets that incorporate missing skills.",
+    parameters: {
+      type: "object",
+      properties: {
+        summary: { type: "string", description: "1-2 sentence summary of how the rewrite incorporates the missing skills." },
+        bullets: {
+          type: "array",
+          minItems: 3,
+          maxItems: 6,
+          items: {
+            type: "object",
+            properties: {
+              text: { type: "string" },
+              skillsCovered: { type: "array", items: { type: "string" } },
+            },
+            required: ["text", "skillsCovered"],
+            additionalProperties: false,
+          },
+        },
+      },
+      required: ["summary", "bullets"],
       additionalProperties: false,
     },
   },
