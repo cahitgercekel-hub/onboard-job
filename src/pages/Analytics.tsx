@@ -1,4 +1,4 @@
-import { useMemo, useRef } from "react";
+import { useMemo, useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
 import {
   BarChart, Bar, XAxis, YAxis, Tooltip, CartesianGrid, ResponsiveContainer, Cell,
@@ -11,6 +11,9 @@ import { FunnelChart } from "@/components/analytics/FunnelChart";
 import { ShareProgress } from "@/components/analytics/ShareProgress";
 import { SkillHeatmap } from "@/components/analytics/SkillHeatmap";
 import { ABTestingLab } from "@/components/analytics/ABTestingLab";
+import { RoleDistribution } from "@/components/analytics/RoleDistribution";
+import { categorizeRole, type RoleCategory } from "@/lib/roleCategory";
+import { Badge } from "@/components/ui/badge";
 
 export const COLOR_VAR: Partial<Record<JobStatus, string>> = {
   saved: "var(--col-saved)",
@@ -23,9 +26,15 @@ export const COLOR_VAR: Partial<Record<JobStatus, string>> = {
 const STATUS_AXIS: JobStatus[] = ["rejected", "saved", "applied", "interviewing", "offer"];
 
 export default function Analytics() {
-  const { jobs } = useJobs();
+  const { jobs: allJobs } = useJobs();
   const { t } = useTranslation();
   const funnelRef = useRef<HTMLDivElement>(null);
+  const [roleFilter, setRoleFilter] = useState<RoleCategory | null>(null);
+
+  const jobs = useMemo(
+    () => (roleFilter ? allJobs.filter((j) => categorizeRole(j.role) === roleFilter) : allJobs),
+    [allJobs, roleFilter],
+  );
 
   const data = useMemo(() => {
     const counts: Record<JobStatus, number> = {
@@ -58,13 +67,20 @@ export default function Analytics() {
 
   return (
     <div className="px-4 md:px-6 py-4 md:py-6 max-w-6xl mx-auto">
-      <div className="mb-5 md:mb-6">
-        <h1 className="text-xl md:text-2xl font-semibold tracking-tight flex items-center gap-2">
-          <BarChart3 className="h-5 w-5 text-accent" /> {t("analytics.title")}
-        </h1>
-        <p className="text-xs md:text-sm text-muted-foreground mt-1">
-          {t("analytics.subtitle", { count: total })}
-        </p>
+      <div className="mb-5 md:mb-6 flex items-start justify-between gap-3 flex-wrap">
+        <div>
+          <h1 className="text-xl md:text-2xl font-semibold tracking-tight flex items-center gap-2">
+            <BarChart3 className="h-5 w-5 text-accent" /> {t("analytics.title")}
+          </h1>
+          <p className="text-xs md:text-sm text-muted-foreground mt-1">
+            {t("analytics.subtitle", { count: total })}
+          </p>
+        </div>
+        {roleFilter && (
+          <Badge variant="secondary" className="cursor-pointer" onClick={() => setRoleFilter(null)}>
+            Filtered: {roleFilter} ✕
+          </Badge>
+        )}
       </div>
 
       <div className="grid grid-cols-2 md:grid-cols-5 gap-3 mb-5 md:mb-6">
@@ -120,6 +136,10 @@ export default function Analytics() {
         <p className="text-[11px] text-muted-foreground mt-2">
           Hover any flow to see exact counts and conversion rates. Archived jobs are routed by the highest stage they reached.
         </p>
+      </div>
+
+      <div className="mb-5 md:mb-6">
+        <RoleDistribution jobs={allJobs} selected={roleFilter} onSelect={setRoleFilter} />
       </div>
 
       <div className="grid lg:grid-cols-2 gap-5 md:gap-6 mb-5 md:mb-6">
