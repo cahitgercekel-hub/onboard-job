@@ -138,6 +138,10 @@ export default function Analytics() {
         </p>
       </div>
 
+      <div className="mb-5 md:mb-6">
+        <RoleDistribution jobs={allJobs} selected={roleFilter} onSelect={setRoleFilter} />
+      </div>
+
       <div className="grid lg:grid-cols-2 gap-5 md:gap-6 mb-5 md:mb-6">
         <SkillHeatmap jobs={jobs} />
         <ABTestingLab jobs={jobs} />
