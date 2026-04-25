@@ -26,9 +26,15 @@ export const COLOR_VAR: Partial<Record<JobStatus, string>> = {
 const STATUS_AXIS: JobStatus[] = ["rejected", "saved", "applied", "interviewing", "offer"];
 
 export default function Analytics() {
-  const { jobs } = useJobs();
+  const { jobs: allJobs } = useJobs();
   const { t } = useTranslation();
   const funnelRef = useRef<HTMLDivElement>(null);
+  const [roleFilter, setRoleFilter] = useState<RoleCategory | null>(null);
+
+  const jobs = useMemo(
+    () => (roleFilter ? allJobs.filter((j) => categorizeRole(j.role) === roleFilter) : allJobs),
+    [allJobs, roleFilter],
+  );
 
   const data = useMemo(() => {
     const counts: Record<JobStatus, number> = {
