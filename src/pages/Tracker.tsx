@@ -50,6 +50,7 @@ export default function Tracker() {
   const [sortKey, setSortKey] = useState<SortKey>("default");
   const [search, setSearch] = useState("");
   const [searchOpen, setSearchOpen] = useState(false);
+  const [discoveryCollapsed, setDiscoveryCollapsed] = useState(false);
   const activeJob = useMemo(() => jobs.find((j) => j.id === activeId) ?? null, [jobs, activeId]);
 
   const sensors = useSensors(
