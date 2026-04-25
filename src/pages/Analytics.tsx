@@ -96,7 +96,9 @@ export default function Analytics() {
       </div>
 
       <div className="surface-card p-3 md:p-5 overflow-hidden mb-5 md:mb-6">
-        <h2 className="text-sm font-medium text-foreground mb-4">{t("analytics.chartTitle")}</h2>
+        <h2 className="text-sm font-medium text-foreground mb-4 flex items-center gap-2">
+          <BarChart3 className="h-4 w-4 text-accent" /> {t("analytics.chartTitle")}
+        </h2>
         <div className="w-full h-[260px] md:h-[360px]">
           <ResponsiveContainer width="100%" height="100%">
             <BarChart data={data} margin={{ top: 8, right: 8, left: 0, bottom: 8 }}>
