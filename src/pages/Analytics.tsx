@@ -67,13 +67,20 @@ export default function Analytics() {
 
   return (
     <div className="px-4 md:px-6 py-4 md:py-6 max-w-6xl mx-auto">
-      <div className="mb-5 md:mb-6">
-        <h1 className="text-xl md:text-2xl font-semibold tracking-tight flex items-center gap-2">
-          <BarChart3 className="h-5 w-5 text-accent" /> {t("analytics.title")}
-        </h1>
-        <p className="text-xs md:text-sm text-muted-foreground mt-1">
-          {t("analytics.subtitle", { count: total })}
-        </p>
+      <div className="mb-5 md:mb-6 flex items-start justify-between gap-3 flex-wrap">
+        <div>
+          <h1 className="text-xl md:text-2xl font-semibold tracking-tight flex items-center gap-2">
+            <BarChart3 className="h-5 w-5 text-accent" /> {t("analytics.title")}
+          </h1>
+          <p className="text-xs md:text-sm text-muted-foreground mt-1">
+            {t("analytics.subtitle", { count: total })}
+          </p>
+        </div>
+        {roleFilter && (
+          <Badge variant="secondary" className="cursor-pointer" onClick={() => setRoleFilter(null)}>
+            Filtered: {roleFilter} ✕
+          </Badge>
+        )}
       </div>
 
       <div className="grid grid-cols-2 md:grid-cols-5 gap-3 mb-5 md:mb-6">
