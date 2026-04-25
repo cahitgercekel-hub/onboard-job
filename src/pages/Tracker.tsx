@@ -14,6 +14,7 @@ import { AutoAddDialog } from "@/components/kanban/AutoAddDialog";
 import { ArchiveDialog } from "@/components/kanban/ArchiveDialog";
 import { ArchiveView } from "@/components/kanban/ArchiveView";
 import { RejectionDialog } from "@/components/kanban/RejectionDialog";
+import { DiscoveryPanel } from "@/components/kanban/DiscoveryPanel";
 import { Button } from "@/components/ui/button";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
