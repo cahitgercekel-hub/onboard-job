@@ -8,3 +8,6 @@ verify_jwt = false
 
 [functions.calculate-fitness]
 verify_jwt = false
+
+[functions.discover-jobs]
+verify_jwt = false
