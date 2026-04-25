@@ -317,29 +317,36 @@ export default function Tracker() {
         </div>
       </div>
 
-      <div className="flex-1 overflow-x-auto snap-x snap-mandatory md:snap-none">
-        <DndContext sensors={sensors} onDragStart={onDragStart} onDragEnd={onDragEnd} onDragCancel={() => setActiveId(null)}>
-          <div className="flex gap-4 px-4 py-4 md:p-6 min-h-full">
-            {STATUS_ORDER.map((status) => (
-              <KanbanColumn
-                key={status}
-                status={status}
-                jobs={byStatus[status]}
-                onAdd={() => openAdd(status)}
-                onCardClick={openEdit}
-                onArchiveCard={(j) => setArchiveTarget(j)}
-                hiddenId={activeId}
-              />
-            ))}
-          </div>
-          <DragOverlay dropAnimation={null}>
-            {activeJob ? (
-              <div className="w-[260px] rotate-1">
-                <JobCard job={activeJob} onClick={() => {}} overlay />
-              </div>
-            ) : null}
-          </DragOverlay>
-        </DndContext>
+      <div className="flex-1 flex min-h-0 overflow-hidden">
+        <DiscoveryPanel
+          collapsed={discoveryCollapsed}
+          onToggle={() => setDiscoveryCollapsed((c) => !c)}
+          onAdd={addJob}
+        />
+        <div className="flex-1 min-w-0 overflow-x-auto snap-x snap-mandatory md:snap-none">
+          <DndContext sensors={sensors} onDragStart={onDragStart} onDragEnd={onDragEnd} onDragCancel={() => setActiveId(null)}>
+            <div className="flex gap-4 px-4 py-4 md:p-6 min-h-full">
+              {STATUS_ORDER.map((status) => (
+                <KanbanColumn
+                  key={status}
+                  status={status}
+                  jobs={byStatus[status]}
+                  onAdd={() => openAdd(status)}
+                  onCardClick={openEdit}
+                  onArchiveCard={(j) => setArchiveTarget(j)}
+                  hiddenId={activeId}
+                />
+              ))}
+            </div>
+            <DragOverlay dropAnimation={null}>
+              {activeJob ? (
+                <div className="w-[260px] rotate-1">
+                  <JobCard job={activeJob} onClick={() => {}} overlay />
+                </div>
+              ) : null}
+            </DragOverlay>
+          </DndContext>
+        </div>
       </div>
 
       {dialog.open && (
