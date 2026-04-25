@@ -1,4 +1,4 @@
-import { useMemo, useRef } from "react";
+import { useMemo, useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
 import {
   BarChart, Bar, XAxis, YAxis, Tooltip, CartesianGrid, ResponsiveContainer, Cell,
@@ -11,6 +11,9 @@ import { FunnelChart } from "@/components/analytics/FunnelChart";
 import { ShareProgress } from "@/components/analytics/ShareProgress";
 import { SkillHeatmap } from "@/components/analytics/SkillHeatmap";
 import { ABTestingLab } from "@/components/analytics/ABTestingLab";
+import { RoleDistribution } from "@/components/analytics/RoleDistribution";
+import { categorizeRole, type RoleCategory } from "@/lib/roleCategory";
+import { Badge } from "@/components/ui/badge";
 
 export const COLOR_VAR: Partial<Record<JobStatus, string>> = {
   saved: "var(--col-saved)",
