@@ -318,11 +318,7 @@ export default function Tracker() {
       </div>
 
       <div className="flex-1 flex min-h-0 overflow-hidden">
-        <DiscoveryPanel
-          collapsed={discoveryCollapsed}
-          onToggle={() => setDiscoveryCollapsed((c) => !c)}
-          onAdd={addJob}
-        />
+        {/* AI Job Match panel hidden for now */}
         <div className="flex-1 min-w-0 overflow-x-auto snap-x snap-mandatory md:snap-none">
           <DndContext sensors={sensors} onDragStart={onDragStart} onDragEnd={onDragEnd} onDragCancel={() => setActiveId(null)}>
             <div className="flex gap-4 px-4 py-4 md:p-6 min-h-full">
