@@ -2,72 +2,78 @@
 @tailwind components;
 @tailwind utilities;
 
-/* Notion-inspired warm neutral design system. All colors HSL. */
+/* JobFlow design system — modern light UI with colored kanban pills + purple premium accent. All colors HSL. */
 
 @layer base {
   :root {
-    --background: 40 24% 97%;
-    --foreground: 30 10% 15%;
+    --background: 220 20% 97%;
+    --foreground: 222 25% 12%;
 
     --card: 0 0% 100%;
-    --card-foreground: 30 10% 15%;
+    --card-foreground: 222 25% 12%;
 
     --popover: 0 0% 100%;
-    --popover-foreground: 30 10% 15%;
+    --popover-foreground: 222 25% 12%;
 
-    --primary: 28 35% 28%;
-    --primary-foreground: 40 30% 97%;
+    --primary: 222 47% 18%;
+    --primary-foreground: 0 0% 100%;
 
-    --secondary: 36 18% 92%;
-    --secondary-foreground: 30 10% 20%;
+    --secondary: 220 16% 94%;
+    --secondary-foreground: 222 25% 18%;
 
-    --muted: 36 16% 94%;
-    --muted-foreground: 30 8% 45%;
+    --muted: 220 16% 95%;
+    --muted-foreground: 220 10% 46%;
 
-    --accent: 28 60% 55%;
-    --accent-foreground: 40 30% 98%;
+    --accent: 250 70% 60%;
+    --accent-foreground: 0 0% 100%;
 
-    --destructive: 0 65% 52%;
-    --destructive-foreground: 40 30% 98%;
+    --destructive: 0 75% 55%;
+    --destructive-foreground: 0 0% 100%;
 
-    --warning: 38 92% 50%;
+    --warning: 32 95% 55%;
     --warning-foreground: 30 30% 15%;
 
-    --success: 142 50% 40%;
-    --success-foreground: 40 30% 98%;
+    --success: 150 60% 40%;
+    --success-foreground: 0 0% 100%;
 
-    --border: 36 14% 87%;
-    --input: 36 14% 87%;
-    --ring: 28 35% 35%;
+    --border: 220 15% 90%;
+    --input: 220 15% 90%;
+    --ring: 250 70% 60%;
 
-    --radius: 0.625rem;
+    --radius: 0.75rem;
 
-    /* Kanban column accents */
-    --col-saved: 220 15% 60%;
-    --col-applied: 215 70% 55%;
-    --col-interviewing: 38 85% 55%;
-    --col-offer: 142 55% 45%;
-    --col-rejected: 0 65% 55%;
+    /* Premium / monetization accent (purple gradient base) */
+    --premium: 258 75% 62%;
+    --premium-foreground: 0 0% 100%;
+    --premium-soft: 258 90% 96%;
+    --gradient-premium: linear-gradient(135deg, hsl(258 75% 62%), hsl(232 70% 58%));
 
-    /* Soft tinted header backgrounds per column (HSL components) */
-    --col-saved-soft: 220 35% 92%;
-    --col-applied-soft: 215 75% 92%;
-    --col-interviewing-soft: 42 90% 88%;
-    --col-offer-soft: 142 50% 88%;
-    --col-rejected-soft: 0 70% 93%;
+    /* Kanban column accents (match screenshot pills) */
+    --col-saved: 215 75% 60%;
+    --col-applied: 222 55% 30%;
+    --col-interviewing: 28 90% 58%;
+    --col-offer: 150 55% 45%;
+    --col-rejected: 0 72% 58%;
 
-    --shadow-sm: 0 1px 2px hsl(30 10% 15% / 0.04), 0 1px 3px hsl(30 10% 15% / 0.06);
-    --shadow-md: 0 4px 12px hsl(30 10% 15% / 0.06), 0 2px 4px hsl(30 10% 15% / 0.04);
-    --shadow-lg: 0 12px 32px hsl(30 10% 15% / 0.10);
+    /* Soft tinted header backgrounds per column */
+    --col-saved-soft: 215 85% 93%;
+    --col-applied-soft: 222 50% 88%;
+    --col-interviewing-soft: 28 95% 90%;
+    --col-offer-soft: 150 60% 90%;
+    --col-rejected-soft: 0 80% 94%;
 
-    --sidebar-background: 36 22% 95%;
-    --sidebar-foreground: 30 10% 25%;
-    --sidebar-primary: 28 35% 28%;
-    --sidebar-primary-foreground: 40 30% 97%;
-    --sidebar-accent: 36 18% 90%;
-    --sidebar-accent-foreground: 30 10% 18%;
-    --sidebar-border: 36 14% 86%;
-    --sidebar-ring: 28 35% 35%;
+    --shadow-sm: 0 1px 2px hsl(222 25% 12% / 0.04), 0 1px 3px hsl(222 25% 12% / 0.06);
+    --shadow-md: 0 4px 14px hsl(222 25% 12% / 0.06), 0 2px 4px hsl(222 25% 12% / 0.04);
+    --shadow-lg: 0 16px 40px hsl(222 25% 12% / 0.10);
+
+    --sidebar-background: 220 22% 97%;
+    --sidebar-foreground: 222 20% 25%;
+    --sidebar-primary: 222 47% 18%;
+    --sidebar-primary-foreground: 0 0% 100%;
+    --sidebar-accent: 215 85% 93%;
+    --sidebar-accent-foreground: 222 47% 18%;
+    --sidebar-border: 220 15% 90%;
+    --sidebar-ring: 250 70% 60%;
   }
 
   .dark {
