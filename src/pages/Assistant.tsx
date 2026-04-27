@@ -3,7 +3,7 @@ import { useTranslation } from "react-i18next";
 import ReactMarkdown from "react-markdown";
 import {
   Sparkles, Loader2, Wand2, Languages, Briefcase, Upload, AlertTriangle, Gauge, FileText,
-  MessageSquare, Target, ListChecks,
+  MessageSquare, Target, ListChecks, Lock,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
