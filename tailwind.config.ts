@@ -55,6 +55,11 @@ export default {
           DEFAULT: "hsl(var(--success))",
           foreground: "hsl(var(--success-foreground))",
         },
+        premium: {
+          DEFAULT: "hsl(var(--premium))",
+          foreground: "hsl(var(--premium-foreground))",
+          soft: "hsl(var(--premium-soft))",
+        },
         column: {
           saved: "hsl(var(--col-saved))",
           applied: "hsl(var(--col-applied))",
