@@ -1,24 +1,41 @@
 import { useState } from "react";
 import { NavLink, Outlet } from "react-router-dom";
-import { LayoutGrid, Sparkles, BriefcaseBusiness, BarChart3, Settings as SettingsIcon, Menu } from "lucide-react";
+import {
+  LayoutGrid, BarChart3, Settings as SettingsIcon, Menu,
+  MessageSquare, Sparkles, Languages, Wand2, Target, FileText, CreditCard,
+} from "lucide-react";
 import { useTranslation } from "react-i18next";
 import { cn } from "@/lib/utils";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
+import { Logo } from "@/components/Logo";
+import { PlanBadge } from "@/components/PlanBadge";
+import { usePlan } from "@/lib/usePlan";
 
 export default function AppLayout() {
   const { t } = useTranslation();
   const [collapsed, setCollapsed] = useState(false);
+  const { plan } = usePlan();
 
   const trackerNav = [
     { to: "/", label: t("nav.board"), icon: LayoutGrid, end: true },
     { to: "/analytics", label: t("nav.analytics"), icon: BarChart3, end: true },
   ];
-  const assistantNav = [{ to: "/assistant", label: t("nav.aiAssistant"), icon: Sparkles, end: false }];
-  const settingsNav = { to: "/settings", label: t("nav.settings"), icon: SettingsIcon, end: false };
-  const allNav = [...trackerNav, ...assistantNav, settingsNav];
+  const assistantNav = [
+    { to: "/assistant/chat", label: "Career Chat", icon: MessageSquare, end: true },
+    { to: "/assistant/tone", label: "Corporate Tone", icon: Sparkles, end: true },
+    { to: "/assistant/translator", label: "Skill Translator", icon: Languages, end: true },
+    { to: "/assistant/polish", label: "Grammar & Polish", icon: Wand2, end: true },
+    { to: "/assistant/interview", label: "Interview Prep", icon: Target, end: true },
+    { to: "/assistant/cv", label: "CV Analyzer", icon: FileText, end: true },
+  ];
+  const footerNav = [
+    { to: "/billing", label: "Plans & Billing", icon: CreditCard, end: true },
+    { to: "/settings", label: t("nav.settings"), icon: SettingsIcon, end: false },
+  ];
+  const allNav = [...trackerNav, assistantNav[0], ...footerNav];
 
   const navItem =
-    "flex items-center gap-2.5 rounded-md px-3 py-2 text-sm transition-colors min-h-[44px]";
+    "flex items-center gap-2.5 rounded-md px-3 py-2 text-sm transition-colors min-h-[40px]";
   const navInactive =
     "text-sidebar-foreground/80 hover:bg-sidebar-accent/60 hover:text-sidebar-foreground";
   const navActive =
@@ -50,18 +67,18 @@ export default function AppLayout() {
           <div
             className={cn(
               "flex items-center gap-2 border-b border-sidebar-border h-[69px]",
-              collapsed ? "justify-center px-2" : "px-5"
+              collapsed ? "justify-center px-2" : "px-4"
             )}
           >
             {collapsed ? (
               toggleBtn
             ) : (
               <>
-                <div className="flex h-8 w-8 items-center justify-center rounded-md text-primary-foreground shrink-0 bg-cyan-500">
-                  <BriefcaseBusiness className="h-4 w-4 text-primary-foreground" />
-                </div>
+                <Logo size={32} />
                 <div className="leading-tight min-w-0 flex-1">
-                  <div className="text-sm font-semibold text-sidebar-foreground truncate">{t("app.name")}</div>
+                  <div className="text-sm font-semibold text-sidebar-foreground truncate flex items-center gap-1.5">
+                    {t("app.name")} <PlanBadge plan={plan} />
+                  </div>
                   <div className="text-[11px] text-muted-foreground truncate">{t("app.tagline")}</div>
                 </div>
                 {toggleBtn}
@@ -79,37 +96,40 @@ export default function AppLayout() {
                         to={n.to}
                         end={n.end as boolean}
                         className={({ isActive }) =>
-                          cn(iconBtn, isActive ? navActive : navInactive, "text-sidebar-foreground bg-sidebar-accent px-[16px] rounded-md py-[8px] my-[8px]")
+                          cn(iconBtn, isActive ? navActive : navInactive)
                         }
                         aria-label={n.label}
                       >
-                        <n.icon className="my-[10px] w-[16px] h-[16px] text-inherit bg-inherit" />
+                        <n.icon className="h-4 w-4" />
                       </NavLink>
                     </TooltipTrigger>
                     <TooltipContent side="right">{n.label}</TooltipContent>
                   </Tooltip>
                 ))}
               </nav>
-              <div className="p-2 border-t border-sidebar-border flex items-center justify-center py-[24px]">
-                <Tooltip>
-                  <TooltipTrigger asChild>
-                    <NavLink
-                      to={settingsNav.to}
-                      className={({ isActive }) =>
-                        cn(iconBtn, isActive ? navActive : navInactive, "text-sidebar-foreground bg-sidebar-accent px-[16px] rounded-md py-[8px] my-[8px]")
-                      }
-                      aria-label={settingsNav.label}
-                    >
-                      <settingsNav.icon className="my-[10px] w-[16px] h-[16px] text-inherit bg-inherit" />
-                    </NavLink>
-                  </TooltipTrigger>
-                  <TooltipContent side="right">{settingsNav.label}</TooltipContent>
-                </Tooltip>
+              <div className="p-2 border-t border-sidebar-border flex flex-col items-center gap-1 py-3">
+                {footerNav.map((n) => (
+                  <Tooltip key={n.to}>
+                    <TooltipTrigger asChild>
+                      <NavLink
+                        to={n.to}
+                        end={n.end as boolean}
+                        className={({ isActive }) =>
+                          cn(iconBtn, isActive ? navActive : navInactive)
+                        }
+                        aria-label={n.label}
+                      >
+                        <n.icon className="h-4 w-4" />
+                      </NavLink>
+                    </TooltipTrigger>
+                    <TooltipContent side="right">{n.label}</TooltipContent>
+                  </Tooltip>
+                ))}
               </div>
             </>
           ) : (
             <>
-              <nav className="flex-1 p-3 space-y-1">
+              <nav className="flex-1 p-3 space-y-1 overflow-y-auto">
                 <div className="px-3 pt-1 pb-1 text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">
                   {t("nav.tracker")}
                 </div>
@@ -127,23 +147,31 @@ export default function AppLayout() {
                 <div className="px-3 pt-3 pb-1 text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">
                   {t("nav.assistant")}
                 </div>
-                <NavLink
-                  to="/assistant"
-                  className={({ isActive }) => cn(navItem, isActive ? navActive : navInactive)}
-                >
-                  <Sparkles className="h-4 w-4" />
-                  {t("nav.aiAssistant")}
-                </NavLink>
+                {assistantNav.map((n) => (
+                  <NavLink
+                    key={n.to}
+                    to={n.to}
+                    end={n.end}
+                    className={({ isActive }) => cn(navItem, isActive ? navActive : navInactive)}
+                  >
+                    <n.icon className="h-4 w-4" />
+                    {n.label}
+                  </NavLink>
+                ))}
               </nav>
-              <div className="p-3 border-t border-sidebar-border">
-                <NavLink
-                  to="/settings"
-                  className={({ isActive }) => cn(navItem, isActive ? navActive : navInactive)}
-                >
-                  <SettingsIcon className="h-4 w-4" />
-                  {t("nav.settings")}
-                </NavLink>
-                <div className="px-3 pt-3 text-[11px] text-muted-foreground">
+              <div className="p-3 border-t border-sidebar-border space-y-1">
+                {footerNav.map((n) => (
+                  <NavLink
+                    key={n.to}
+                    to={n.to}
+                    end={n.end}
+                    className={({ isActive }) => cn(navItem, isActive ? navActive : navInactive)}
+                  >
+                    <n.icon className="h-4 w-4" />
+                    {n.label}
+                  </NavLink>
+                ))}
+                <div className="px-3 pt-2 text-[11px] text-muted-foreground">
                   Synced to your account.
                 </div>
               </div>
@@ -152,13 +180,13 @@ export default function AppLayout() {
         </aside>
 
         <div className="flex-1 flex flex-col min-w-0 transition-all duration-300 ease-in-out">
-          {/* Mobile top header — logo only */}
+          {/* Mobile top header */}
           <header className="md:hidden flex items-center border-b border-border px-4 h-12 bg-card">
             <div className="flex items-center gap-2">
-              <div className="flex h-7 w-7 items-center justify-center rounded-md bg-cyan-500 text-primary-foreground">
-                <BriefcaseBusiness className="h-3.5 w-3.5 text-primary-foreground" />
+              <Logo size={28} />
+              <div className="text-sm font-semibold flex items-center gap-1.5">
+                {t("app.name")} <PlanBadge plan={plan} />
               </div>
-              <div className="text-sm font-semibold">{t("app.name")}</div>
             </div>
           </header>
 
@@ -166,13 +194,13 @@ export default function AppLayout() {
             <Outlet />
           </main>
 
-          {/* Mobile bottom nav */}
+          {/* Mobile bottom nav — 4 slots: Dashboard / Analytics / Chat / Settings */}
           <nav
             className="md:hidden fixed bottom-0 inset-x-0 z-40 border-t border-border bg-card/95 backdrop-blur"
             style={{ paddingBottom: "env(safe-area-inset-bottom)" }}
           >
             <div className="grid grid-cols-4 h-16">
-              {allNav.map((n) => (
+              {allNav.slice(0, 4).map((n) => (
                 <NavLink
                   key={n.to}
                   to={n.to}
