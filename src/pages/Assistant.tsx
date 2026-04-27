@@ -105,7 +105,7 @@ function scoreTone(s: number): { label: string; ring: string; bg: string; fg: st
   return { label: "Weak", ring: "ring-destructive/40", bg: "bg-destructive/10", fg: "text-destructive" };
 }
 
-function ToneAnalyzer() {
+export function ToneAnalyzer() {
   const [company, setCompany] = useState("");
   const [draft, setDraft] = useState("");
   const [result, setResult] = useState<ToneResult | null>(null);
@@ -226,7 +226,7 @@ function ToneAnalyzer() {
 
 /* ----------------------------- Skill Translator --------------------------- */
 
-function SkillTranslator() {
+export function SkillTranslator() {
   const [experience, setExperience] = useState("");
   const [jobDescription, setJobDescription] = useState("");
   const [out, setOut] = useState("");
@@ -268,7 +268,7 @@ function SkillTranslator() {
 
 /* --------------------------------- Polish --------------------------------- */
 
-function PolishTool() {
+export function PolishTool() {
   const { t } = useTranslation();
   const [text, setText] = useState("");
   const [language, setLanguage] = useState("English");
@@ -363,7 +363,7 @@ function PolishTool() {
 
 /* -------------------------------- Interview ------------------------------- */
 
-function InterviewPrep() {
+export function InterviewPrep() {
   const { t } = useTranslation();
   const { jobs } = useJobs();
   const interviewJobs = useMemo(() => jobs.filter((j) => j.status === "interviewing"), [jobs]);
@@ -511,7 +511,7 @@ function combineScores(ai: CvAiResult["scores"], rules: ReturnType<typeof ruleCh
   };
 }
 
-function CvAnalyzer() {
+export function CvAnalyzer() {
   const { t } = useTranslation();
   const [text, setText] = useState("");
   const [loading, setLoading] = useState(false);
