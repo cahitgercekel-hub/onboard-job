@@ -105,7 +105,7 @@ function scoreTone(s: number): { label: string; ring: string; bg: string; fg: st
   return { label: "Weak", ring: "ring-destructive/40", bg: "bg-destructive/10", fg: "text-destructive" };
 }
 
-function ToneAnalyzer() {
+export function ToneAnalyzer() {
   const [company, setCompany] = useState("");
   const [draft, setDraft] = useState("");
   const [result, setResult] = useState<ToneResult | null>(null);
@@ -226,7 +226,7 @@ function ToneAnalyzer() {
 
 /* ----------------------------- Skill Translator --------------------------- */
 
-function SkillTranslator() {
+export function SkillTranslator() {
   const [experience, setExperience] = useState("");
   const [jobDescription, setJobDescription] = useState("");
   const [out, setOut] = useState("");
@@ -268,7 +268,7 @@ function SkillTranslator() {
 
 /* --------------------------------- Polish --------------------------------- */
 
-function PolishTool() {
+export function PolishTool() {
   const { t } = useTranslation();
   const [text, setText] = useState("");
   const [language, setLanguage] = useState("English");
@@ -363,7 +363,7 @@ function PolishTool() {
 
 /* -------------------------------- Interview ------------------------------- */
 
-function InterviewPrep() {
+export function InterviewPrep() {
   const { t } = useTranslation();
   const { jobs } = useJobs();
   const interviewJobs = useMemo(() => jobs.filter((j) => j.status === "interviewing"), [jobs]);
@@ -511,7 +511,7 @@ function combineScores(ai: CvAiResult["scores"], rules: ReturnType<typeof ruleCh
   };
 }
 
-function CvAnalyzer() {
+export function CvAnalyzer() {
   const { t } = useTranslation();
   const [text, setText] = useState("");
   const [loading, setLoading] = useState(false);
@@ -605,32 +605,11 @@ function CvAnalyzer() {
 }
 
 /* --------------------------------- Page ---------------------------------- */
+// The legacy /assistant tabbed page has been split into per-tool routes.
+// This default export now just redirects to the Career Chat landing page.
+import { Navigate } from "react-router-dom";
 
 export default function Assistant() {
-  const { t } = useTranslation();
-  return (
-    <div className="px-4 md:px-6 py-4 md:py-6 max-w-6xl mx-auto">
-      <div className="mb-5 md:mb-6">
-        <h1 className="text-xl md:text-2xl font-semibold tracking-tight flex items-center gap-2">
-          <Sparkles className="h-5 w-5 text-accent" /> {t("assistant.title")}
-        </h1>
-        <p className="text-xs md:text-sm text-muted-foreground mt-1">{t("assistant.subtitle")}</p>
-      </div>
-
-      <Tabs defaultValue="tone" className="w-full">
-        <TabsList className="mb-5 flex-wrap h-auto w-full md:w-auto justify-start">
-          <TabsTrigger value="tone">{t("assistant.tabs.tone")}</TabsTrigger>
-          <TabsTrigger value="translate">{t("assistant.tabs.translate")}</TabsTrigger>
-          <TabsTrigger value="polish">{t("assistant.tabs.polish")}</TabsTrigger>
-          <TabsTrigger value="interview">{t("assistant.tabs.interview")}</TabsTrigger>
-          <TabsTrigger value="cv">{t("assistant.tabs.cv")}</TabsTrigger>
-        </TabsList>
-        <TabsContent value="tone"><ToneAnalyzer /></TabsContent>
-        <TabsContent value="translate"><SkillTranslator /></TabsContent>
-        <TabsContent value="polish"><PolishTool /></TabsContent>
-        <TabsContent value="interview"><InterviewPrep /></TabsContent>
-        <TabsContent value="cv"><CvAnalyzer /></TabsContent>
-      </Tabs>
-    </div>
-  );
+  return <Navigate to="/assistant/chat" replace />;
 }
+
