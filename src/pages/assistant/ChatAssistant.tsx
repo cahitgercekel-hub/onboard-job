@@ -91,7 +91,7 @@ export default function ChatAssistant() {
             company: attachedJob.company,
             role: attachedJob.role,
             jobDescription: attachedJob.jobDescription,
-            fitness_score: attachedJob.fitness_score,
+            fitness_score: attachedJob.fitnessScore,
           }
         : null;
 
