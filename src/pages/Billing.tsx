@@ -90,16 +90,21 @@ export default function Billing() {
         </p>
       </div>
 
-      <div className="grid md:grid-cols-3 gap-5">
+      <div className="grid md:grid-cols-3 gap-5 items-stretch">
         {TIERS.map((tier) => {
           const isCurrent = tier.id === plan;
+          const isBusiness = tier.id === "business";
+          // Headline features get bolded for Business
+          const headlineSet = new Set(["Auto-Apply Bot", "Up to 5 team members", "Priority support + SLA"]);
           return (
             <div
               key={tier.id}
               className={cn(
-                "surface-card p-6 flex flex-col relative",
+                "surface-card p-6 flex flex-col relative transition-all duration-200",
                 tier.highlight && "ring-2 ring-accent shadow-lg",
-                isCurrent && "border-accent"
+                isBusiness &&
+                  "ring-2 ring-premium/60 shadow-[0_10px_40px_-10px_hsl(var(--premium)/0.45)] hover:-translate-y-0.5 hover:shadow-[0_18px_50px_-10px_hsl(var(--premium)/0.55)] bg-gradient-to-b from-premium-soft/40 to-transparent",
+                isCurrent && !isBusiness && "border-accent"
               )}
             >
               {tier.highlight && (
@@ -107,29 +112,42 @@ export default function Billing() {
                   MOST POPULAR
                 </div>
               )}
+              {isBusiness && (
+                <div className="absolute -top-3 left-1/2 -translate-x-1/2 px-3 py-0.5 rounded-full text-[10px] font-semibold text-white shadow bg-gradient-premium">
+                  FOR TEAMS · BEST VALUE
+                </div>
+              )}
               <div className="flex items-center gap-2 mb-1">
-                <h2 className="text-lg font-semibold">{tier.name}</h2>
+                <h2 className={cn("text-lg font-semibold", isBusiness && "bg-gradient-premium bg-clip-text text-transparent")}>{tier.name}</h2>
                 {tier.id === "pro" && <Crown className="h-4 w-4 text-amber-500" />}
-                {tier.id === "business" && <Sparkles className="h-4 w-4 text-violet-500" />}
+                {isBusiness && <Sparkles className="h-4 w-4 text-premium" />}
               </div>
               <p className="text-xs text-muted-foreground mb-4">{tier.tagline}</p>
-              <div className="mb-5">
-                <span className="text-3xl font-bold">{tier.price}</span>
-                <span className="text-sm text-muted-foreground ml-1">{tier.period}</span>
+              <div className="mb-5 flex items-baseline gap-1">
+                <span className={cn("text-3xl font-bold", isBusiness && "bg-gradient-premium bg-clip-text text-transparent")}>{tier.price}</span>
+                <span className="text-sm text-muted-foreground">{tier.period}</span>
+                {isBusiness && <Sparkles className="h-3.5 w-3.5 text-premium ml-1" />}
               </div>
               <ul className="space-y-2 mb-6 flex-1">
-                {tier.features.map((f) => (
-                  <li key={f} className="flex gap-2 text-sm">
-                    <Check className="h-4 w-4 text-success shrink-0 mt-0.5" />
-                    <span className="text-foreground/90">{f}</span>
-                  </li>
-                ))}
+                {tier.features.map((f) => {
+                  const bold = isBusiness && headlineSet.has(f);
+                  return (
+                    <li key={f} className="flex gap-2 text-sm">
+                      <Check className={cn("h-4 w-4 shrink-0 mt-0.5", isBusiness ? "text-premium" : "text-success")} />
+                      <span className={cn("text-foreground/90", bold && "font-semibold text-foreground")}>{f}</span>
+                    </li>
+                  );
+                })}
               </ul>
               <Button
                 onClick={() => onClick(tier)}
                 disabled={isCurrent}
                 variant={tier.highlight ? "ai" : "outline"}
-                className="w-full"
+                className={cn(
+                  "w-full",
+                  isBusiness && !isCurrent &&
+                    "bg-gradient-premium text-white border-0 hover:opacity-95 hover:shadow-lg"
+                )}
               >
                 {cta(tier)}
               </Button>
@@ -137,10 +155,6 @@ export default function Billing() {
           );
         })}
       </div>
-
-      <p className="text-center text-xs text-muted-foreground mt-8">
-        Tip: append <code className="px-1 py-0.5 rounded bg-muted">?devplan=pro</code> or <code className="px-1 py-0.5 rounded bg-muted">?devplan=business</code> to any URL to preview gated UI before billing is live.
-      </p>
     </div>
   );
 }
