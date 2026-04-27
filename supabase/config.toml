@@ -1,13 +1,1 @@
-project_id = "hfbtzweutmfeupdqvmqb"
-
-[functions.career-assistant]
-verify_jwt = false
-
-[functions.ingest-job]
-verify_jwt = false
-
-[functions.calculate-fitness]
-verify_jwt = false
-
-[functions.discover-jobs]
-verify_jwt = false
+project_id = "jquzbeowvobfvyovvpfn"
