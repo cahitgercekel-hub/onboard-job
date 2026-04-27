@@ -55,6 +55,11 @@ export default {
           DEFAULT: "hsl(var(--success))",
           foreground: "hsl(var(--success-foreground))",
         },
+        premium: {
+          DEFAULT: "hsl(var(--premium))",
+          foreground: "hsl(var(--premium-foreground))",
+          soft: "hsl(var(--premium-soft))",
+        },
         column: {
           saved: "hsl(var(--col-saved))",
           applied: "hsl(var(--col-applied))",
@@ -77,6 +82,9 @@ export default {
         lg: "var(--radius)",
         md: "calc(var(--radius) - 2px)",
         sm: "calc(var(--radius) - 4px)",
+      },
+      backgroundImage: {
+        "gradient-premium": "var(--gradient-premium)",
       },
       keyframes: {
         "accordion-down": {
