@@ -3,7 +3,7 @@ import { useTranslation } from "react-i18next";
 import ReactMarkdown from "react-markdown";
 import {
   Sparkles, Loader2, Wand2, Languages, Briefcase, Upload, AlertTriangle, Gauge, FileText,
-  MessageSquare, Target, ListChecks,
+  MessageSquare, Target, ListChecks, Lock,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -455,26 +455,50 @@ export function InterviewPrep() {
 
 /* ---------------------------------- CV ----------------------------------- */
 
-function ringColor(score: number) {
-  if (score >= 80) return "text-success";
-  if (score >= 60) return "text-warning-foreground";
-  return "text-destructive";
+function ringColorClass(score: number) {
+  if (score >= 80) return "stroke-success text-success";
+  if (score >= 60) return "stroke-warning-foreground text-warning-foreground";
+  return "stroke-destructive text-destructive";
 }
 
-function ScoreRing({ label, score }: { label: string; score: number }) {
-  const c = ringColor(score);
+function ScoreGauge({ label, score }: { label: string; score: number }) {
+  const c = ringColorClass(score);
+  const pct = Math.max(0, Math.min(100, score));
+  const r = 26;
+  const circ = 2 * Math.PI * r;
+  const dash = (pct / 100) * circ;
   return (
     <div className="surface-card p-4">
-      <div className="flex items-center justify-between mb-2">
-        <div className="text-[11px] uppercase tracking-wider text-muted-foreground font-medium">{label}</div>
-        <div className={cn("text-2xl font-bold tabular-nums", c)}>{score}</div>
+      <div className="text-sm font-semibold mb-2">{label}</div>
+      <div className="flex items-center gap-3">
+        <div className="relative h-16 w-16 shrink-0">
+          <svg viewBox="0 0 64 64" className="h-full w-full -rotate-90">
+            <circle cx="32" cy="32" r={r} className="stroke-muted" strokeWidth="6" fill="none" />
+            <circle
+              cx="32" cy="32" r={r}
+              className={cn(c, "transition-all")}
+              strokeWidth="6"
+              fill="none"
+              strokeLinecap="round"
+              strokeDasharray={`${dash} ${circ}`}
+            />
+          </svg>
+          <div className={cn("absolute inset-0 flex items-center justify-center text-xs font-bold tabular-nums", c)}>
+            {pct}%
+          </div>
+        </div>
+        <div className="flex-1 min-w-0">
+          <div className={cn("text-2xl font-bold tabular-nums leading-none", c)}>{pct}</div>
+          <div className="mt-1.5 h-1.5 w-full rounded-full bg-muted overflow-hidden">
+            <div className={cn("h-full rounded-full", pct >= 80 ? "bg-success" : pct >= 60 ? "bg-warning-foreground" : "bg-destructive")} style={{ width: `${pct}%` }} />
+          </div>
+          <div className="text-[10px] text-muted-foreground mt-1 tabular-nums">{pct} / 100</div>
+        </div>
       </div>
-      <Progress value={score} className="h-1.5" />
     </div>
   );
 }
 
-// Deterministic rule checks combined with AI scores
 function ruleCheckCv(text: string) {
   const words = text.trim().split(/\s+/).filter(Boolean).length;
   const hasEmail = /\S+@\S+\.\S+/.test(text);
@@ -483,14 +507,12 @@ function ruleCheckCv(text: string) {
   const lines = text.split(/\r?\n/);
   const longLines = lines.filter((l) => l.length > 200).length;
 
-  // Length score: ideal 350-900 words
   let lengthScore = 100;
   if (words < 200) lengthScore = 40;
   else if (words < 350) lengthScore = 70;
   else if (words > 1200) lengthScore = 55;
   else if (words > 900) lengthScore = 80;
 
-  // ATS score: penalise fancy chars + missing contact info
   let atsScore = 100;
   if (fancyChars > 5) atsScore -= 25;
   if (longLines > 3) atsScore -= 10;
@@ -502,7 +524,6 @@ function ruleCheckCv(text: string) {
 }
 
 function combineScores(ai: CvAiResult["scores"], rules: ReturnType<typeof ruleCheckCv>) {
-  // Average AI with deterministic checks where applicable
   return {
     language: ai.language,
     formatting: Math.round((ai.formatting + rules.lengthScore) / 2),
@@ -511,24 +532,68 @@ function combineScores(ai: CvAiResult["scores"], rules: ReturnType<typeof ruleCh
   };
 }
 
+// Daily scan tracking (local, free-tier only)
+const SCAN_LIMIT = 3;
+function getTodayKey() {
+  const d = new Date();
+  return `jat.cvscan.${d.getUTCFullYear()}-${d.getUTCMonth() + 1}-${d.getUTCDate()}`;
+}
+function readScanCount() {
+  try { return parseInt(localStorage.getItem(getTodayKey()) || "0", 10) || 0; } catch { return 0; }
+}
+function bumpScanCount() {
+  try { const k = getTodayKey(); localStorage.setItem(k, String(readScanCount() + 1)); } catch { /* noop */ }
+}
+
 export function CvAnalyzer() {
   const { t } = useTranslation();
   const [text, setText] = useState("");
   const [loading, setLoading] = useState(false);
   const [aiResult, setAiResult] = useState<CvAiResult | null>(null);
+  const [scansUsed, setScansUsed] = useState(0);
+  const dropRef = useRef<HTMLDivElement>(null);
+  const fileInputRef = useRef<HTMLInputElement>(null);
+  const [dragOver, setDragOver] = useState(false);
+
+  // Lazy import plan hook to avoid extra prop drilling
+  const { plan } = require("@/lib/usePlan").usePlan() as { plan: "free" | "pro" | "business" };
+  const isPro = plan !== "free";
+
+  useMemo(() => setScansUsed(readScanCount()), []);
 
   const rules = useMemo(() => (text.trim() ? ruleCheckCv(text) : null), [text]);
   const finalScores = useMemo(() => (aiResult && rules ? combineScores(aiResult.scores, rules) : null), [aiResult, rules]);
 
+  const limitReached = !isPro && scansUsed >= SCAN_LIMIT;
+
   const run = async () => {
     if (!text.trim()) return toast.error("Paste or upload your CV first.");
+    if (limitReached) return toast.error("Daily scan limit reached. Upgrade to Pro for unlimited scans.");
     setLoading(true); setAiResult(null);
     try {
       const r = await runStructured<CvAiResult>("cv", { cv: text });
       if (typeof r === "string") throw new Error("Unexpected response format");
       setAiResult(r);
+      if (!isPro) { bumpScanCount(); setScansUsed(readScanCount()); }
     } catch (e: any) { toast.error(e.message); }
     finally { setLoading(false); }
+  };
+
+  const handleFile = async (file: File) => {
+    try {
+      const txt = await extractTextFromFile(file);
+      if (!txt.trim()) throw new Error("Could not read any text from that file.");
+      setText(txt);
+      toast.success(`Loaded ${file.name}`);
+    } catch (err: any) {
+      toast.error(err?.message || "Failed to read file");
+    }
+  };
+
+  const onDrop = (e: React.DragEvent) => {
+    e.preventDefault(); setDragOver(false);
+    const f = e.dataTransfer.files?.[0];
+    if (f) handleFile(f);
   };
 
   const extraTips: string[] = [];
@@ -540,23 +605,84 @@ export function CvAnalyzer() {
     if (rules.words > 1200) extraTips.push(`Your CV is long (${rules.words} words). Trim to under 1200 for impact.`);
   }
 
+  const scanPct = Math.min(100, Math.round((scansUsed / SCAN_LIMIT) * 100));
+
   return (
-    <div className="grid lg:grid-cols-[1fr_1.4fr] gap-5">
-      <div className="space-y-3">
-        <div className="flex items-center justify-between">
-          <Label htmlFor="cv-text">{t("assistant.cv.paste")}</Label>
-          <FileUploadButton onText={setText} disabled={loading} label={t("assistant.cv.upload")} />
+    <div className="grid lg:grid-cols-2 gap-5">
+      {/* LEFT — Input */}
+      <div className="space-y-4">
+        <div className="surface-card p-4">
+          <Label htmlFor="cv-text" className="text-sm font-semibold mb-2 block">Paste CV Text</Label>
+          <Textarea
+            id="cv-text"
+            rows={10}
+            value={text}
+            onChange={(e) => setText(e.target.value)}
+            placeholder="Paste your full CV here…"
+            className="resize-none"
+          />
         </div>
-        <Textarea id="cv-text" rows={18} value={text} onChange={(e) => setText(e.target.value)} placeholder="Paste your full CV here, or upload a PDF/DOCX…" />
-        <Button onClick={run} disabled={loading} variant="ai">
-          {loading ? <Loader2 className="h-4 w-4 animate-spin" /> : <Target className="h-4 w-4" />}
-          {t("assistant.cv.analyze")}
+
+        <div
+          ref={dropRef}
+          onDragOver={(e) => { e.preventDefault(); setDragOver(true); }}
+          onDragLeave={() => setDragOver(false)}
+          onDrop={onDrop}
+          onClick={() => fileInputRef.current?.click()}
+          className={cn(
+            "surface-card p-8 flex flex-col items-center justify-center text-center cursor-pointer border-2 border-dashed transition-colors",
+            dragOver ? "border-accent bg-accent/5" : "border-border hover:border-accent/50 hover:bg-muted/30"
+          )}
+        >
+          <input
+            ref={fileInputRef}
+            type="file"
+            accept=".pdf,.docx,.txt,application/pdf,application/vnd.openxmlformats-officedocument.wordprocessingml.document,text/plain"
+            className="hidden"
+            onChange={(e) => { const f = e.target.files?.[0]; e.target.value = ""; if (f) handleFile(f); }}
+          />
+          <Upload className="h-7 w-7 text-accent mb-2" />
+          <div className="text-sm font-semibold">Upload PDF or Docx</div>
+          <div className="text-xs text-muted-foreground mt-0.5">Drag & Drop or Browse Files</div>
+        </div>
+
+        <div className="surface-card p-4">
+          <div className="flex items-center justify-between mb-2 text-xs">
+            <span className="text-muted-foreground">
+              {isPro ? (
+                <span className="inline-flex items-center gap-1 text-premium font-medium">
+                  <Sparkles className="h-3 w-3" /> Unlimited scans
+                </span>
+              ) : (
+                `Daily Scan Limit: ${scansUsed}/${SCAN_LIMIT} free scans used`
+              )}
+            </span>
+            {!isPro && <span className="font-medium">{scanPct}%</span>}
+          </div>
+          {!isPro && <Progress value={scanPct} className="h-1.5" />}
+          {limitReached && (
+            <p className="text-[11px] text-destructive mt-2">
+              Daily limit reached. <a href="/billing" className="underline font-medium">Upgrade to Pro</a> for unlimited scans.
+            </p>
+          )}
+        </div>
+
+        <Button
+          onClick={run}
+          disabled={loading || limitReached}
+          className="w-full h-11 text-sm font-semibold bg-gradient-premium text-white border-0 hover:opacity-95 disabled:opacity-50"
+        >
+          {loading ? <Loader2 className="h-4 w-4 animate-spin mr-2" /> : <Target className="h-4 w-4 mr-2" />}
+          Analyze CV
         </Button>
       </div>
 
+      {/* RIGHT — Results */}
       <div className="space-y-4">
         {!aiResult && !loading && (
-          <div className="surface-card p-6 text-sm text-muted-foreground min-h-[260px]">{t("assistant.cv.empty")}</div>
+          <div className="surface-card p-8 text-sm text-muted-foreground min-h-[260px] flex items-center justify-center text-center">
+            Paste or upload your CV, then run the analyzer to see scores, keywords, and personalized tips.
+          </div>
         )}
         {loading && (
           <div className="surface-card p-6 flex items-center gap-2 text-sm text-muted-foreground">
@@ -566,17 +692,15 @@ export function CvAnalyzer() {
         {aiResult && finalScores && (
           <>
             <div className="grid grid-cols-2 gap-3">
-              <ScoreRing label={t("assistant.cv.language")} score={finalScores.language} />
-              <ScoreRing label={t("assistant.cv.formatting")} score={finalScores.formatting} />
-              <ScoreRing label={t("assistant.cv.ats")} score={finalScores.ats} />
-              <ScoreRing label={t("assistant.cv.keywords")} score={finalScores.keywords} />
+              <ScoreGauge label="Professional Language" score={finalScores.language} />
+              <ScoreGauge label="Length & Formatting" score={finalScores.formatting} />
+              <ScoreGauge label="ATS Appropriateness" score={finalScores.ats} />
+              <ScoreGauge label="Keyword Optimization" score={finalScores.keywords} />
             </div>
 
             {aiResult.strongKeywords.length > 0 && (
               <div className="surface-card p-4">
-                <div className="text-[11px] uppercase tracking-wider text-muted-foreground font-medium mb-2">
-                  {t("assistant.cv.strengths")}
-                </div>
+                <div className="text-sm font-semibold mb-2">Strong Keywords</div>
                 <div className="flex flex-wrap gap-1.5">
                   {aiResult.strongKeywords.map((k) => (
                     <Badge key={k} variant="outline" className="bg-success/10 text-success border-success/30">{k}</Badge>
@@ -586,8 +710,8 @@ export function CvAnalyzer() {
             )}
 
             <div className="surface-card p-4">
-              <div className="text-[11px] uppercase tracking-wider text-muted-foreground font-medium mb-2 flex items-center gap-1.5">
-                <ListChecks className="h-3.5 w-3.5" /> {t("assistant.cv.tips")}
+              <div className="text-sm font-semibold mb-2 flex items-center gap-1.5">
+                <ListChecks className="h-4 w-4 text-accent" /> Actionable Tips
               </div>
               <ul className="space-y-2">
                 {[...extraTips, ...aiResult.tips].map((tip, i) => (
@@ -596,6 +720,42 @@ export function CvAnalyzer() {
                   </li>
                 ))}
               </ul>
+            </div>
+
+            {/* Premium ATS Simulation */}
+            <div className="surface-card p-4 relative overflow-hidden">
+              <div className="flex items-center justify-between mb-3">
+                <div className="text-sm font-semibold">Detailed ATS Simulation</div>
+                <Badge className="bg-gradient-premium text-white border-0 gap-1">
+                  <Sparkles className="h-3 w-3" /> Premium
+                </Badge>
+              </div>
+              {isPro ? (
+                <div className="text-sm text-muted-foreground">
+                  Detailed ATS report unlocks deeper keyword scoring, recruiter-readability heuristics,
+                  and per-section feedback. Re-run the analyzer to refresh.
+                </div>
+              ) : (
+                <div className="relative">
+                  <div className="space-y-2 select-none pointer-events-none blur-sm" aria-hidden="true">
+                    <div className="text-xs font-semibold">Detailed ATS Report</div>
+                    <ul className="text-xs space-y-1 text-foreground/80 list-disc pl-5">
+                      <li>Agile Methodologies — React Native: Lorem ipsum dolor sit amet…</li>
+                      <li>Cross-functional leadership and stakeholder management benchmarks…</li>
+                      <li>Section-by-section ATS parser simulation with extracted entities…</li>
+                      <li>Recruiter scan-path heatmap and 6-second readability score…</li>
+                      <li>Keyword density alignment vs. top 10 listings in your role…</li>
+                    </ul>
+                  </div>
+                  <div className="absolute inset-0 flex items-end justify-center pb-2">
+                    <a href="/billing">
+                      <Button className="bg-gradient-premium text-white border-0 hover:opacity-95 gap-2 shadow-lg">
+                        <Lock className="h-4 w-4" /> Unlock with Pro
+                      </Button>
+                    </a>
+                  </div>
+                </div>
+              )}
             </div>
           </>
         )}

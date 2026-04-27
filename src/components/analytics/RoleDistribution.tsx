@@ -72,13 +72,23 @@ export function RoleDistribution({ jobs, selected, onSelect }: Props) {
                   {data.map((d, i) => {
                     const dim = selected && selected !== d.name;
                     const intensity = d.hasScore ? Math.min(100, d.avgScore) : 50;
-                    const opacity = dim ? 0.25 : 0.4 + (intensity / 100) * 0.6;
+                    const opacity = dim ? 0.25 : 0.55 + (intensity / 100) * 0.45;
+                    const palette = [
+                      "262 83% 65%", // purple
+                      "239 84% 67%", // indigo
+                      "217 91% 60%", // blue
+                      "173 70% 45%", // teal
+                      "142 65% 48%", // green
+                      "38 92% 55%",  // amber
+                      "346 80% 60%", // rose
+                    ];
+                    const color = `hsl(${palette[i % palette.length]})`;
                     return (
                       <Cell
                         key={i}
-                        fill="hsl(var(--accent))"
+                        fill={color}
                         opacity={opacity}
-                        stroke={selected === d.name ? "hsl(var(--accent))" : "transparent"}
+                        stroke={selected === d.name ? color : "transparent"}
                         strokeWidth={selected === d.name ? 2 : 0}
                       />
                     );
