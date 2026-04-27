@@ -27,10 +27,11 @@ interface Props {
   onAdd: () => void;
   onCardClick: (job: Job) => void;
   onArchiveCard?: (job: Job) => void;
+  onDeleteCard?: (job: Job) => void;
   hiddenId?: string | null;
 }
 
-export function KanbanColumn({ status, jobs, onAdd, onCardClick, onArchiveCard, hiddenId }: Props) {
+export function KanbanColumn({ status, jobs, onAdd, onCardClick, onArchiveCard, onDeleteCard, hiddenId }: Props) {
   const { isOver, setNodeRef } = useDroppable({ id: status });
 
   return (
@@ -65,6 +66,7 @@ export function KanbanColumn({ status, jobs, onAdd, onCardClick, onArchiveCard, 
               job={j}
               onClick={() => onCardClick(j)}
               onArchive={onArchiveCard ? () => onArchiveCard(j) : undefined}
+              onDelete={onDeleteCard ? () => onDeleteCard(j) : undefined}
             />
           )
         )}

@@ -330,6 +330,19 @@ export default function Tracker() {
                   onAdd={() => openAdd(status)}
                   onCardClick={openEdit}
                   onArchiveCard={(j) => setArchiveTarget(j)}
+                  onDeleteCard={(j) => {
+                    toast(`Delete "${j.role}" at ${j.company}?`, {
+                      action: {
+                        label: "Delete",
+                        onClick: () => {
+                          removeJob(j.id);
+                          toast.success("Job deleted");
+                        },
+                      },
+                      cancel: { label: "Cancel", onClick: () => {} },
+                      duration: 6000,
+                    });
+                  }}
                   hiddenId={activeId}
                 />
               ))}
