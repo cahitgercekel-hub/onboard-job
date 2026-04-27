@@ -19,6 +19,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { extractTextFromFile } from "@/lib/fileExtract";
 import { useJobs } from "@/lib/jobsStore";
 import { cn } from "@/lib/utils";
+import { usePlan } from "@/lib/usePlan";
 
 type Tool = "tone" | "translate" | "polish" | "interview" | "cv";
 
@@ -555,8 +556,7 @@ export function CvAnalyzer() {
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [dragOver, setDragOver] = useState(false);
 
-  // Lazy import plan hook to avoid extra prop drilling
-  const { plan } = require("@/lib/usePlan").usePlan() as { plan: "free" | "pro" | "business" };
+  const { plan } = usePlan();
   const isPro = plan !== "free";
 
   useMemo(() => setScansUsed(readScanCount()), []);
