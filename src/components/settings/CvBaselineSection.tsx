@@ -112,62 +112,62 @@ export function CvBaselineSection() {
   };
 
   return (
-    <section className="surface-card p-6">
-      <div className="mb-5">
-        <h2 className="text-base font-semibold text-foreground flex items-center gap-2">
-          <FileText className="h-4 w-4" /> Baseline CV
-        </h2>
-        <p className="text-xs text-muted-foreground mt-1">
-          Upload a PDF or DOCX of your CV. Text is extracted and used by the AI Fitness Score and Assistant.
-        </p>
+    <div>
+      <div className="flex items-start justify-between gap-3 mb-4">
+        <div>
+          <h3 className="text-sm font-semibold text-foreground">Baseline CV</h3>
+          {cv?.file_name && (
+            <p className="text-xs text-muted-foreground mt-1 truncate max-w-[260px]">{cv.file_name}</p>
+          )}
+        </div>
+        <div className="flex items-center gap-2 shrink-0">
+          <input
+            ref={fileRef}
+            type="file"
+            accept=".pdf,.docx,.txt,application/pdf,application/vnd.openxmlformats-officedocument.wordprocessingml.document,text/plain"
+            className="hidden"
+            onChange={(e) => {
+              const f = e.target.files?.[0];
+              if (f) handleFile(f);
+            }}
+          />
+          <Button variant="outline" size="sm" disabled={busy} onClick={() => fileRef.current?.click()}>
+            {busy ? <Loader2 className="h-4 w-4 animate-spin" /> : <Upload className="h-4 w-4" />}
+            {cv?.file_name ? "Replace CV" : "Upload CV"}
+          </Button>
+          {(cv?.file_name || cv?.cv_text) && (
+            <Button
+              variant="outline"
+              size="sm"
+              disabled={busy}
+              onClick={removeCv}
+              className="text-destructive border-destructive/40 hover:bg-destructive/10 hover:text-destructive"
+            >
+              <Trash2 className="h-4 w-4" /> Remove
+            </Button>
+          )}
+        </div>
       </div>
 
       {loading ? (
         <div className="text-sm text-muted-foreground">Loading…</div>
       ) : (
-        <div className="space-y-4">
-          <div className="flex flex-wrap items-center gap-3">
-            <input
-              ref={fileRef}
-              type="file"
-              accept=".pdf,.docx,.txt,application/pdf,application/vnd.openxmlformats-officedocument.wordprocessingml.document,text/plain"
-              className="hidden"
-              onChange={(e) => {
-                const f = e.target.files?.[0];
-                if (f) handleFile(f);
-              }}
-            />
-            <Button variant="outline" disabled={busy} onClick={() => fileRef.current?.click()}>
-              {busy ? <Loader2 className="h-4 w-4 animate-spin" /> : <Upload className="h-4 w-4" />}
-              {cv?.file_name ? "Replace CV" : "Upload CV (PDF/DOCX)"}
+        <div className="grid gap-1.5">
+          <Label htmlFor="cv-text" className="text-xs">Extracted text (editable)</Label>
+          <Textarea
+            id="cv-text"
+            rows={5}
+            value={text}
+            onChange={(e) => setText(e.target.value)}
+            placeholder="Or paste your CV / skills here…"
+          />
+          <div className="flex justify-end">
+            <Button size="sm" onClick={saveText} disabled={busy || text === (cv?.cv_text ?? "")}>
+              Save text
             </Button>
-            {cv?.file_name && (
-              <span className="text-xs text-muted-foreground truncate max-w-[260px]">
-                {cv.file_name}
-              </span>
-            )}
-            {(cv?.file_name || cv?.cv_text) && (
-              <Button variant="ghost" size="sm" disabled={busy} onClick={removeCv} className="text-destructive hover:text-destructive">
-                <Trash2 className="h-4 w-4" /> Remove
-              </Button>
-            )}
-          </div>
-
-          <div className="grid gap-1.5">
-            <Label htmlFor="cv-text" className="text-xs">Extracted text (editable)</Label>
-            <Textarea
-              id="cv-text"
-              rows={8}
-              value={text}
-              onChange={(e) => setText(e.target.value)}
-              placeholder="Or paste your CV / skills here…"
-            />
-            <div className="flex justify-end">
-              <Button size="sm" onClick={saveText} disabled={busy}>Save text</Button>
-            </div>
           </div>
         </div>
       )}
-    </section>
+    </div>
   );
 }
