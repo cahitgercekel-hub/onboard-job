@@ -118,6 +118,7 @@ export type Database = {
           location: string | null
           notes: string | null
           previous_status: Database["public"]["Enums"]["job_status"] | null
+          rejected_at: string | null
           rejection_reason: string | null
           rejection_tag: string | null
           role: string
@@ -144,6 +145,7 @@ export type Database = {
           location?: string | null
           notes?: string | null
           previous_status?: Database["public"]["Enums"]["job_status"] | null
+          rejected_at?: string | null
           rejection_reason?: string | null
           rejection_tag?: string | null
           role: string
@@ -170,6 +172,7 @@ export type Database = {
           location?: string | null
           notes?: string | null
           previous_status?: Database["public"]["Enums"]["job_status"] | null
+          rejected_at?: string | null
           rejection_reason?: string | null
           rejection_tag?: string | null
           role?: string
