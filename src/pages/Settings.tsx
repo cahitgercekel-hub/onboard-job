@@ -1,6 +1,11 @@
 import { useState } from "react";
+import { Link } from "react-router-dom";
 import { useTranslation } from "react-i18next";
-import { Settings as SettingsIcon, Download, Upload, Trash2, Sun, Moon, Monitor, Languages, Calendar as CalendarIcon, LogOut } from "lucide-react";
+import {
+  Download, Upload, Trash2, Sun, Moon, Monitor, Languages,
+  Calendar as CalendarIcon, LogOut, User as UserIcon, FileText,
+  Settings2, Shield,
+} from "lucide-react";
 import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
@@ -17,6 +22,7 @@ import { CvVersionsSection } from "@/components/settings/CvVersionsSection";
 import { RecalculateFitnessSection } from "@/components/settings/RecalculateFitnessSection";
 import { ApiTokensSection } from "@/components/settings/ApiTokensSection";
 import { useAuth } from "@/lib/auth";
+import { usePlan } from "@/lib/usePlan";
 import { toast } from "sonner";
 import { cn } from "@/lib/utils";
 
@@ -26,40 +32,78 @@ const themeOptions: { value: Theme; icon: typeof Sun }[] = [
   { value: "system", icon: Monitor },
 ];
 
+function CardHeader({ icon: Icon, title }: { icon: typeof UserIcon; title: string }) {
+  return (
+    <div className="flex items-center gap-2 mb-5">
+      <Icon className="h-4 w-4 text-muted-foreground" />
+      <h2 className="text-base font-semibold text-foreground">{title}</h2>
+    </div>
+  );
+}
+
 export default function Settings() {
   const { t } = useTranslation();
   const { theme, setTheme, language, setLanguage, dateFormat, setDateFormat, ghostingDays, setGhostingDays } = usePrefs();
   const { user, signOut } = useAuth();
+  const { plan } = usePlan();
   const [confirmOpen, setConfirmOpen] = useState(false);
   const [importOpen, setImportOpen] = useState(false);
 
-  return (
-    <div className="px-6 py-6 max-w-4xl mx-auto space-y-8">
-      <div className="flex items-start justify-between gap-3">
-        <div>
-          <h1 className="text-2xl font-semibold tracking-tight flex items-center gap-2">
-            <SettingsIcon className="h-5 w-5 text-accent" /> {t("settings.title")}
-          </h1>
-          <p className="text-sm text-muted-foreground mt-1">{t("settings.subtitle")}</p>
-          {user?.email && <p className="text-xs text-muted-foreground mt-1">Signed in as {user.email}</p>}
-        </div>
-        <Button variant="outline" size="sm" onClick={() => signOut()}>
-          <LogOut className="h-4 w-4" /> Sign out
-        </Button>
-      </div>
+  const planLabel = plan === "free" ? "Free Plan" : plan === "pro" ? "Pro" : "Business";
 
-      <section className="surface-card p-6">
-        <div className="mb-5">
-          <h2 className="text-base font-semibold text-foreground">{t("settings.prefs")}</h2>
-        </div>
-        <div className="space-y-6">
-          {/* Appearance */}
-          <div className="grid sm:grid-cols-[1fr_auto] gap-4 items-start">
-            <div>
-              <Label className="text-sm font-medium">{t("settings.appearance")}</Label>
-              <p className="text-xs text-muted-foreground mt-0.5">{t("settings.appearanceHint")}</p>
+  return (
+    <div className="px-6 py-6 max-w-6xl mx-auto space-y-6">
+      <h1 className="text-2xl font-semibold tracking-tight">{t("settings.title")}</h1>
+
+      <div className="grid gap-6 lg:grid-cols-2">
+        {/* 1. Account & Subscription */}
+        <section className="surface-card p-6 flex flex-col">
+          <CardHeader icon={UserIcon} title="Account & Subscription" />
+          <div className="flex-1">
+            <h3 className="text-xl font-semibold text-foreground">Current Plan: {planLabel}</h3>
+            <p className="text-sm text-muted-foreground mt-1">
+              {plan === "free"
+                ? "Upgrade for unlimited job tracking and advanced AI features."
+                : "Thanks for supporting JobFlow."}
+            </p>
+            <div className="mt-4 space-y-2">
+              {plan === "free" && (
+                <Button asChild className="w-full">
+                  <Link to="/billing">Upgrade to Pro</Link>
+                </Button>
+              )}
+              <Button asChild variant="link" className="w-full text-accent">
+                <Link to="/billing">Manage Subscription</Link>
+              </Button>
             </div>
-            <div className="inline-flex rounded-md border border-border bg-muted/40 p-0.5">
+          </div>
+          {user?.email && (
+            <div className="mt-6 pt-4 border-t border-border flex items-center justify-between gap-3">
+              <p className="text-xs text-muted-foreground truncate">Signed in as {user.email}</p>
+              <Button variant="ghost" size="sm" onClick={() => signOut()}>
+                <LogOut className="h-4 w-4" /> Sign out
+              </Button>
+            </div>
+          )}
+        </section>
+
+        {/* 2. CV Management */}
+        <section className="surface-card p-6 space-y-6">
+          <CardHeader icon={FileText} title="CV Management" />
+          <CvBaselineSection />
+          <div className="border-t border-border pt-6">
+            <CvVersionsSection />
+          </div>
+        </section>
+
+        {/* 3. Workflow Preferences */}
+        <section className="surface-card p-6 space-y-6">
+          <CardHeader icon={Settings2} title="Workflow Preferences" />
+
+          {/* Appearance */}
+          <div className="space-y-1.5">
+            <Label className="text-sm font-medium">{t("settings.appearance")}</Label>
+            <div className="inline-flex w-full rounded-md border border-border bg-muted/40 p-0.5">
               {themeOptions.map((o) => {
                 const active = theme === o.value;
                 const Icon = o.icon;
@@ -68,7 +112,7 @@ export default function Settings() {
                     key={o.value}
                     onClick={() => setTheme(o.value)}
                     className={cn(
-                      "inline-flex items-center gap-1.5 px-3 py-1.5 text-xs rounded-[5px] transition-colors",
+                      "flex-1 inline-flex items-center justify-center gap-1.5 px-3 py-1.5 text-xs rounded-[5px] transition-colors",
                       active ? "bg-card text-foreground shadow-sm" : "text-muted-foreground hover:text-foreground"
                     )}
                   >
@@ -81,15 +125,12 @@ export default function Settings() {
           </div>
 
           {/* Language */}
-          <div className="grid sm:grid-cols-[1fr_auto] gap-4 items-start">
-            <div>
-              <Label className="text-sm font-medium flex items-center gap-1.5">
-                <Languages className="h-3.5 w-3.5" /> {t("settings.language")}
-              </Label>
-              <p className="text-xs text-muted-foreground mt-0.5">{t("settings.languageHint")}</p>
-            </div>
+          <div className="space-y-1.5">
+            <Label className="text-sm font-medium flex items-center gap-1.5">
+              <Languages className="h-3.5 w-3.5" /> {t("settings.language")}
+            </Label>
             <Select value={language} onValueChange={setLanguage}>
-              <SelectTrigger className="w-48"><SelectValue /></SelectTrigger>
+              <SelectTrigger className="w-full"><SelectValue /></SelectTrigger>
               <SelectContent>
                 {LANGUAGES.map((l) => (
                   <SelectItem key={l.code} value={l.code}>{l.label}</SelectItem>
@@ -98,100 +139,86 @@ export default function Settings() {
             </Select>
           </div>
 
-          {/* Date Format */}
-          <div className="grid sm:grid-cols-[1fr_auto] gap-4 items-start">
-            <div>
+          {/* Date format + Ghosting threshold */}
+          <div className="grid gap-4 sm:grid-cols-2">
+            <div className="space-y-1.5">
               <Label className="text-sm font-medium flex items-center gap-1.5">
                 <CalendarIcon className="h-3.5 w-3.5" /> {t("settings.dateFormat")}
               </Label>
-              <p className="text-xs text-muted-foreground mt-0.5">{t("settings.dateFormatHint")}</p>
+              <Select value={dateFormat} onValueChange={(v) => setDateFormat(v as DateFormat)}>
+                <SelectTrigger className="w-full"><SelectValue /></SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="DD.MM.YYYY">DD.MM.YYYY</SelectItem>
+                  <SelectItem value="MM/DD/YYYY">MM/DD/YYYY</SelectItem>
+                </SelectContent>
+              </Select>
             </div>
-            <Select value={dateFormat} onValueChange={(v) => setDateFormat(v as DateFormat)}>
-              <SelectTrigger className="w-48"><SelectValue /></SelectTrigger>
-              <SelectContent>
-                <SelectItem value="DD.MM.YYYY">DD.MM.YYYY</SelectItem>
-                <SelectItem value="MM/DD/YYYY">MM/DD/YYYY</SelectItem>
-              </SelectContent>
-            </Select>
-          </div>
-
-          {/* Ghosting threshold */}
-          <div className="grid sm:grid-cols-[1fr_auto] gap-4 items-start">
-            <div>
+            <div className="space-y-1.5">
               <Label className="text-sm font-medium">Ghosting threshold</Label>
-              <p className="text-xs text-muted-foreground mt-0.5">Show a "Mark as ghosted" prompt when a job sits in Applied/Interviewing this long without movement.</p>
+              <Select value={String(ghostingDays)} onValueChange={(v) => setGhostingDays(Number(v))}>
+                <SelectTrigger className="w-full"><SelectValue /></SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="14">14 days</SelectItem>
+                  <SelectItem value="21">21 days</SelectItem>
+                  <SelectItem value="30">30 days (default)</SelectItem>
+                  <SelectItem value="45">45 days</SelectItem>
+                  <SelectItem value="60">60 days</SelectItem>
+                </SelectContent>
+              </Select>
             </div>
-            <Select value={String(ghostingDays)} onValueChange={(v) => setGhostingDays(Number(v))}>
-              <SelectTrigger className="w-48"><SelectValue /></SelectTrigger>
-              <SelectContent>
-                <SelectItem value="14">14 days</SelectItem>
-                <SelectItem value="21">21 days</SelectItem>
-                <SelectItem value="30">30 days (default)</SelectItem>
-                <SelectItem value="45">45 days</SelectItem>
-                <SelectItem value="60">60 days</SelectItem>
-              </SelectContent>
-            </Select>
           </div>
-        </div>
-      </section>
 
-      <CvBaselineSection />
+          <div className="border-t border-border pt-6">
+            <RecalculateFitnessSection />
+          </div>
+        </section>
 
-      <CvVersionsSection />
+        {/* 4. Data & Security */}
+        <section className="surface-card p-6 space-y-6">
+          <CardHeader icon={Shield} title="Data & Security" />
 
-      <RecalculateFitnessSection />
+          <ApiTokensSection />
 
-      <ApiTokensSection />
-
-      <section className="surface-card p-6">
-        <div className="mb-5">
-          <h2 className="text-base font-semibold text-foreground">{t("settings.data")}</h2>
-        </div>
-        <div className="space-y-5">
-          <div className="grid sm:grid-cols-[1fr_auto] gap-4 items-center">
-            <div>
-              <Label className="text-sm font-medium">{t("settings.export")}</Label>
-              <p className="text-xs text-muted-foreground mt-0.5">{t("settings.exportHint")}</p>
+          <div className="border-t border-border pt-6">
+            <h3 className="text-sm font-semibold text-foreground mb-3">Data Export & Import</h3>
+            <div className="space-y-2">
+              <Button
+                variant="outline"
+                className="w-full justify-between"
+                onClick={async () => {
+                  try { await downloadJobsCsv(); toast.success("CSV downloaded"); }
+                  catch (e: any) { toast.error(e?.message || "Export failed"); }
+                }}
+              >
+                <span>Export data as CSV</span>
+                <Download className="h-4 w-4" />
+              </Button>
+              <Button
+                variant="outline"
+                className="w-full justify-between"
+                onClick={() => setImportOpen(true)}
+              >
+                <span>Import data from CSV</span>
+                <Upload className="h-4 w-4" />
+              </Button>
             </div>
+          </div>
+
+          <div className="rounded-lg border border-destructive/30 bg-destructive/5 p-4">
+            <h3 className="text-sm font-semibold text-destructive mb-1">Danger Zone</h3>
+            <p className="text-sm font-medium text-foreground">{t("settings.clearAll")}</p>
+            <p className="text-xs text-muted-foreground mt-0.5 mb-3">{t("settings.clearAllHint")}</p>
             <Button
               variant="outline"
-              onClick={async () => {
-                try { await downloadJobsCsv(); toast.success("CSV downloaded"); }
-                catch (e: any) { toast.error(e?.message || "Export failed"); }
-              }}
+              size="sm"
+              onClick={() => setConfirmOpen(true)}
+              className="text-destructive border-destructive/40 hover:bg-destructive/10 hover:text-destructive"
             >
-              <Download className="h-4 w-4" /> {t("settings.export")}
+              <Trash2 className="h-4 w-4" /> {t("settings.clearAll")}
             </Button>
           </div>
-
-          <div className="grid sm:grid-cols-[1fr_auto] gap-4 items-center border-t border-border pt-5">
-            <div>
-              <Label className="text-sm font-medium">Import data from CSV</Label>
-              <p className="text-xs text-muted-foreground mt-0.5">
-                Add jobs from a CSV file matching the export format. You'll preview rows before they're saved.
-              </p>
-            </div>
-            <Button variant="outline" onClick={() => setImportOpen(true)}>
-              <Upload className="h-4 w-4" /> Import CSV
-            </Button>
-          </div>
-        </div>
-      </section>
-
-      <section className="surface-card p-6 border-destructive/40">
-        <div className="mb-5">
-          <h2 className="text-base font-semibold text-destructive">{t("settings.danger")}</h2>
-        </div>
-        <div className="grid sm:grid-cols-[1fr_auto] gap-4 items-center">
-          <div>
-            <Label className="text-sm font-medium">{t("settings.clearAll")}</Label>
-            <p className="text-xs text-muted-foreground mt-0.5">{t("settings.clearAllHint")}</p>
-          </div>
-          <Button variant="destructive" onClick={() => setConfirmOpen(true)}>
-            <Trash2 className="h-4 w-4" /> {t("settings.clearAll")}
-          </Button>
-        </div>
-      </section>
+        </section>
+      </div>
 
       <ClearAllDialog open={confirmOpen} onOpenChange={setConfirmOpen} />
       <ImportCsvDialog open={importOpen} onOpenChange={setImportOpen} />
