@@ -407,6 +407,68 @@ export default function ChatAssistant() {
             </div>
           </div>
 
+          {searchOpen && (
+            <div className="flex items-center gap-2 px-3 md:px-4 py-2 border-b border-border bg-card/80">
+              <Search className="h-3.5 w-3.5 text-muted-foreground shrink-0" />
+              <Input
+                ref={searchInputRef}
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                onKeyDown={(e) => {
+                  if (e.key === "Enter") {
+                    e.preventDefault();
+                    if (e.shiftKey) gotoPrevMatch();
+                    else gotoNextMatch();
+                  } else if (e.key === "Escape") {
+                    e.preventDefault();
+                    closeSearch();
+                  }
+                }}
+                placeholder="Search this conversation…"
+                className="h-8 text-xs flex-1 bg-background"
+              />
+              <span className="text-[11px] text-muted-foreground tabular-nums min-w-[3.5rem] text-right">
+                {searchQuery.trim()
+                  ? matchedIndices.length
+                    ? `${activeMatchIdx + 1} / ${matchedIndices.length}`
+                    : "0 / 0"
+                  : ""}
+              </span>
+              <Button
+                type="button"
+                variant="ghost"
+                size="icon"
+                className="h-7 w-7"
+                onClick={gotoPrevMatch}
+                disabled={matchedIndices.length === 0}
+                aria-label="Previous match"
+              >
+                <ChevronUp className="h-3.5 w-3.5" />
+              </Button>
+              <Button
+                type="button"
+                variant="ghost"
+                size="icon"
+                className="h-7 w-7"
+                onClick={gotoNextMatch}
+                disabled={matchedIndices.length === 0}
+                aria-label="Next match"
+              >
+                <ChevronDown className="h-3.5 w-3.5" />
+              </Button>
+              <Button
+                type="button"
+                variant="ghost"
+                size="icon"
+                className="h-7 w-7"
+                onClick={closeSearch}
+                aria-label="Close search"
+              >
+                <X className="h-3.5 w-3.5" />
+              </Button>
+            </div>
+          )}
+
           {hasCv === false && (
             <div className="text-xs px-4 py-2 bg-warning/10 border-b border-warning/30 text-foreground">
               No baseline CV found. Add one in Settings so the agent knows your background.
