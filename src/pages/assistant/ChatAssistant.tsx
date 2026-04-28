@@ -212,7 +212,7 @@ export default function ChatAssistant() {
                 <PopoverTrigger asChild>
                   <Button variant="outline" size="sm" className="h-8 text-xs gap-1.5">
                     <MessagesSquare className="h-3.5 w-3.5" />
-                    {attachedJob ? `${attachedJob.company}` : "SelectJob"}
+                    {attachedJob ? `${attachedJob.company}` : "Select a Job"}
                   </Button>
                 </PopoverTrigger>
                 <PopoverContent align="end" className="w-72">
