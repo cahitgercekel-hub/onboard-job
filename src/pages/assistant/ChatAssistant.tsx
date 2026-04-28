@@ -3,7 +3,7 @@ import { Link } from "react-router-dom";
 import ReactMarkdown from "react-markdown";
 import {
   Loader2, Send, Square, Sparkles, X, Briefcase, Bot, FileText,
-  CalendarCheck, Plus, Smile, MessagesSquare, Lock, ChevronRight,
+  CalendarCheck, Plus, Smile, MessagesSquare,
 } from "lucide-react";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
@@ -16,7 +16,7 @@ import { useJobs } from "@/lib/jobsStore";
 import { supabase } from "@/integrations/supabase/client";
 import { cn } from "@/lib/utils";
 import { Logo } from "@/components/Logo";
-import { PlanBadge } from "@/components/PlanBadge";
+import { PremiumRail } from "@/components/assistant/PremiumRail";
 import { usePlan } from "@/lib/usePlan";
 import { useAuth } from "@/lib/auth";
 
@@ -42,6 +42,8 @@ const PREMIUM_TOOLS = [
 
 const CHAT_URL = `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/career-chat`;
 
+const RAIL_STORAGE_KEY = "jat.premiumRail.collapsed";
+
 export default function ChatAssistant() {
   const { jobs } = useJobs();
   const { user } = useAuth();
@@ -54,8 +56,23 @@ export default function ChatAssistant() {
   const [attachedJobId, setAttachedJobId] = useState<string>("");
   const [hasCv, setHasCv] = useState<boolean | null>(null);
   const [moreOpen, setMoreOpen] = useState(false);
+  const [railCollapsed, setRailCollapsed] = useState<boolean>(() => {
+    try {
+      return localStorage.getItem(RAIL_STORAGE_KEY) === "1";
+    } catch {
+      return false;
+    }
+  });
   const abortRef = useRef<AbortController | null>(null);
   const scrollRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    try {
+      localStorage.setItem(RAIL_STORAGE_KEY, railCollapsed ? "1" : "0");
+    } catch {
+      // ignore
+    }
+  }, [railCollapsed]);
 
   const attachedJob = useMemo(
     () => jobs.find((j) => j.id === attachedJobId) || null,
@@ -193,7 +210,14 @@ export default function ChatAssistant() {
 
   return (
     <div className="px-4 md:px-6 py-4 md:py-6 mx-auto max-w-7xl">
-      <div className="grid lg:grid-cols-[1fr_300px] gap-4 lg:gap-6 h-[calc(100vh-6rem)]">
+      <div
+        className="grid gap-4 lg:gap-6 h-[calc(100vh-6rem)] transition-[grid-template-columns] duration-300"
+        style={{
+          gridTemplateColumns: railCollapsed
+            ? "minmax(0,1fr) 44px"
+            : "minmax(0,1fr) 300px",
+        }}
+      >
         {/* MAIN COLUMN */}
         <div className="flex flex-col surface-card overflow-hidden">
           {/* Header */}
@@ -410,53 +434,11 @@ export default function ChatAssistant() {
         </div>
 
         {/* RIGHT RAIL — Premium Tools */}
-        <aside className="hidden lg:flex flex-col surface-card overflow-hidden">
-          <div className="px-4 py-3 border-b border-border bg-gradient-premium text-white">
-            <div className="flex items-center justify-between">
-              <div className="flex items-center gap-2">
-                <ChevronRight className="h-4 w-4 -ml-1 opacity-80" />
-                <h2 className="text-sm font-semibold">Premium Tools</h2>
-              </div>
-              <PlanBadge plan={isPro ? plan : "pro"} />
-            </div>
-            <p className="text-[11px] opacity-90 mt-0.5">{isPro ? "Active features" : "Pro features"}</p>
-          </div>
-
-          <div className="flex-1 overflow-y-auto p-3 space-y-3">
-            {PREMIUM_TOOLS.map((tool) => (
-              <div key={tool.id} className="rounded-lg border border-border p-3 bg-card relative">
-                {!isPro && (
-                  <Lock className="h-3.5 w-3.5 text-muted-foreground absolute top-2.5 right-2.5" />
-                )}
-                <div className="flex items-start gap-2.5 mb-2">
-                  <div className="h-8 w-8 rounded-md bg-premium-soft flex items-center justify-center shrink-0">
-                    <tool.icon className="h-4 w-4 text-premium" />
-                  </div>
-                  <div className="min-w-0 pr-4">
-                    <div className="text-sm font-semibold leading-tight">{tool.title}</div>
-                    <p className="text-[11px] text-muted-foreground leading-snug mt-0.5">{tool.desc}</p>
-                  </div>
-                </div>
-                <div className="flex items-center justify-between mt-2">
-                  <PlanBadge plan="pro" />
-                  <Switch checked={isPro} disabled={!isPro} />
-                </div>
-              </div>
-            ))}
-          </div>
-
-          <div className="p-3 border-t border-border">
-            {isPro ? (
-              <Button asChild variant="outline" className="w-full">
-                <Link to="/billing">Manage plan</Link>
-              </Button>
-            ) : (
-              <Button asChild className="w-full bg-gradient-premium text-white border-0 hover:opacity-95">
-                <Link to="/billing">Upgrade to Pro for Access</Link>
-              </Button>
-            )}
-          </div>
-        </aside>
+        <PremiumRail
+          tools={PREMIUM_TOOLS}
+          collapsed={railCollapsed}
+          onToggle={() => setRailCollapsed((c) => !c)}
+        />
       </div>
     </div>
   );
