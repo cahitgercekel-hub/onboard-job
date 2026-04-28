@@ -52,12 +52,24 @@ export default function ChatAssistant() {
   const { plan } = usePlan();
   const isPro = plan !== "free";
 
+  const ATTACHED_JOB_KEY = useMemo(
+    () => `jat.chat.attachedJob.${user?.id || "anon"}`,
+    [user?.id],
+  );
+
   const [messages, setMessages] = useState<Msg[]>([]);
   const [input, setInput] = useState("");
   const [isStreaming, setIsStreaming] = useState(false);
-  const [attachedJobId, setAttachedJobId] = useState<string>("");
+  const [attachedJobId, setAttachedJobId] = useState<string>(() => {
+    try {
+      return localStorage.getItem(ATTACHED_JOB_KEY) || "";
+    } catch {
+      return "";
+    }
+  });
   const [hasCv, setHasCv] = useState<boolean | null>(null);
   const [moreOpen, setMoreOpen] = useState(false);
+  const [hydrated, setHydrated] = useState(false);
   const [railCollapsed, setRailCollapsed] = useState<boolean>(() => {
     try {
       return localStorage.getItem(RAIL_STORAGE_KEY) === "1";
@@ -94,9 +106,37 @@ export default function ChatAssistant() {
     })();
   }, []);
 
+  // Remember which job the user had attached, per user.
+  useEffect(() => {
+    try {
+      if (attachedJobId) localStorage.setItem(ATTACHED_JOB_KEY, attachedJobId);
+      else localStorage.removeItem(ATTACHED_JOB_KEY);
+    } catch {
+      // ignore
+    }
+  }, [attachedJobId, ATTACHED_JOB_KEY]);
+
+  // Load the persisted thread for the current (user, job) pair whenever it changes.
+  useEffect(() => {
+    setHydrated(false);
+    const stored = loadChatThread(user?.id, attachedJobId || null);
+    setMessages(stored);
+    // Defer marking hydrated so the save-effect below doesn't overwrite storage
+    // with the previous thread on a job switch.
+    const t = setTimeout(() => setHydrated(true), 0);
+    return () => clearTimeout(t);
+  }, [user?.id, attachedJobId]);
+
+  // Persist the active thread whenever it changes (after hydration).
+  useEffect(() => {
+    if (!hydrated) return;
+    saveChatThread(user?.id, attachedJobId || null, messages);
+  }, [messages, user?.id, attachedJobId, hydrated]);
+
   useEffect(() => {
     scrollRef.current?.scrollTo({ top: scrollRef.current.scrollHeight, behavior: "smooth" });
   }, [messages]);
+
 
   const send = async (raw: string) => {
     const text = raw.trim();
