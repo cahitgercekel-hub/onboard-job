@@ -1,8 +1,10 @@
-import type { ReactNode } from "react";
+import { useEffect, useState, type ReactNode } from "react";
 import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Logo } from "@/components/Logo";
 import { PremiumRail, type PremiumTool } from "@/components/assistant/PremiumRail";
+
+const STORAGE_KEY = "jat.premiumRail.collapsed";
 
 export function AssistantToolShell({
   title,
@@ -17,12 +19,35 @@ export function AssistantToolShell({
   premiumTools: PremiumTool[];
   children: ReactNode;
 }) {
+  const [collapsed, setCollapsed] = useState<boolean>(() => {
+    try {
+      return localStorage.getItem(STORAGE_KEY) === "1";
+    } catch {
+      return false;
+    }
+  });
+
+  useEffect(() => {
+    try {
+      localStorage.setItem(STORAGE_KEY, collapsed ? "1" : "0");
+    } catch {
+      // ignore
+    }
+  }, [collapsed]);
+
   return (
     <div className="px-4 md:px-6 py-4 md:py-6 mx-auto max-w-7xl">
-      <div className="grid lg:grid-cols-[1fr_300px] gap-4 lg:gap-6 min-h-[calc(100vh-6rem)]">
+      <div
+        className="grid gap-4 lg:gap-6 min-h-[calc(100vh-6rem)] transition-[grid-template-columns] duration-300"
+        style={{
+          gridTemplateColumns: collapsed
+            ? "minmax(0,1fr) 44px"
+            : "minmax(0,1fr) 300px",
+        }}
+      >
         {/* MAIN COLUMN */}
-        <div className="flex flex-col surface-card overflow-hidden">
-          {/* Header (matches ChatAssistant) */}
+        <div className="flex flex-col surface-card overflow-hidden min-w-0">
+          {/* Header */}
           <div className="flex items-center justify-between gap-3 px-4 md:px-5 py-3 border-b border-border">
             <div className="flex items-center gap-3 min-w-0">
               <div className="h-9 w-9 rounded-md bg-gradient-premium flex items-center justify-center shadow-sm shrink-0">
@@ -43,10 +68,14 @@ export function AssistantToolShell({
         </div>
 
         {/* RIGHT RAIL */}
-        <PremiumRail tools={premiumTools} />
+        <PremiumRail
+          tools={premiumTools}
+          collapsed={collapsed}
+          onToggle={() => setCollapsed((c) => !c)}
+        />
 
         {/* Mobile fallback CTA */}
-        <div className="lg:hidden">
+        <div className="lg:hidden col-span-full">
           <Link to="/billing">
             <Button className="w-full bg-gradient-premium text-white border-0 hover:opacity-95">
               Upgrade to Pro for Access
