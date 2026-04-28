@@ -210,7 +210,14 @@ export default function ChatAssistant() {
 
   return (
     <div className="px-4 md:px-6 py-4 md:py-6 mx-auto max-w-7xl">
-      <div className="grid lg:grid-cols-[1fr_300px] gap-4 lg:gap-6 h-[calc(100vh-6rem)]">
+      <div
+        className="grid gap-4 lg:gap-6 h-[calc(100vh-6rem)] transition-[grid-template-columns] duration-300"
+        style={{
+          gridTemplateColumns: railCollapsed
+            ? "minmax(0,1fr) 44px"
+            : "minmax(0,1fr) 300px",
+        }}
+      >
         {/* MAIN COLUMN */}
         <div className="flex flex-col surface-card overflow-hidden">
           {/* Header */}
