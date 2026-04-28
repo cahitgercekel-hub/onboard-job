@@ -223,7 +223,7 @@ export function JobDialog({ open, onOpenChange, initialStatus = "saved", job, on
         <DialogFooter className="gap-2 sm:justify-between">
           <div className="flex gap-1">
             {job && onDelete && (
-              <Button variant="ghost" className="text-destructive hover:text-destructive" onClick={() => { onDelete(); onOpenChange(false); }}>
+              <Button variant="ghost" className="text-destructive hover:bg-destructive hover:text-destructive-foreground" onClick={() => { onDelete(); onOpenChange(false); }}>
                 {t("common.delete")}
               </Button>
             )}
