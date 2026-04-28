@@ -16,16 +16,9 @@ export function CvVersionsSection() {
   const [creating, setCreating] = useState(false);
 
   return (
-    <section className="surface-card p-6">
-      <div className="flex items-start justify-between gap-3 mb-5">
-        <div>
-          <h2 className="text-base font-semibold text-foreground flex items-center gap-2">
-            <Files className="h-4 w-4" /> CV Versions
-          </h2>
-          <p className="text-xs text-muted-foreground mt-1">
-            Track different resume variants (e.g. "Tech V1", "Manager V2"). Tag jobs with the version you used to compare conversion rates in the A/B Lab.
-          </p>
-        </div>
+    <div>
+      <div className="flex items-start justify-between gap-3 mb-4">
+        <h3 className="text-sm font-semibold text-foreground">CV Versions</h3>
         <Button size="sm" onClick={() => setCreating(true)}>
           <Plus className="h-4 w-4" /> New version
         </Button>
@@ -36,9 +29,14 @@ export function CvVersionsSection() {
           <Loader2 className="h-4 w-4 animate-spin" /> Loading…
         </div>
       ) : versions.length === 0 ? (
-        <p className="text-sm text-muted-foreground py-3">
-          No CV versions yet — create one to start tagging jobs.
-        </p>
+        <div className="rounded-md border border-dashed border-border bg-muted/20 px-4 py-6 text-center">
+          <p className="text-xs text-muted-foreground mb-1">
+            Track different resume variants (e.g. "Tech V1", "Manager V2"). Tag jobs with the version you used to compare conversion rates in the A/B Lab.
+          </p>
+          <p className="text-sm text-muted-foreground mt-2">
+            No CV versions yet — create one to start tagging jobs.
+          </p>
+        </div>
       ) : (
         <ul className="divide-y divide-border rounded-md border border-border overflow-hidden">
           {versions.map((v) => (
@@ -88,7 +86,7 @@ export function CvVersionsSection() {
           toast.success("Saved");
         }}
       />
-    </section>
+    </div>
   );
 }
 
