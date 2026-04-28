@@ -124,7 +124,7 @@ export function ShareProgress({ jobs, funnelRef }: Props) {
     try {
       const blob = await captureNode(milestoneRef.current);
       if (!blob) throw new Error("Couldn't capture image");
-      await shareOrDownload(blob, `jobflow-milestone-${Date.now()}.png`, milestone.headline);
+      await shareOrDownload(blob, `jobby-milestone-${Date.now()}.png`, milestone.headline);
       setMilestoneOpen(false);
     } catch (e: any) {
       toast.error(e?.message || "Share failed");
