@@ -331,16 +331,18 @@ export default function Tracker() {
                   onCardClick={openEdit}
                   onArchiveCard={(j) => setArchiveTarget(j)}
                   onDeleteCard={(j) => {
-                    toast(`Delete "${j.role}" at ${j.company}?`, {
+                    const snapshot = j;
+                    removeJob(j.id);
+                    toast(`"${j.role}" at ${j.company} deleted`, {
                       action: {
-                        label: "Delete",
+                        label: "Undo",
                         onClick: () => {
-                          removeJob(j.id);
-                          toast.success("Job deleted");
+                          const { id, createdAt, updatedAt, ...rest } = snapshot;
+                          addJob(rest);
                         },
                       },
-                      cancel: { label: "Cancel", onClick: () => {} },
                       duration: 6000,
+                      position: "bottom-right",
                     });
                   }}
                   hiddenId={activeId}
