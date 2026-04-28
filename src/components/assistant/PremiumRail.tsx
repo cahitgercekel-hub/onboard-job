@@ -2,7 +2,6 @@ import { Link } from "react-router-dom";
 import { Lock, Crown, ChevronRight, ChevronLeft, type LucideIcon } from "lucide-react";
 import { Switch } from "@/components/ui/switch";
 import { Button } from "@/components/ui/button";
-import { cn } from "@/lib/utils";
 
 export interface PremiumTool {
   id: string;
@@ -26,18 +25,18 @@ export function PremiumRail({
         <button
           type="button"
           onClick={onToggle}
-          className="h-full w-full bg-gradient-premium text-white flex flex-col items-center gap-3 py-3 hover:opacity-95 transition"
+          className="h-full w-full bg-gradient-premium text-white flex flex-col items-center justify-between py-3 hover:opacity-95 transition rounded-md"
           aria-label="Expand premium tools"
           title="Expand premium tools"
         >
-          <ChevronLeft className="h-4 w-4" />
-          <Crown className="h-4 w-4" />
+          <ChevronLeft className="h-4 w-4 shrink-0" />
           <span
-            className="text-[10px] font-bold tracking-wider"
-            style={{ writingMode: "vertical-rl", transform: "rotate(180deg)" }}
+            className="text-[10px] font-bold tracking-[0.2em] uppercase select-none"
+            style={{ writingMode: "vertical-rl" }}
           >
-            PREMIUM TOOLS
+            Premium Tools
           </span>
+          <Crown className="h-4 w-4 shrink-0" />
         </button>
       </aside>
     );
@@ -53,7 +52,7 @@ export function PremiumRail({
           aria-label="Collapse premium tools"
           title="Collapse"
         >
-          <ChevronRight className={cn("h-4 w-4 transition-transform", !collapsed && "rotate-180")} />
+          <ChevronRight className="h-4 w-4" />
           <div className="min-w-0">
             <div className="text-sm font-semibold leading-tight">Premium Tools</div>
             <div className="text-[11px] opacity-90 leading-tight">Pro features</div>
