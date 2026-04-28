@@ -164,17 +164,16 @@ export function JobCard({ job, onClick, onArchive: _onArchive, onDelete, overlay
         overlay && "shadow-lg ring-1 ring-accent/40"
       )}
     >
-      {/* Top: title + match ring */}
+      {/* Top: title + match ring (fixed-width slot keeps title width stable) */}
       <div className="flex items-start justify-between gap-2">
         <div className="min-w-0 flex-1">
           <div className="text-sm font-semibold text-foreground leading-snug line-clamp-2">{job.role}</div>
         </div>
-        {(job.fitnessScore ?? null) !== null && (
-          <div className="flex flex-col items-center shrink-0 -mt-0.5">
+        <div className="w-12 h-12 shrink-0 flex items-center justify-center" title="Match score">
+          {(job.fitnessScore ?? null) !== null && (
             <FitnessRing score={job.fitnessScore} variant="lg" />
-            <span className="text-[9px] text-muted-foreground mt-0.5 leading-none">Match score</span>
-          </div>
-        )}
+          )}
+        </div>
       </div>
 
       {/* Company row */}
@@ -222,7 +221,7 @@ export function JobCard({ job, onClick, onArchive: _onArchive, onDelete, overlay
               <MapPin className="h-3 w-3 shrink-0" />
               <span className="truncate">
                 {job.location}
-                {alarm === "none" && job.updatedAt && ` — ${daysSince(job.updatedAt)}d ago`}
+                {alarm === "none" && job.updatedAt && job.status !== "saved" && ` — ${daysSince(job.updatedAt)}d ago`}
               </span>
             </span>
           )}
@@ -258,7 +257,7 @@ export function JobCard({ job, onClick, onArchive: _onArchive, onDelete, overlay
                 e.preventDefault();
                 window.open(job.url, "_blank", "noopener,noreferrer");
               }}
-              className="inline-flex items-center gap-1 text-muted-foreground hover:text-accent transition-colors"
+              className="inline-flex items-center gap-1 text-accent hover:text-accent/80 font-medium transition-colors"
             >
               <ExternalLink className="h-3 w-3" /> Link
             </a>
@@ -269,7 +268,7 @@ export function JobCard({ job, onClick, onArchive: _onArchive, onDelete, overlay
               <button
                 type="button"
                 onClick={(e) => { e.stopPropagation(); onDelete(); }}
-                className="inline-flex items-center gap-1 text-muted-foreground hover:text-destructive transition-colors"
+                className="inline-flex items-center gap-1 text-destructive hover:text-destructive/80 font-medium transition-colors"
                 aria-label="Delete job"
                 title="Delete"
               >
