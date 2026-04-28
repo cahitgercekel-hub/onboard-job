@@ -4,8 +4,9 @@ import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
 import {
   Loader2, Send, Square, Sparkles, X, Briefcase, Bot, FileText,
-  CalendarCheck, Plus, Smile, MessagesSquare,
+  CalendarCheck, Plus, Smile, MessagesSquare, Search, ChevronUp, ChevronDown,
 } from "lucide-react";
+import { Input } from "@/components/ui/input";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
