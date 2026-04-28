@@ -180,88 +180,25 @@ export default function AppLayout() {
               </span>
             </div>
             {trackerNav.map((n) => renderNavRow(n))}
-              const link = (
-                <NavLink
-                  to={n.to}
-                  end={n.end as boolean}
-                  className={({ isActive }) =>
-                    cn(navItem, collapsed && "justify-center px-0 w-10 mx-auto", isActive ? navActive : navInactive)
-                  }
-                  aria-label={n.label}
-                >
-                  <n.icon className="h-4 w-4 shrink-0" data-nav-icon />
-                  {!collapsed && <span className="truncate">{n.label}</span>}
-                </NavLink>
-              );
-              return collapsed ? (
-                <Tooltip key={n.to}>
-                  <TooltipTrigger asChild>{link}</TooltipTrigger>
-                  <TooltipContent side="right">{n.label}</TooltipContent>
-                </Tooltip>
-              ) : (
-                <div key={n.to}>{link}</div>
-              );
-            })}
 
             <div className={sectionHeader}>
               <span className={cn("transition-opacity duration-150", collapsed && "opacity-0")}>
                 {t("nav.assistant")}
               </span>
             </div>
-            {assistantNav.map((n) => {
-              const link = (
-                <NavLink
-                  to={n.to}
-                  end={n.end as boolean}
-                  className={({ isActive }) =>
-                    cn(navItem, collapsed && "justify-center px-0 w-10 mx-auto", isActive ? navActive : navInactive)
-                  }
-                  aria-label={n.label}
-                >
-                  <n.icon className="h-4 w-4 shrink-0" data-nav-icon />
-                  {!collapsed && <span className="truncate">{n.label}</span>}
-                </NavLink>
-              );
-              return collapsed ? (
-                <Tooltip key={n.to}>
-                  <TooltipTrigger asChild>{link}</TooltipTrigger>
-                  <TooltipContent side="right">{n.label}</TooltipContent>
-                </Tooltip>
-              ) : (
-                <div key={n.to}>{link}</div>
-              );
-            })}
+            {assistantNav.map((n) => renderNavRow(n))}
           </nav>
 
           <div className="p-3 border-t border-sidebar-border space-y-1">
-            {footerNav.map((n) => {
-              const link = (
-                <NavLink
-                  to={n.to}
-                  end={n.end as boolean}
-                  className={({ isActive }) =>
-                    cn(navItem, collapsed && "justify-center px-0 w-10 mx-auto", isActive ? navActive : navInactive)
-                  }
-                  aria-label={n.label}
-                >
-                  <n.icon className="h-4 w-4 shrink-0" data-nav-icon />
-                  {!collapsed && <span className="truncate">{n.label}</span>}
-                </NavLink>
-              );
-              return collapsed ? (
-                <Tooltip key={n.to}>
-                  <TooltipTrigger asChild>{link}</TooltipTrigger>
-                  <TooltipContent side="right">{n.label}</TooltipContent>
-                </Tooltip>
-              ) : (
-                <div key={n.to}>{link}</div>
-              );
-            })}
-            {!collapsed && (
-              <div className="px-3 pt-2 text-[11px] text-muted-foreground">
-                Synced to your account.
-              </div>
-            )}
+            {footerNav.map((n) => renderNavRow(n))}
+            <div
+              className={cn(
+                "px-3 pt-2 text-[11px] text-muted-foreground transition-opacity duration-150",
+                collapsed && "opacity-0 pointer-events-none"
+              )}
+            >
+              Synced to your account.
+            </div>
           </div>
 
           {/* Sidebar alignment-check toggle (dev) — also Shift+G */}
