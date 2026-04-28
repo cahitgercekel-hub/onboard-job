@@ -98,7 +98,7 @@ export default function AuthPage() {
             <BriefcaseBusiness className="h-4 w-4" />
           </div>
           <div>
-            <h1 className="text-lg font-semibold">JobFlow</h1>
+            <h1 className="text-lg font-semibold">Jobby</h1>
             <p className="text-xs text-muted-foreground">Track Job & CV Assist</p>
           </div>
         </div>

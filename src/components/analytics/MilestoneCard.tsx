@@ -82,7 +82,7 @@ export const MilestoneCard = forwardRef<HTMLDivElement, Props>(({ milestone, sta
             <BriefcaseBusiness size={20} />
           </div>
           <div>
-            <div style={{ fontSize: 16, fontWeight: 600, lineHeight: 1 }}>JobFlow</div>
+            <div style={{ fontSize: 16, fontWeight: 600, lineHeight: 1 }}>Jobby</div>
             <div style={{ fontSize: 11, opacity: 0.8, marginTop: 2 }}>Track Job & CV Assist</div>
           </div>
         </div>
