@@ -240,6 +240,7 @@ export default function Settings() {
 
       <ClearAllDialog open={confirmOpen} onOpenChange={setConfirmOpen} />
       <ImportCsvDialog open={importOpen} onOpenChange={setImportOpen} />
+      <DeleteAccountDialog open={deleteAccountOpen} onOpenChange={setDeleteAccountOpen} onDeleted={signOut} />
     </div>
   );
 }
