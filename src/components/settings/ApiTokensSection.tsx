@@ -214,6 +214,6 @@ export function ApiTokensSection() {
           </DialogFooter>
         </DialogContent>
       </Dialog>
-    </section>
+    </div>
   );
 }
