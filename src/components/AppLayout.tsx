@@ -77,8 +77,9 @@ export default function AppLayout() {
   const allNav = [...trackerNav, assistantNav[0], ...footerNav];
 
   // Single row style used in BOTH expanded & collapsed so Y-positions stay identical.
+  // Icon is absolutely positioned at left:12px so its X stays locked regardless of label visibility.
   const navItem =
-    "flex items-center gap-2.5 rounded-md h-10 px-3 text-sm transition-colors";
+    "relative flex items-center rounded-md h-10 pl-10 pr-3 text-sm transition-colors";
   const navInactive =
     "text-sidebar-foreground/80 hover:bg-sidebar-accent/60 hover:text-sidebar-foreground";
   const navActive =
@@ -90,6 +91,42 @@ export default function AppLayout() {
   // Section header — same height in both modes (text hidden when collapsed).
   const sectionHeader =
     "h-7 flex items-end px-3 pb-1 text-[10px] font-semibold uppercase tracking-wider text-muted-foreground overflow-hidden";
+
+  // Render a nav row. Identical DOM in both modes; icon X/Y locked via absolute positioning.
+  const renderNavLink = (n: { to: string; label: string; icon: any; end?: boolean }) => (
+    <NavLink
+      to={n.to}
+      end={n.end as boolean}
+      className={({ isActive }) => cn(navItem, isActive ? navActive : navInactive)}
+      aria-label={n.label}
+    >
+      <span className="absolute left-3 top-1/2 -translate-y-1/2 flex h-4 w-4 items-center justify-center">
+        <n.icon className="h-4 w-4 shrink-0" data-nav-icon />
+      </span>
+      <span
+        className={cn(
+          "truncate transition-opacity duration-150",
+          collapsed && "opacity-0 pointer-events-none"
+        )}
+      >
+        {n.label}
+      </span>
+    </NavLink>
+  );
+
+  const renderNavRow = (n: { to: string; label: string; icon: any; end?: boolean }) => {
+    const link = renderNavLink(n);
+    return collapsed ? (
+      <Tooltip key={n.to}>
+        <TooltipTrigger asChild>
+          <div>{link}</div>
+        </TooltipTrigger>
+        <TooltipContent side="right">{n.label}</TooltipContent>
+      </Tooltip>
+    ) : (
+      <div key={n.to}>{link}</div>
+    );
+  };
 
   const toggleBtn = (
     <button
@@ -112,26 +149,27 @@ export default function AppLayout() {
             collapsed ? "w-16" : "w-60"
           )}
         >
-          <div
-            className={cn(
-              "flex items-center gap-2 border-b border-sidebar-border h-[69px]",
-              collapsed ? "justify-center px-2" : "px-4"
-            )}
-          >
-            {collapsed ? (
-              toggleBtn
-            ) : (
-              <>
+          {/* Header — identical 69px height in both modes; only contents fade */}
+          <div className="flex items-center gap-2 border-b border-sidebar-border h-[69px] px-2">
+            <div className="flex h-10 w-10 items-center justify-center shrink-0">
+              {collapsed ? (
+                toggleBtn
+              ) : (
                 <Logo size={32} />
-                <div className="leading-tight min-w-0 flex-1">
-                  <div className="text-sm font-semibold text-sidebar-foreground truncate flex items-center gap-1.5">
-                    {t("app.name")} <PlanBadge plan={plan} />
-                  </div>
-                  <div className="text-[11px] text-muted-foreground truncate">{t("app.tagline")}</div>
-                </div>
-                {toggleBtn}
-              </>
-            )}
+              )}
+            </div>
+            <div
+              className={cn(
+                "leading-tight min-w-0 flex-1 transition-opacity duration-150",
+                collapsed && "opacity-0 pointer-events-none"
+              )}
+            >
+              <div className="text-sm font-semibold text-sidebar-foreground truncate flex items-center gap-1.5">
+                {t("app.name")} <PlanBadge plan={plan} />
+              </div>
+              <div className="text-[11px] text-muted-foreground truncate">{t("app.tagline")}</div>
+            </div>
+            {!collapsed && toggleBtn}
           </div>
 
           {/* Unified nav — same DOM in both modes; labels/headers fade away when collapsed */}
@@ -141,89 +179,26 @@ export default function AppLayout() {
                 {t("nav.tracker")}
               </span>
             </div>
-            {trackerNav.map((n) => {
-              const link = (
-                <NavLink
-                  to={n.to}
-                  end={n.end as boolean}
-                  className={({ isActive }) =>
-                    cn(navItem, collapsed && "justify-center px-0 w-10 mx-auto", isActive ? navActive : navInactive)
-                  }
-                  aria-label={n.label}
-                >
-                  <n.icon className="h-4 w-4 shrink-0" data-nav-icon />
-                  {!collapsed && <span className="truncate">{n.label}</span>}
-                </NavLink>
-              );
-              return collapsed ? (
-                <Tooltip key={n.to}>
-                  <TooltipTrigger asChild>{link}</TooltipTrigger>
-                  <TooltipContent side="right">{n.label}</TooltipContent>
-                </Tooltip>
-              ) : (
-                <div key={n.to}>{link}</div>
-              );
-            })}
+            {trackerNav.map((n) => renderNavRow(n))}
 
             <div className={sectionHeader}>
               <span className={cn("transition-opacity duration-150", collapsed && "opacity-0")}>
                 {t("nav.assistant")}
               </span>
             </div>
-            {assistantNav.map((n) => {
-              const link = (
-                <NavLink
-                  to={n.to}
-                  end={n.end as boolean}
-                  className={({ isActive }) =>
-                    cn(navItem, collapsed && "justify-center px-0 w-10 mx-auto", isActive ? navActive : navInactive)
-                  }
-                  aria-label={n.label}
-                >
-                  <n.icon className="h-4 w-4 shrink-0" data-nav-icon />
-                  {!collapsed && <span className="truncate">{n.label}</span>}
-                </NavLink>
-              );
-              return collapsed ? (
-                <Tooltip key={n.to}>
-                  <TooltipTrigger asChild>{link}</TooltipTrigger>
-                  <TooltipContent side="right">{n.label}</TooltipContent>
-                </Tooltip>
-              ) : (
-                <div key={n.to}>{link}</div>
-              );
-            })}
+            {assistantNav.map((n) => renderNavRow(n))}
           </nav>
 
           <div className="p-3 border-t border-sidebar-border space-y-1">
-            {footerNav.map((n) => {
-              const link = (
-                <NavLink
-                  to={n.to}
-                  end={n.end as boolean}
-                  className={({ isActive }) =>
-                    cn(navItem, collapsed && "justify-center px-0 w-10 mx-auto", isActive ? navActive : navInactive)
-                  }
-                  aria-label={n.label}
-                >
-                  <n.icon className="h-4 w-4 shrink-0" data-nav-icon />
-                  {!collapsed && <span className="truncate">{n.label}</span>}
-                </NavLink>
-              );
-              return collapsed ? (
-                <Tooltip key={n.to}>
-                  <TooltipTrigger asChild>{link}</TooltipTrigger>
-                  <TooltipContent side="right">{n.label}</TooltipContent>
-                </Tooltip>
-              ) : (
-                <div key={n.to}>{link}</div>
-              );
-            })}
-            {!collapsed && (
-              <div className="px-3 pt-2 text-[11px] text-muted-foreground">
-                Synced to your account.
-              </div>
-            )}
+            {footerNav.map((n) => renderNavRow(n))}
+            <div
+              className={cn(
+                "px-3 pt-2 text-[11px] text-muted-foreground transition-opacity duration-150",
+                collapsed && "opacity-0 pointer-events-none"
+              )}
+            >
+              Synced to your account.
+            </div>
           </div>
 
           {/* Sidebar alignment-check toggle (dev) — also Shift+G */}
