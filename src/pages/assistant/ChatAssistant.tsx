@@ -275,8 +275,8 @@ export default function ChatAssistant() {
                 <div className="h-14 w-14 rounded-full bg-gradient-premium flex items-center justify-center shadow-md">
                   <Sparkles className="h-7 w-7 text-white" />
                 </div>
-                <div className="text-sm max-w-md">
-                  Ask me anything about your job search — or pick a quick action below to get started.
+                <div className="text-sm max-w-md text-center whitespace-pre-line">
+                  Ask me anything!{"\n"}Select a job posting from the button above — or pick a quick action below to get started.
                 </div>
               </div>
             )}
