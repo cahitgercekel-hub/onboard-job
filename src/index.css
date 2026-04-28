@@ -6,7 +6,7 @@
 
 @layer base {
   :root {
-    --background: 220 20% 97%;
+    --background: 200 70% 95%;
     --foreground: 222 25% 12%;
 
     --card: 0 0% 100%;
@@ -66,7 +66,7 @@
     --shadow-md: 0 4px 14px hsl(222 25% 12% / 0.06), 0 2px 4px hsl(222 25% 12% / 0.04);
     --shadow-lg: 0 16px 40px hsl(222 25% 12% / 0.10);
 
-    --sidebar-background: 220 22% 97%;
+    --sidebar-background: 200 65% 96%;
     --sidebar-foreground: 222 20% 25%;
     --sidebar-primary: 222 47% 18%;
     --sidebar-primary-foreground: 0 0% 100%;
@@ -77,7 +77,7 @@
   }
 
   .dark {
-    --background: 30 8% 10%;
+    --background: 205 40% 10%;
     --foreground: 40 20% 92%;
     --card: 30 8% 13%;
     --card-foreground: 40 20% 92%;
@@ -108,7 +108,7 @@
     --col-offer-soft: 142 25% 20%;
     --col-rejected-soft: 0 30% 22%;
 
-    --sidebar-background: 30 8% 12%;
+    --sidebar-background: 205 40% 12%;
     --sidebar-foreground: 40 15% 85%;
     --sidebar-primary: 36 50% 70%;
     --sidebar-primary-foreground: 30 10% 12%;
