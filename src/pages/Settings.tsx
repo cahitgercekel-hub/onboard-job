@@ -78,6 +78,23 @@ export default function Settings() {
               </Button>
             </div>
           </div>
+
+          <div className="mt-6 rounded-lg border border-destructive/30 bg-destructive/5 p-4">
+            <h3 className="text-sm font-semibold text-destructive mb-1">Danger Zone</h3>
+            <p className="text-sm font-medium text-foreground">Delete account</p>
+            <p className="text-xs text-muted-foreground mt-0.5 mb-3">
+              Permanently remove your account and all associated data. This cannot be undone.
+            </p>
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => setDeleteAccountOpen(true)}
+              className="text-destructive border-destructive/40 hover:bg-destructive/10 hover:text-destructive"
+            >
+              <Trash2 className="h-4 w-4" /> Delete account
+            </Button>
+          </div>
+
           {user?.email && (
             <div className="mt-6 pt-4 border-t border-border flex items-center justify-between gap-3">
               <p className="text-xs text-muted-foreground truncate">Signed in as {user.email}</p>
