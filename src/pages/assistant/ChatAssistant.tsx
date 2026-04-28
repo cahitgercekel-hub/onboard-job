@@ -20,8 +20,9 @@ import { Logo } from "@/components/Logo";
 import { PremiumRail } from "@/components/assistant/PremiumRail";
 import { usePlan } from "@/lib/usePlan";
 import { useAuth } from "@/lib/auth";
+import { loadChatThread, saveChatThread, clearChatThread, type ChatMsg } from "@/lib/chatStore";
 
-type Msg = { role: "user" | "assistant"; content: string };
+type Msg = ChatMsg;
 
 const PRIMARY_QUICK = [
   { label: "View Tailored CV", icon: FileText, prompt: "Tailor my baseline CV to the attached job. Show the rewritten summary and 3 most-improved bullet points." },
