@@ -221,7 +221,7 @@ export function JobCard({ job, onClick, onArchive: _onArchive, onDelete, overlay
               <MapPin className="h-3 w-3 shrink-0" />
               <span className="truncate">
                 {job.location}
-                {alarm === "none" && job.updatedAt && job.status !== "saved" && ` — ${daysSince(job.updatedAt)}d ago`}
+                {alarm === "none" && (job.dateApplied ? ` — ${formatDate(job.dateApplied)}` : " — Ready to apply")}
               </span>
             </span>
           )}
