@@ -16,6 +16,7 @@ import {
 import { usePrefs, type Theme, type DateFormat } from "@/lib/preferences";
 import { LANGUAGES } from "@/lib/i18n";
 import { downloadJobsCsv, clearAllJobs } from "@/lib/jobsStore";
+import { clearAllChats } from "@/lib/chatStore";
 import { ImportCsvDialog } from "@/components/settings/ImportCsvDialog";
 import { CvBaselineSection } from "@/components/settings/CvBaselineSection";
 import { CvVersionsSection } from "@/components/settings/CvVersionsSection";
@@ -282,6 +283,7 @@ function ClearAllDialog({ open, onOpenChange }: { open: boolean; onOpenChange: (
             onClick={async () => {
               try {
                 await clearAllJobs();
+                clearAllChats();
                 onOpenChange(false);
                 setText("");
                 toast.success("All data cleared");
@@ -337,6 +339,7 @@ function DeleteAccountDialog({
               try {
                 // Wipe local data first
                 await clearAllJobs().catch(() => {});
+                clearAllChats();
                 toast.success("Account deletion requested. You've been signed out.");
                 onOpenChange(false);
                 setText("");
