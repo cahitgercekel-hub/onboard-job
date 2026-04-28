@@ -219,10 +219,7 @@ export function JobCard({ job, onClick, onArchive: _onArchive, onDelete, overlay
           {job.location && (
             <span className="inline-flex items-center gap-1 min-w-0">
               <MapPin className="h-3 w-3 shrink-0" />
-              <span className="truncate">
-                {job.location}
-                {alarm === "none" && (job.dateApplied ? ` — ${formatDate(job.dateApplied)}` : " — Ready to apply")}
-              </span>
+              <span className="truncate">{job.location}</span>
             </span>
           )}
           {alarm !== "none" && (
