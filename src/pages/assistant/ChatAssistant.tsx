@@ -490,8 +490,14 @@ export default function ChatAssistant() {
 
             {messages.map((m, i) => {
               const isUser = m.role === "user";
+              const isMatch = matchSet.has(i);
+              const isActive = i === activeMatchMsgIdx;
               return (
-                <div key={i} className={cn("flex gap-2.5 items-start", isUser ? "justify-end" : "justify-start")}>
+                <div
+                  key={i}
+                  id={`chat-msg-${i}`}
+                  className={cn("flex gap-2.5 items-start scroll-mt-4", isUser ? "justify-end" : "justify-start")}
+                >
                   {!isUser && (
                     <div className="h-8 w-8 rounded-full bg-gradient-premium flex items-center justify-center shrink-0 shadow-sm">
                       <Bot className="h-4 w-4 text-white" />
@@ -499,10 +505,12 @@ export default function ChatAssistant() {
                   )}
                   <div
                     className={cn(
-                      "rounded-2xl text-sm leading-relaxed shadow-sm",
+                      "rounded-2xl text-sm leading-relaxed shadow-sm transition-shadow",
                       isUser
                         ? "max-w-[78%] px-4 py-2.5 bg-gradient-premium text-white rounded-tr-sm"
-                        : "max-w-[88%] px-5 py-4 bg-card text-foreground border border-border rounded-tl-sm"
+                        : "max-w-[88%] px-5 py-4 bg-card text-foreground border border-border rounded-tl-sm",
+                      isMatch && !isActive && "ring-1 ring-warning/50",
+                      isActive && "ring-2 ring-warning shadow-[0_0_0_4px_hsl(var(--warning)/0.15)]"
                     )}
                   >
                     {isUser ? (
