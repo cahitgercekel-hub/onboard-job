@@ -110,7 +110,6 @@ export default function AppLayout() {
     <TooltipProvider delayDuration={150}>
       <div className="flex h-full min-h-screen w-full bg-background">
         <aside
-          ref={asideRef}
           className={cn(
             "hidden md:flex shrink-0 flex-col border-r border-sidebar-border bg-sidebar transition-[width] duration-300 ease-in-out relative",
             collapsed ? "w-16" : "w-60"
