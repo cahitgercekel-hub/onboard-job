@@ -60,23 +60,16 @@ export function RecalculateFitnessSection() {
   }
 
   return (
-    <section className="surface-card p-6">
-      <div className="mb-5">
-        <h2 className="text-base font-semibold text-foreground">Fitness scoring</h2>
-      </div>
-      <div className="grid sm:grid-cols-[1fr_auto] gap-4 items-center">
-        <div>
-          <Label className="text-sm font-medium">Recalculate saved jobs</Label>
-          <p className="text-xs text-muted-foreground mt-0.5">
-            Re-runs AI fitness scoring against your current baseline CV for every job in the Saved column with a description.
-            {progress && running && ` Processing ${progress.done}/${progress.total}…`}
-          </p>
-        </div>
-        <Button variant="outline" onClick={handleRecalculate} disabled={running}>
-          {running ? <Loader2 className="h-4 w-4 animate-spin" /> : <Sparkles className="h-4 w-4" />}
-          {running ? "Recalculating…" : "Recalculate fitness"}
-        </Button>
-      </div>
-    </section>
+    <div>
+      <h3 className="text-sm font-semibold text-foreground mb-1">Fitness Scoring</h3>
+      <p className="text-xs text-muted-foreground mb-3">
+        Re-runs AI fitness scoring against your current baseline CV for every job in the Saved column with a description.
+        {progress && running && ` Processing ${progress.done}/${progress.total}…`}
+      </p>
+      <Button variant="outline" size="sm" onClick={handleRecalculate} disabled={running}>
+        {running ? <Loader2 className="h-4 w-4 animate-spin" /> : <Sparkles className="h-4 w-4" />}
+        {running ? "Recalculating…" : "Recalculate fitness"}
+      </Button>
+    </div>
   );
 }
