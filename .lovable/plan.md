@@ -1,79 +1,106 @@
-## Goal
 
-Make **Corporate Tone**, **Skill Translator**, **Grammar & Polish**, **Interview Prep**, and **CV Analyzer** feel like siblings of the redesigned **Career Chat** — same chrome, colors, gradients, buttons, and "Premium Tools" rail.
+## Goals
+Fix layout collisions and inconsistencies in the Assistant tools, make the Premium Rail collapsible (and let the work area expand when collapsed), and clean up several JobCard issues (wrong logos, "0d ago" on Saved cards, action button colors, layout shift when a match score appears).
 
-## What changes (visual only — logic untouched)
+---
 
-### 1. Shared page shell — new `AssistantToolShell`
-Replace the plain `AssistantPageHeader` + bare content layout with a chat-style 2-column shell:
+## 1) Assistant tools — layout & button consistency
 
-```text
-┌─────────────────────────────────────┬──────────────────┐
-│  [logo tile] Tool Name              │ ▸ Premium Tools  │
-│  subtitle                           │   Pro features   │
-├─────────────────────────────────────┤                  │
-│                                     │  ┌────────────┐  │
-│   tool body (inputs + results)      │  │ Premium    │  │
-│   on muted/30 background            │  │ feature 1  │  │
-│                                     │  └────────────┘  │
-│                                     │  ┌────────────┐  │
-│                                     │  │ Premium    │  │
-│                                     │  │ feature 2  │  │
-│                                     │  └────────────┘  │
-│                                     │                  │
-│                                     │ [Upgrade to Pro] │
-└─────────────────────────────────────┴──────────────────┘
-```
+**File: `src/components/assistant/AssistantToolShell.tsx`**
 
-Same header treatment as chat:
-- Square gradient logo tile (`bg-gradient-premium`) with the Logo on the left
-- Title + subtitle stacked tight
-- Wrapped in `surface-card` with rounded corners and border
-- Body area uses `bg-muted/30` like the chat message panel
+- Add a `collapsed` state for the Premium Rail (persisted in `localStorage` under `jat.premiumRail.collapsed`).
+- Switch the grid template based on state:
+  - Expanded: `lg:grid-cols-[1fr_300px]`
+  - Collapsed: `lg:grid-cols-[1fr_44px]` (thin strip that just shows the toggle chevron)
+- The textarea/work area inside the main column already uses `flex-1`, so collapsing the rail will naturally let the main panel grow wider — no per-page changes needed.
+- Pass `collapsed` + `onToggle` into `<PremiumRail />`.
 
-### 2. Per-tool premium rail
-Each tool gets 2 contextual "Pro" upsell cards in the right rail (locked toggles + Pro badge, identical to chat):
+**File: `src/components/assistant/PremiumRail.tsx`**
 
-| Tool | Premium teaser 1 | Premium teaser 2 |
-|------|------------------|------------------|
-| Corporate Tone | Multi-company tone presets | Bulk cover-letter rewrite |
-| Skill Translator | JD batch translation | Industry-specific tone packs |
-| Grammar & Polish | Track-changes export (DOCX) | Tone presets (formal/friendly/exec) |
-| Interview Prep | Live mock interview (voice) | Recruiter-style follow-ups |
-| CV Analyzer | Detailed ATS simulation | Unlimited daily scans |
+- Make the header arrow (`▸`) the actual toggle button (chevron rotates with state).
+- When `collapsed`:
+  - Render only a vertical strip: gradient background, the chevron (pointing left/right), and a tiny "Pro" pill rotated vertically (or just the crown icon).
+  - Hide the tool list and the "Upgrade" footer.
+- When expanded: current behavior.
 
-Each rail ends with the same gradient **"Upgrade to Pro for Access"** button linking to `/billing`. Rail hidden on `<lg` breakpoints (collapses to a single CTA card under the tool body).
+**File: `src/pages/Assistant.tsx` — unify button placement across all tools**
 
-### 3. Buttons & accents — match chat
-- Primary action buttons (Analyze tone, Translate, Polish, Generate questions, Analyze CV) → `bg-gradient-premium text-white` with `Sparkles` / tool icon, full-width on mobile, rounded
-- Secondary buttons → outline pill style
-- Quick-action style chips reused for Polish language toggle and Interview job picker shortcuts
-- Replace plain `Upload` boxes with the chat-style dashed dropzone already present in CV Analyzer (extend to Tone, Translator, Polish via a shared `DropZone` component) — kept compact next to inputs
+Currently every tool puts the action button right under its inputs, so the button "jumps" depending on textarea height (Tone, Translator, Polish, Interview, CV all differ). Fix by:
 
-### 4. Result panel polish
-- All result cards already use `surface-card` — add the subtle gradient ring (`ring-1 ring-accent/20`) used on chat bot bubbles, plus a small avatar tile (Bot / FileText / Sparkles) next to result section titles for visual continuity with chat
-- Tone score gauge → restyle to match the `ScoreGauge` radial used in CV Analyzer for consistency
-- Interview Q cards → keep STAR layout but add the gradient `Q1`/`Q2` numbered chip used in chat bubbles
+- Wrap every tool's left/input column in a `flex flex-col h-full` container.
+- Push the primary action button to the bottom with `mt-auto`.
+- Make the textareas grow to fill remaining space (`className="flex-1 min-h-[160px] resize-none"`) instead of fixed `rows={N}`.
 
-### 5. Background
-- Page wrapper switches from default body to the same soft `bg-muted/30` outer fill used by the chat page so everything sits on the same canvas
-- Outer max-width raised from `max-w-6xl` → `max-w-7xl` to align with chat
+Specifically update:
+- `ToneAnalyzer` (line ~129): wrap left col in `flex flex-col h-full`; textarea uses `flex-1`; "Analyze tone" button gets `mt-auto`.
+- `SkillTranslator` (line ~247): same treatment, both textareas share remaining space (`flex-1`), "Translate skills" pinned bottom.
+- `PolishTool` (line ~292): fix the broken header row where `Label` for Text and the Upload + Language selector are on one line but Label is empty (the textarea Label currently floats above the upload button — see screenshot 6). Restructure as:
+  ```
+  <Label>Text</Label>
+  <row>[Upload file]   [Language select]   [BusinessGerman toggle inline when DE]</row>
+  <Textarea flex-1 />
+  <Button mt-auto />
+  ```
+- `InterviewPrep` (line ~390): the action card and the empty-state card are two stacked cards; merge them so the "Generate prep" button is in the same vertical position as other tools' buttons. Remove the separate empty card and instead show the empty hint inside the right column placeholder, matching the 2-column shape used by Tone/Translator/Polish/CV.
+- `CvAnalyzer` (line ~610): wrap left col in `flex flex-col h-full`; "Analyze CV" pinned `mt-auto`.
 
-## Files to edit
+**File: `src/pages/assistant/InterviewAssistant.tsx`**
 
-- `src/components/assistant/AssistantPageHeader.tsx` — replace with `AssistantToolShell` (header + 2-col grid + premium rail props)
-- `src/components/assistant/PremiumRail.tsx` *(new)* — the right-side rail (toggles, lock icons, gradient CTA), data-driven from a `tools` prop
-- `src/components/assistant/DropZone.tsx` *(new, optional)* — extracted from CV Analyzer's drag/drop block, reused by Tone / Translator / Polish
-- `src/pages/assistant/ToneAssistant.tsx` — wrap in shell + premium rail
-- `src/pages/assistant/TranslatorAssistant.tsx` — wrap in shell + premium rail
-- `src/pages/assistant/PolishAssistant.tsx` — wrap in shell + premium rail
-- `src/pages/assistant/InterviewAssistant.tsx` — wrap in shell + premium rail
-- `src/pages/assistant/CvAssistant.tsx` — wrap in shell (CvAnalyzer already has its own scan-rail; the right rail will replace/absorb it so we don't double up)
-- `src/pages/Assistant.tsx` — within `ToneAnalyzer`, `SkillTranslator`, `PolishTool`, `InterviewPrep`, `CvAnalyzer`: swap primary buttons to `bg-gradient-premium`, refresh badge/chip styles, add small bot avatar tiles to result section headers. **No logic, state, or API calls change.**
+Interview is currently a single-column tool — it needs the same 2-column shape so its button lines up. Update `InterviewPrep` itself (in `Assistant.tsx`) to use a `grid lg:grid-cols-2 gap-5` layout: left = role picker + Generate button (pinned bottom), right = results / placeholder. No change needed to the wrapper page.
 
-## Out of scope
+---
 
-- No backend / edge function changes
-- No new routes
-- No copy rewrites beyond the new premium-rail teaser labels
-- No changes to `ChatAssistant.tsx` itself (it's the reference)
+## 2) JobCard — logo accuracy
+
+**File: `src/components/kanban/JobCard.tsx`**
+
+The `slugifyToDomain()` heuristic produces wrong domains for multi-word companies (e.g., "Altagram Group - Game Localization" → `altagramgroupgamelocalization.com`). Fix:
+
+- **Prefer the parsed posting URL hostname first** (already done) — keep.
+- **Use a smarter slug** when no URL: take only the first significant token, strip suffixes like `Group`, `GmbH`, `AG`, `Inc`, `Ltd`, `LLC`, `Germany`, and anything after `-` / `–` / `|`. Example: "Altagram Group - Game Localization" → `altagram.com`.
+- **Add a Brandfetch fallback** as the first source (highest hit-rate for company branding):
+  `https://cdn.brandfetch.io/{domain}/w/80/h/80?c=1idV74_default` — falls through to logo.dev, Clearbit, Google favicon, then color initials tile.
+- **Only show LinkedIn-style "in" placeholder** when ALL sources fail and the domain looked guessable; otherwise show the colored initial tile (already done).
+- Cache successful sources keyed by `company` (not just domain) so re-renders don't re-probe.
+
+---
+
+## 3) JobCard — "0d ago" should not show for Saved jobs
+
+**File: `src/components/kanban/JobCard.tsx`** (location row, ~line 198)
+
+Current logic shows `— {daysSince}d ago` whenever `alarm === "none"` and `updatedAt` exists, regardless of status. Change to only show the "Xd ago" suffix when `job.status !== "saved"` AND `job.dateApplied` exists (or status is interviewing/offer/rejected). For Saved, just show the location.
+
+---
+
+## 4) JobCard — colored Link / Delete actions
+
+**File: `src/components/kanban/JobCard.tsx`** (footer, ~line 220)
+
+- Link: change classes from `text-muted-foreground hover:text-accent` to `text-accent hover:text-accent/80 font-medium` (icon inherits via `currentColor`).
+- Delete: change from `text-muted-foreground hover:text-destructive` to `text-destructive hover:text-destructive/80 font-medium`.
+- Keep the `·` divider neutral.
+
+---
+
+## 5) JobCard — stable layout when match score is present
+
+**File: `src/components/kanban/JobCard.tsx`** (top row, ~line 168 and company row ~line 180)
+
+Issue (screenshot 13): when `fitnessScore` exists, the FitnessRing column pushes the title narrower AND the "Match score" caption below the ring adds extra height, so the company row drops and a blank gap appears.
+
+Fix:
+- Reserve the score slot with a fixed-width column always (e.g., `w-12`) so title width is identical with/without score. When score is null, render an empty placeholder div of the same dimensions.
+- Move "Match score" caption out of the flow: render it as a `title`/tooltip on the ring, OR overlay it (absolute) so it doesn't add to row height. Preferred: remove the caption text, put it in `title="Match score"` on the ring wrapper.
+- Reduce `FitnessRing variant="lg"` margin (`-mt-0.5` → `mt-0`) and ensure company row has consistent `mt-2` regardless.
+
+---
+
+## Files to change
+
+- `src/components/assistant/AssistantToolShell.tsx` — collapsible rail state, dynamic grid.
+- `src/components/assistant/PremiumRail.tsx` — chevron toggle, collapsed strip.
+- `src/pages/Assistant.tsx` — flex-column layouts for all 5 tools, `mt-auto` buttons, fix Polish header row, give Interview a 2-column layout.
+- `src/components/kanban/JobCard.tsx` — smarter domain slug + Brandfetch source, conditional "Xd ago", blue Link / red Delete, fixed-width score slot, removed inline "Match score" caption.
+
+No backend, schema, or routing changes.
