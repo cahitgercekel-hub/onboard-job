@@ -1,7 +1,7 @@
-import { useState } from "react";
+import { useEffect, useLayoutEffect, useRef, useState } from "react";
 import { NavLink, Outlet } from "react-router-dom";
 import {
-  LayoutGrid, BarChart3, Settings as SettingsIcon, Menu,
+  LayoutGrid, BarChart3, Settings as SettingsIcon, Menu, Ruler,
   MessageSquare, Sparkles, Languages, Wand2, Target, FileText, CreditCard,
 } from "lucide-react";
 import { useTranslation } from "react-i18next";
@@ -15,6 +15,48 @@ export default function AppLayout() {
   const { t } = useTranslation();
   const [collapsed, setCollapsed] = useState(false);
   const { plan } = usePlan();
+
+  // Dev-only "Sidebar alignment check" — draws Y-position guide lines for every nav icon.
+  const [alignCheck, setAlignCheck] = useState(false);
+  const asideRef = useRef<HTMLElement>(null);
+  const [iconYs, setIconYs] = useState<number[]>([]);
+
+  // Toggle with keyboard shortcut: Shift + G
+  useEffect(() => {
+    const onKey = (e: KeyboardEvent) => {
+      if (e.shiftKey && (e.key === "G" || e.key === "g") && !e.metaKey && !e.ctrlKey && !e.altKey) {
+        const tag = (e.target as HTMLElement)?.tagName;
+        if (tag === "INPUT" || tag === "TEXTAREA") return;
+        setAlignCheck((v) => !v);
+      }
+    };
+    window.addEventListener("keydown", onKey);
+    return () => window.removeEventListener("keydown", onKey);
+  }, []);
+
+  // Measure each nav icon's Y center relative to the sidebar.
+  useLayoutEffect(() => {
+    if (!alignCheck) return;
+    const measure = () => {
+      const aside = asideRef.current;
+      if (!aside) return;
+      const baseTop = aside.getBoundingClientRect().top;
+      const icons = aside.querySelectorAll<SVGSVGElement>("[data-nav-icon]");
+      const ys: number[] = [];
+      icons.forEach((el) => {
+        const r = el.getBoundingClientRect();
+        ys.push(Math.round(r.top - baseTop + r.height / 2));
+      });
+      setIconYs(ys);
+    };
+    measure();
+    const t1 = window.setTimeout(measure, 320);
+    window.addEventListener("resize", measure);
+    return () => {
+      window.clearTimeout(t1);
+      window.removeEventListener("resize", measure);
+    };
+  }, [alignCheck, collapsed]);
 
   const trackerNav = [
     { to: "/", label: t("nav.board"), icon: LayoutGrid, end: true },
