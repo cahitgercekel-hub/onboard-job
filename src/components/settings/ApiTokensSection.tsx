@@ -109,20 +109,16 @@ export function ApiTokensSection() {
   };
 
   return (
-    <section className="surface-card p-6">
-      <div className="mb-5 flex items-start justify-between gap-3">
-        <div>
-          <h2 className="text-base font-semibold text-foreground flex items-center gap-2">
-            <KeyRound className="h-4 w-4 text-accent" /> API Tokens
-          </h2>
-          <p className="text-xs text-muted-foreground mt-1">
-            Use these tokens with the browser extension or any client to ingest jobs into your tracker.
-          </p>
-        </div>
+    <div>
+      <div className="mb-3 flex items-start justify-between gap-3">
+        <h3 className="text-sm font-semibold text-foreground">API Tokens</h3>
         <Button size="sm" onClick={() => { setNewToken(null); setCreateOpen(true); }}>
           <Plus className="h-4 w-4" /> New token
         </Button>
       </div>
+      <p className="text-xs text-muted-foreground mb-3">
+        Use these tokens with the browser extension or any client to ingest jobs into your tracker.
+      </p>
 
       <div className="rounded-md border border-border bg-muted/20 p-3 mb-4">
         <Label className="text-xs text-muted-foreground">Ingestion endpoint</Label>
