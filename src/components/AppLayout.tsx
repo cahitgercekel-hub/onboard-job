@@ -34,8 +34,9 @@ export default function AppLayout() {
   ];
   const allNav = [...trackerNav, assistantNav[0], ...footerNav];
 
+  // Single row style used in BOTH expanded & collapsed so Y-positions stay identical.
   const navItem =
-    "flex items-center gap-2.5 rounded-md px-3 py-2 text-sm transition-colors min-h-[40px]";
+    "flex items-center gap-2.5 rounded-md h-10 px-3 text-sm transition-colors";
   const navInactive =
     "text-sidebar-foreground/80 hover:bg-sidebar-accent/60 hover:text-sidebar-foreground";
   const navActive =
@@ -43,6 +44,10 @@ export default function AppLayout() {
 
   const iconBtn =
     "flex h-10 w-10 items-center justify-center rounded-md transition-colors";
+
+  // Section header — same height in both modes (text hidden when collapsed).
+  const sectionHeader =
+    "h-7 flex items-end px-3 pb-1 text-[10px] font-semibold uppercase tracking-wider text-muted-foreground overflow-hidden";
 
   const toggleBtn = (
     <button
@@ -86,118 +91,97 @@ export default function AppLayout() {
             )}
           </div>
 
-          {collapsed ? (
-            <>
-              <nav className="flex-1 p-3 space-y-1 flex flex-col items-center overflow-y-auto">
-                {/* spacer matches expanded "Tracker" section header height */}
-                <div className="h-[22px] w-full" aria-hidden="true" />
-                {trackerNav.map((n) => (
-                  <Tooltip key={n.to}>
-                    <TooltipTrigger asChild>
-                      <NavLink
-                        to={n.to}
-                        end={n.end as boolean}
-                        className={({ isActive }) =>
-                          cn(iconBtn, isActive ? navActive : navInactive)
-                        }
-                        aria-label={n.label}
-                      >
-                        <n.icon className="h-4 w-4" />
-                      </NavLink>
-                    </TooltipTrigger>
-                    <TooltipContent side="right">{n.label}</TooltipContent>
-                  </Tooltip>
-                ))}
-                {/* spacer matches expanded "Assistant" section header height */}
-                <div className="h-[30px] w-full" aria-hidden="true" />
-                {assistantNav.map((n) => (
-                  <Tooltip key={n.to}>
-                    <TooltipTrigger asChild>
-                      <NavLink
-                        to={n.to}
-                        end={n.end as boolean}
-                        className={({ isActive }) =>
-                          cn(iconBtn, isActive ? navActive : navInactive)
-                        }
-                        aria-label={n.label}
-                      >
-                        <n.icon className="h-4 w-4" />
-                      </NavLink>
-                    </TooltipTrigger>
-                    <TooltipContent side="right">{n.label}</TooltipContent>
-                  </Tooltip>
-                ))}
-              </nav>
-              <div className="p-3 border-t border-sidebar-border flex flex-col items-center gap-1">
-                {footerNav.map((n) => (
-                  <Tooltip key={n.to}>
-                    <TooltipTrigger asChild>
-                      <NavLink
-                        to={n.to}
-                        end={n.end as boolean}
-                        className={({ isActive }) =>
-                          cn(iconBtn, isActive ? navActive : navInactive)
-                        }
-                        aria-label={n.label}
-                      >
-                        <n.icon className="h-4 w-4" />
-                      </NavLink>
-                    </TooltipTrigger>
-                    <TooltipContent side="right">{n.label}</TooltipContent>
-                  </Tooltip>
-                ))}
+          {/* Unified nav — same DOM in both modes; labels/headers fade away when collapsed */}
+          <nav className="flex-1 p-3 space-y-1 overflow-y-auto overflow-x-hidden">
+            <div className={sectionHeader}>
+              <span className={cn("transition-opacity duration-150", collapsed && "opacity-0")}>
+                {t("nav.tracker")}
+              </span>
+            </div>
+            {trackerNav.map((n) => {
+              const link = (
+                <NavLink
+                  to={n.to}
+                  end={n.end as boolean}
+                  className={({ isActive }) =>
+                    cn(navItem, collapsed && "justify-center px-0 w-10 mx-auto", isActive ? navActive : navInactive)
+                  }
+                  aria-label={n.label}
+                >
+                  <n.icon className="h-4 w-4 shrink-0" />
+                  {!collapsed && <span className="truncate">{n.label}</span>}
+                </NavLink>
+              );
+              return collapsed ? (
+                <Tooltip key={n.to}>
+                  <TooltipTrigger asChild>{link}</TooltipTrigger>
+                  <TooltipContent side="right">{n.label}</TooltipContent>
+                </Tooltip>
+              ) : (
+                <div key={n.to}>{link}</div>
+              );
+            })}
+
+            <div className={sectionHeader}>
+              <span className={cn("transition-opacity duration-150", collapsed && "opacity-0")}>
+                {t("nav.assistant")}
+              </span>
+            </div>
+            {assistantNav.map((n) => {
+              const link = (
+                <NavLink
+                  to={n.to}
+                  end={n.end as boolean}
+                  className={({ isActive }) =>
+                    cn(navItem, collapsed && "justify-center px-0 w-10 mx-auto", isActive ? navActive : navInactive)
+                  }
+                  aria-label={n.label}
+                >
+                  <n.icon className="h-4 w-4 shrink-0" />
+                  {!collapsed && <span className="truncate">{n.label}</span>}
+                </NavLink>
+              );
+              return collapsed ? (
+                <Tooltip key={n.to}>
+                  <TooltipTrigger asChild>{link}</TooltipTrigger>
+                  <TooltipContent side="right">{n.label}</TooltipContent>
+                </Tooltip>
+              ) : (
+                <div key={n.to}>{link}</div>
+              );
+            })}
+          </nav>
+
+          <div className="p-3 border-t border-sidebar-border space-y-1">
+            {footerNav.map((n) => {
+              const link = (
+                <NavLink
+                  to={n.to}
+                  end={n.end as boolean}
+                  className={({ isActive }) =>
+                    cn(navItem, collapsed && "justify-center px-0 w-10 mx-auto", isActive ? navActive : navInactive)
+                  }
+                  aria-label={n.label}
+                >
+                  <n.icon className="h-4 w-4 shrink-0" />
+                  {!collapsed && <span className="truncate">{n.label}</span>}
+                </NavLink>
+              );
+              return collapsed ? (
+                <Tooltip key={n.to}>
+                  <TooltipTrigger asChild>{link}</TooltipTrigger>
+                  <TooltipContent side="right">{n.label}</TooltipContent>
+                </Tooltip>
+              ) : (
+                <div key={n.to}>{link}</div>
+              );
+            })}
+            {!collapsed && (
+              <div className="px-3 pt-2 text-[11px] text-muted-foreground">
+                Synced to your account.
               </div>
-            </>
-          ) : (
-            <>
-              <nav className="flex-1 p-3 space-y-1 overflow-y-auto">
-                <div className="px-3 pt-1 pb-1 text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">
-                  {t("nav.tracker")}
-                </div>
-                {trackerNav.map((n) => (
-                  <NavLink
-                    key={n.to}
-                    to={n.to}
-                    end={n.end}
-                    className={({ isActive }) => cn(navItem, isActive ? navActive : navInactive)}
-                  >
-                    <n.icon className="h-4 w-4" />
-                    {n.label}
-                  </NavLink>
-                ))}
-                <div className="px-3 pt-3 pb-1 text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">
-                  {t("nav.assistant")}
-                </div>
-                {assistantNav.map((n) => (
-                  <NavLink
-                    key={n.to}
-                    to={n.to}
-                    end={n.end}
-                    className={({ isActive }) => cn(navItem, isActive ? navActive : navInactive)}
-                  >
-                    <n.icon className="h-4 w-4" />
-                    {n.label}
-                  </NavLink>
-                ))}
-              </nav>
-              <div className="p-3 border-t border-sidebar-border space-y-1">
-                {footerNav.map((n) => (
-                  <NavLink
-                    key={n.to}
-                    to={n.to}
-                    end={n.end}
-                    className={({ isActive }) => cn(navItem, isActive ? navActive : navInactive)}
-                  >
-                    <n.icon className="h-4 w-4" />
-                    {n.label}
-                  </NavLink>
-                ))}
-                <div className="px-3 pt-2 text-[11px] text-muted-foreground">
-                  Synced to your account.
-                </div>
-              </div>
-            </>
-          )}
+            )}
+          </div>
         </aside>
 
         <div className="flex-1 flex flex-col min-w-0 transition-all duration-300 ease-in-out">
