@@ -182,17 +182,21 @@ export default function AppLayout() {
 
           {/* Unified nav — same DOM in both modes; labels/headers fade away when collapsed */}
           <nav className="flex-1 p-3 space-y-1 overflow-y-auto overflow-x-hidden">
-            <div className={sectionHeader}>
-              <span className={cn("transition-opacity duration-150", collapsed && "opacity-0")}>
-                {t("nav.tracker")}
-              </span>
+            <div className={cn(sectionHeader, collapsed && "items-center justify-center pb-0")}>
+              {collapsed ? (
+                <div className="h-px w-6 bg-sidebar-border" aria-hidden="true" />
+              ) : (
+                <span>{t("nav.tracker")}</span>
+              )}
             </div>
             {trackerNav.map((n) => renderNavRow(n))}
 
-            <div className={sectionHeader}>
-              <span className={cn("transition-opacity duration-150", collapsed && "opacity-0")}>
-                {t("nav.assistant")}
-              </span>
+            <div className={cn(sectionHeader, collapsed && "items-center justify-center pb-0")}>
+              {collapsed ? (
+                <div className="h-px w-6 bg-sidebar-border" aria-hidden="true" />
+              ) : (
+                <span>{t("nav.assistant")}</span>
+              )}
             </div>
             {assistantNav.map((n) => renderNavRow(n))}
           </nav>
