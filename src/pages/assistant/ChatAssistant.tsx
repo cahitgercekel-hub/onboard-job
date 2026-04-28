@@ -42,6 +42,8 @@ const PREMIUM_TOOLS = [
 
 const CHAT_URL = `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/career-chat`;
 
+const RAIL_STORAGE_KEY = "jat.premiumRail.collapsed";
+
 export default function ChatAssistant() {
   const { jobs } = useJobs();
   const { user } = useAuth();
@@ -54,8 +56,23 @@ export default function ChatAssistant() {
   const [attachedJobId, setAttachedJobId] = useState<string>("");
   const [hasCv, setHasCv] = useState<boolean | null>(null);
   const [moreOpen, setMoreOpen] = useState(false);
+  const [railCollapsed, setRailCollapsed] = useState<boolean>(() => {
+    try {
+      return localStorage.getItem(RAIL_STORAGE_KEY) === "1";
+    } catch {
+      return false;
+    }
+  });
   const abortRef = useRef<AbortController | null>(null);
   const scrollRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    try {
+      localStorage.setItem(RAIL_STORAGE_KEY, railCollapsed ? "1" : "0");
+    } catch {
+      // ignore
+    }
+  }, [railCollapsed]);
 
   const attachedJob = useMemo(
     () => jobs.find((j) => j.id === attachedJobId) || null,
