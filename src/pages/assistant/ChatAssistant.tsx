@@ -248,6 +248,7 @@ export default function ChatAssistant() {
   const reset = () => {
     if (isStreaming) stop();
     setMessages([]);
+    clearChatThread(user?.id, attachedJobId || null);
   };
 
   return (
