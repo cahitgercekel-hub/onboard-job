@@ -82,7 +82,7 @@ function FileUploadButton({ onText, disabled, label = "Upload PDF / DOCX" }: { o
 
 function ResultPanel({ loading, content, empty }: { loading: boolean; content: string; empty: ReactNode }) {
   return (
-    <div className="surface-card p-5 min-h-[260px]">
+    <div className="surface-card p-5 min-h-[260px] h-full">
       {loading ? (
         <div className="flex items-center gap-2 text-sm text-muted-foreground">
           <Loader2 className="h-4 w-4 animate-spin" /> Thinking…
@@ -145,13 +145,13 @@ export function ToneAnalyzer() {
         </Button>
       </div>
 
-      <div className="min-h-[260px]">
+      <div className="min-h-[260px] h-full">
         {loading ? (
-          <div className="surface-card p-5 flex items-center gap-2 text-sm text-muted-foreground">
+          <div className="surface-card p-5 flex items-center gap-2 text-sm text-muted-foreground h-full">
             <Loader2 className="h-4 w-4 animate-spin" /> Thinking…
           </div>
         ) : !result ? (
-          <div className="surface-card p-5 text-sm text-muted-foreground min-h-[260px]">
+          <div className="surface-card p-5 text-sm text-muted-foreground min-h-[260px] h-full">
             Output will appear here — culture inference, tone match, issues, and concrete before/after edits.
           </div>
         ) : (
@@ -324,13 +324,13 @@ export function PolishTool() {
         </Button>
       </div>
 
-      <div className="min-h-[260px]">
+      <div className="min-h-[260px] h-full">
         {loading ? (
-          <div className="surface-card p-5 flex items-center gap-2 text-sm text-muted-foreground">
+          <div className="surface-card p-5 flex items-center gap-2 text-sm text-muted-foreground h-full">
             <Loader2 className="h-4 w-4 animate-spin" /> Thinking…
           </div>
         ) : !result ? (
-          <div className="surface-card p-5 text-sm text-muted-foreground min-h-[260px]">
+          <div className="surface-card p-5 text-sm text-muted-foreground min-h-[260px] h-full">
             Polished version + a short list of key changes will appear here.
           </div>
         ) : (
@@ -416,14 +416,14 @@ export function InterviewPrep() {
       </div>
 
       {/* RIGHT — results / placeholder */}
-      <div className="min-h-[260px]">
+      <div className="min-h-[260px] h-full">
         {!result && !loading && (
-          <div className="surface-card p-6 text-sm text-muted-foreground min-h-[260px] flex items-center justify-center text-center">
+          <div className="surface-card p-6 text-sm text-muted-foreground min-h-[260px] h-full flex items-center justify-center text-center">
             {t("assistant.interview.empty")}
           </div>
         )}
         {loading && (
-          <div className="surface-card p-6 flex items-center gap-2 text-sm text-muted-foreground">
+          <div className="surface-card p-6 flex items-center gap-2 text-sm text-muted-foreground h-full">
             <Loader2 className="h-4 w-4 animate-spin" /> Thinking…
           </div>
         )}
