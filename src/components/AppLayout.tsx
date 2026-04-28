@@ -149,26 +149,27 @@ export default function AppLayout() {
             collapsed ? "w-16" : "w-60"
           )}
         >
-          <div
-            className={cn(
-              "flex items-center gap-2 border-b border-sidebar-border h-[69px]",
-              collapsed ? "justify-center px-2" : "px-4"
-            )}
-          >
-            {collapsed ? (
-              toggleBtn
-            ) : (
-              <>
+          {/* Header — identical 69px height in both modes; only contents fade */}
+          <div className="flex items-center gap-2 border-b border-sidebar-border h-[69px] px-2">
+            <div className="flex h-10 w-10 items-center justify-center shrink-0">
+              {collapsed ? (
+                toggleBtn
+              ) : (
                 <Logo size={32} />
-                <div className="leading-tight min-w-0 flex-1">
-                  <div className="text-sm font-semibold text-sidebar-foreground truncate flex items-center gap-1.5">
-                    {t("app.name")} <PlanBadge plan={plan} />
-                  </div>
-                  <div className="text-[11px] text-muted-foreground truncate">{t("app.tagline")}</div>
-                </div>
-                {toggleBtn}
-              </>
-            )}
+              )}
+            </div>
+            <div
+              className={cn(
+                "leading-tight min-w-0 flex-1 transition-opacity duration-150",
+                collapsed && "opacity-0 pointer-events-none"
+              )}
+            >
+              <div className="text-sm font-semibold text-sidebar-foreground truncate flex items-center gap-1.5">
+                {t("app.name")} <PlanBadge plan={plan} />
+              </div>
+              <div className="text-[11px] text-muted-foreground truncate">{t("app.tagline")}</div>
+            </div>
+            {!collapsed && toggleBtn}
           </div>
 
           {/* Unified nav — same DOM in both modes; labels/headers fade away when collapsed */}
@@ -178,7 +179,7 @@ export default function AppLayout() {
                 {t("nav.tracker")}
               </span>
             </div>
-            {trackerNav.map((n) => {
+            {trackerNav.map((n) => renderNavRow(n))}
               const link = (
                 <NavLink
                   to={n.to}
