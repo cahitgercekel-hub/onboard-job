@@ -4,8 +4,9 @@ import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
 import {
   Loader2, Send, Square, Sparkles, X, Briefcase, Bot, FileText,
-  CalendarCheck, Plus, Smile, MessagesSquare,
+  CalendarCheck, Plus, Smile, MessagesSquare, Search, ChevronUp, ChevronDown,
 } from "lucide-react";
+import { Input } from "@/components/ui/input";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
@@ -98,6 +99,71 @@ export default function ChatAssistant() {
   );
 
   const userInitial = (user?.email || "U").slice(0, 1).toUpperCase();
+
+  // ---- In-thread search ----
+  const [searchOpen, setSearchOpen] = useState(false);
+  const [searchQuery, setSearchQuery] = useState("");
+  const [activeMatchIdx, setActiveMatchIdx] = useState(0);
+  const searchInputRef = useRef<HTMLInputElement>(null);
+
+  const matchedIndices = useMemo(() => {
+    const q = searchQuery.trim().toLowerCase();
+    if (!q) return [];
+    const out: number[] = [];
+    messages.forEach((m, i) => {
+      if (m.content.toLowerCase().includes(q)) out.push(i);
+    });
+    return out;
+  }, [messages, searchQuery]);
+
+  // Reset / clamp the active match when matches change
+  useEffect(() => {
+    if (matchedIndices.length === 0) {
+      setActiveMatchIdx(0);
+      return;
+    }
+    setActiveMatchIdx((prev) => (prev >= matchedIndices.length ? 0 : prev));
+  }, [matchedIndices]);
+
+  // Scroll the active match into view
+  useEffect(() => {
+    if (!searchOpen || matchedIndices.length === 0) return;
+    const msgIdx = matchedIndices[activeMatchIdx];
+    const el = document.getElementById(`chat-msg-${msgIdx}`);
+    if (el) el.scrollIntoView({ behavior: "smooth", block: "center" });
+  }, [activeMatchIdx, matchedIndices, searchOpen]);
+
+  // Clear search when switching threads
+  useEffect(() => {
+    setSearchOpen(false);
+    setSearchQuery("");
+    setActiveMatchIdx(0);
+  }, [user?.id, attachedJobId]);
+
+  // Focus input when opening
+  useEffect(() => {
+    if (searchOpen) {
+      const t = setTimeout(() => searchInputRef.current?.focus(), 0);
+      return () => clearTimeout(t);
+    }
+  }, [searchOpen]);
+
+  const gotoNextMatch = () => {
+    if (matchedIndices.length === 0) return;
+    setActiveMatchIdx((i) => (i + 1) % matchedIndices.length);
+  };
+  const gotoPrevMatch = () => {
+    if (matchedIndices.length === 0) return;
+    setActiveMatchIdx((i) => (i - 1 + matchedIndices.length) % matchedIndices.length);
+  };
+  const closeSearch = () => {
+    setSearchOpen(false);
+    setSearchQuery("");
+    setActiveMatchIdx(0);
+  };
+  const matchSet = useMemo(() => new Set(matchedIndices), [matchedIndices]);
+  const activeMatchMsgIdx = matchedIndices[activeMatchIdx] ?? -1;
+
 
   useEffect(() => {
     (async () => {
@@ -275,6 +341,18 @@ export default function ChatAssistant() {
               </div>
             </div>
             <div className="flex items-center gap-2 shrink-0">
+              <Button
+                variant="outline"
+                size="sm"
+                className="h-8 text-xs gap-1.5"
+                onClick={() => setSearchOpen((o) => !o)}
+                disabled={messages.length === 0}
+                aria-label="Search in chat"
+                aria-pressed={searchOpen}
+              >
+                <Search className="h-3.5 w-3.5" />
+                <span className="hidden sm:inline">Search</span>
+              </Button>
               <Popover>
                 <PopoverTrigger asChild>
                   <Button variant="outline" size="sm" className="h-8 text-xs gap-1.5">
@@ -329,6 +407,68 @@ export default function ChatAssistant() {
             </div>
           </div>
 
+          {searchOpen && (
+            <div className="flex items-center gap-2 px-3 md:px-4 py-2 border-b border-border bg-card/80">
+              <Search className="h-3.5 w-3.5 text-muted-foreground shrink-0" />
+              <Input
+                ref={searchInputRef}
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                onKeyDown={(e) => {
+                  if (e.key === "Enter") {
+                    e.preventDefault();
+                    if (e.shiftKey) gotoPrevMatch();
+                    else gotoNextMatch();
+                  } else if (e.key === "Escape") {
+                    e.preventDefault();
+                    closeSearch();
+                  }
+                }}
+                placeholder="Search this conversation…"
+                className="h-8 text-xs flex-1 bg-background"
+              />
+              <span className="text-[11px] text-muted-foreground tabular-nums min-w-[3.5rem] text-right">
+                {searchQuery.trim()
+                  ? matchedIndices.length
+                    ? `${activeMatchIdx + 1} / ${matchedIndices.length}`
+                    : "0 / 0"
+                  : ""}
+              </span>
+              <Button
+                type="button"
+                variant="ghost"
+                size="icon"
+                className="h-7 w-7"
+                onClick={gotoPrevMatch}
+                disabled={matchedIndices.length === 0}
+                aria-label="Previous match"
+              >
+                <ChevronUp className="h-3.5 w-3.5" />
+              </Button>
+              <Button
+                type="button"
+                variant="ghost"
+                size="icon"
+                className="h-7 w-7"
+                onClick={gotoNextMatch}
+                disabled={matchedIndices.length === 0}
+                aria-label="Next match"
+              >
+                <ChevronDown className="h-3.5 w-3.5" />
+              </Button>
+              <Button
+                type="button"
+                variant="ghost"
+                size="icon"
+                className="h-7 w-7"
+                onClick={closeSearch}
+                aria-label="Close search"
+              >
+                <X className="h-3.5 w-3.5" />
+              </Button>
+            </div>
+          )}
+
           {hasCv === false && (
             <div className="text-xs px-4 py-2 bg-warning/10 border-b border-warning/30 text-foreground">
               No baseline CV found. Add one in Settings so the agent knows your background.
@@ -350,8 +490,14 @@ export default function ChatAssistant() {
 
             {messages.map((m, i) => {
               const isUser = m.role === "user";
+              const isMatch = matchSet.has(i);
+              const isActive = i === activeMatchMsgIdx;
               return (
-                <div key={i} className={cn("flex gap-2.5 items-start", isUser ? "justify-end" : "justify-start")}>
+                <div
+                  key={i}
+                  id={`chat-msg-${i}`}
+                  className={cn("flex gap-2.5 items-start scroll-mt-4", isUser ? "justify-end" : "justify-start")}
+                >
                   {!isUser && (
                     <div className="h-8 w-8 rounded-full bg-gradient-premium flex items-center justify-center shrink-0 shadow-sm">
                       <Bot className="h-4 w-4 text-white" />
@@ -359,10 +505,12 @@ export default function ChatAssistant() {
                   )}
                   <div
                     className={cn(
-                      "rounded-2xl text-sm leading-relaxed shadow-sm",
+                      "rounded-2xl text-sm leading-relaxed shadow-sm transition-shadow",
                       isUser
                         ? "max-w-[78%] px-4 py-2.5 bg-gradient-premium text-white rounded-tr-sm"
-                        : "max-w-[88%] px-5 py-4 bg-card text-foreground border border-border rounded-tl-sm"
+                        : "max-w-[88%] px-5 py-4 bg-card text-foreground border border-border rounded-tl-sm",
+                      isMatch && !isActive && "ring-1 ring-warning/50",
+                      isActive && "ring-2 ring-warning shadow-[0_0_0_4px_hsl(var(--warning)/0.15)]"
                     )}
                   >
                     {isUser ? (
