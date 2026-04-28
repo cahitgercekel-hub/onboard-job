@@ -661,7 +661,6 @@ export function CvAnalyzer() {
                 `Daily Scan Limit: ${scansUsed}/${SCAN_LIMIT} free scans used`
               )}
             </span>
-            {!isPro && <span className="font-medium">{scanPct}%</span>}
           </div>
           {!isPro && <Progress value={scanPct} className="h-1.5" />}
           {limitReached && (
