@@ -126,7 +126,7 @@ export function ToneAnalyzer() {
   const tone = result ? scoreTone(result.toneScore) : null;
 
   return (
-    <div className="grid lg:grid-cols-2 gap-5 min-h-[560px]">
+    <div className="grid lg:grid-cols-2 gap-5 min-h-[560px] h-full">
       <div className="flex flex-col gap-3 h-full">
         <div className="grid gap-1.5">
           <Label htmlFor="company">Target company</Label>
@@ -244,7 +244,7 @@ export function SkillTranslator() {
   };
 
   return (
-    <div className="grid lg:grid-cols-2 gap-5 min-h-[560px]">
+    <div className="grid lg:grid-cols-2 gap-5 min-h-[560px] h-full">
       <div className="flex flex-col gap-3 h-full">
         <div className="flex flex-col gap-1.5 flex-1 min-h-[200px]">
           <Label htmlFor="exp">Unconventional experience</Label>
@@ -289,7 +289,7 @@ export function PolishTool() {
   };
 
   return (
-    <div className="grid lg:grid-cols-2 gap-5 min-h-[560px]">
+    <div className="grid lg:grid-cols-2 gap-5 min-h-[560px] h-full">
       <div className="flex flex-col gap-3 h-full">
         <div className="flex items-end justify-between gap-3 flex-wrap">
           <Label htmlFor="polish-text" className="mb-0">Text</Label>
@@ -388,7 +388,7 @@ export function InterviewPrep() {
   };
 
   return (
-    <div className="grid lg:grid-cols-2 gap-5 min-h-[560px]">
+    <div className="grid lg:grid-cols-2 gap-5 min-h-[560px] h-full">
       {/* LEFT — picker + button */}
       <div className="flex flex-col gap-3 h-full">
         <div className="grid gap-1.5">
