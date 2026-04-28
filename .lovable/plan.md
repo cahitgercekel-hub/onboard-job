@@ -1,56 +1,67 @@
-# Align primary action buttons across all assistant tools
-
-## Problem
-
-Each assistant tool (Corporate Tone, Skill Translator, Grammar & Polish, Interview Prep, CV Analyzer) renders a primary CTA button in the left column, but they end up at different vertical positions because:
-
-- **CV Analyzer** uses `w-full h-11` gradient button pinned to the bottom via `mt-auto`, with the textarea (`flex-1`) and other cards growing to fill the column → button sits flush at the bottom edge of the right column.
-- **Other four tools** use `w-full sm:w-auto` (smaller auto-width on desktop) and their textareas have small `min-h` values without aggressive growth, so the button sits well above the bottom of the right column. Interview Prep is worst (no textarea at all → button floats near the top).
-
 ## Goal
 
-Make the CTA button on Corporate Tone, Skill Translator, Grammar & Polish, and Interview Prep visually identical (size + bottom-edge alignment) to the **Analyze CV** button on CV Analyzer, and grow the input fields to fill the freed vertical space so the layout looks intentional.
+In the "Attach a job" popover (AI Assistant header), there should be **one** control instead of two:
 
-## Reference button (CV Analyzer, line 673-680)
+- The purple pill (currently just a display) becomes the clickable selector that opens the job list.
+- The plain dropdown trigger underneath is removed.
+- The X close button on the pill is removed.
 
-```tsx
-<Button
-  onClick={run}
-  disabled={loading || limitReached}
-  className="mt-auto w-full h-11 text-sm font-semibold bg-gradient-premium text-white border-0 hover:opacity-95 disabled:opacity-50"
->
-  {loading ? <Loader2 ... /> : <Icon ... />}
-  Label
-</Button>
+When no job is attached yet, the purple pill itself is shown in an empty/placeholder state ("Select a job…") and clicking it opens the list.
+
+## Reference
+
+Current state (from screenshot):
+```text
+┌ Attach a job ─────────────────────┐
+│ ╔═══════════════════════════════╗ │  ← purple pill (display only, has X)
+│ ║ Altagram Group — Game Loc.  × ║ │
+│ ║ Junior Localization Engineer  ║ │
+│ ╚═══════════════════════════════╝ │
+│ ┌───────────────────────────────┐ │  ← separate dropdown trigger
+│ │ Altagram Group — Junior… ▾    │ │
+│ └───────────────────────────────┘ │
+└───────────────────────────────────┘
 ```
 
-Key tokens to standardize: `mt-auto w-full h-11 text-sm font-semibold bg-gradient-premium text-white border-0 hover:opacity-95 disabled:opacity-50`.
+Target state:
+```text
+┌ Attach a job ─────────────────────┐
+│ ╔═══════════════════════════════╗ │  ← purple pill IS the trigger (click to open list)
+│ ║ Altagram Group — Game Loc.    ║ │
+│ ║ Junior Localization Engineer  ║ │
+│ ╚═══════════════════════════════╝ │
+└───────────────────────────────────┘
+```
 
-## Changes (all in `src/pages/Assistant.tsx`)
+Empty state (no job attached):
+```text
+┌ Attach a job ─────────────────────┐
+│ ╔═══════════════════════════════╗ │
+│ ║ Select a job…              ▾  ║ │  ← muted placeholder styling
+│ ╚═══════════════════════════════╝ │
+└───────────────────────────────────┘
+```
 
-### 1. ToneAnalyzer (~line 128–146)
-- Promote the cover-letter Textarea to fill all available space: change its wrapper to `flex flex-col gap-1.5 flex-1 min-h-[260px]` (already has `flex-1`, just bump min-h so the column stretches more).
-- Replace the button className with the standard one above. Icon stays `Wand2`, label stays "Analyze tone".
+## Changes
 
-### 2. SkillTranslator (~line 246–266)
-- Both textareas already share `flex-1`. Keep them, but bump each `min-h-[140px]` → `min-h-[200px]` so the column stretches like CV Analyzer's column.
-- Replace button className with the standard one. Icon stays `Briefcase`, label stays "Translate skills".
+**File:** `src/pages/assistant/ChatAssistant.tsx` (the popover content inside the chat header, around lines 363–410)
 
-### 3. PolishTool (~line 291–325)
-- The Textarea has `flex-1 min-h-[240px]` — keep `flex-1`, bump min-h to `min-h-[300px]` so the textarea visibly grows and pushes the button down.
-- Replace button className with the standard one. Icon stays `Sparkles`, label stays "Polish".
+1. Replace the two-part block (badge + Select) with a single shadcn `<Select>` whose `<SelectTrigger>` is restyled into the purple pill:
+   - `h-auto` (so two lines fit), full width, padded (`px-3 py-2`).
+   - Background `bg-accent/15`, border `border-accent/20`, text `text-accent`.
+   - Inside the trigger, use `<SelectValue>` with a custom render: company name (semibold, top line) + role title (smaller, second line).
+   - Show two-line content using `flex flex-col items-start text-left` and remove the trigger's default truncation so the role can wrap.
+2. Remove the standalone X button (clearing the attached job is no longer offered here; switching to a different job is done by picking from the list).
+3. Remove the now-unused `Badge` import if no other usages remain.
+4. Keep the existing "Start new chat" button beneath, untouched.
 
-### 4. InterviewPrep (~line 390–415)
-- This is the most off-position because the left column only contains a short job picker. Add a flex spacer (`<div className="flex-1" />`) between the picker block and the button so `mt-auto` actually pushes the button to the bottom of the column (which is sized by the right-column results panel).
-- Replace button className with the standard one. Icon stays `MessageSquare`, label stays from i18n.
+## Behavior
 
-### 5. CV Analyzer
-- No change — this is the reference.
+- Clicking the purple pill opens the job list directly.
+- Selecting a different job updates `attachedJobId` (existing handler), the pill updates to the new company/role, and the persisted thread for that job loads (existing effect already handles this).
+- Empty list message ("No saved jobs yet") still shows when there are no jobs.
 
-## Result
+## Out of scope
 
-All five tools will show a full-width, 44px-tall gradient primary button anchored to the bottom edge of the left column, exactly matching the right column's bottom edge. The freed vertical space is absorbed by the input textareas (or a spacer in Interview Prep's case), so nothing looks empty or floating.
-
-## Files touched
-
-- `src/pages/Assistant.tsx` — 4 button classNames + a few `min-h` bumps + 1 spacer div in InterviewPrep.
+- No change to thread persistence, search, or any other behavior.
+- No removal action for the attached job from this popover (was previously the X). If the user later wants to "detach" a job, we can add a dedicated "No job attached" entry at the top of the list — flag if you want this.
