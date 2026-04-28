@@ -132,15 +132,15 @@ export function ToneAnalyzer() {
           <Label htmlFor="company">Target company</Label>
           <Input id="company" value={company} onChange={(e) => setCompany(e.target.value)} placeholder="e.g. Deutsche Bank, Stripe, BMW" />
         </div>
-        <div className="flex flex-col gap-1.5 flex-1 min-h-[200px]">
+        <div className="flex flex-col gap-1.5 flex-1 min-h-[260px]">
           <div className="flex items-center justify-between">
             <Label htmlFor="draft">Cover letter draft</Label>
             <FileUploadButton onText={setDraft} disabled={loading} label="Upload cover letter" />
           </div>
-          <Textarea id="draft" value={draft} onChange={(e) => setDraft(e.target.value)} placeholder="Paste your draft here, or upload a PDF/DOCX…" className="flex-1 min-h-[200px] resize-none" />
+          <Textarea id="draft" value={draft} onChange={(e) => setDraft(e.target.value)} placeholder="Paste your draft here, or upload a PDF/DOCX…" className="flex-1 min-h-[260px] resize-none" />
         </div>
-        <Button onClick={run} disabled={loading} className="mt-auto w-full sm:w-auto bg-gradient-premium text-white border-0 hover:opacity-95">
-          {loading ? <Loader2 className="h-4 w-4 animate-spin" /> : <Wand2 className="h-4 w-4" />}
+        <Button onClick={run} disabled={loading} className="mt-auto w-full h-11 text-sm font-semibold bg-gradient-premium text-white border-0 hover:opacity-95 disabled:opacity-50">
+          {loading ? <Loader2 className="h-4 w-4 animate-spin mr-2" /> : <Wand2 className="h-4 w-4 mr-2" />}
           Analyze tone
         </Button>
       </div>
@@ -246,19 +246,19 @@ export function SkillTranslator() {
   return (
     <div className="grid lg:grid-cols-2 gap-5 min-h-[560px]">
       <div className="flex flex-col gap-3 h-full">
-        <div className="flex flex-col gap-1.5 flex-1 min-h-[140px]">
+        <div className="flex flex-col gap-1.5 flex-1 min-h-[200px]">
           <Label htmlFor="exp">Unconventional experience</Label>
-          <Textarea id="exp" value={experience} onChange={(e) => setExperience(e.target.value)} placeholder="e.g. Led a 30-person volunteer cleanup, coordinated logistics across 5 districts…" className="flex-1 min-h-[140px] resize-none" />
+          <Textarea id="exp" value={experience} onChange={(e) => setExperience(e.target.value)} placeholder="e.g. Led a 30-person volunteer cleanup, coordinated logistics across 5 districts…" className="flex-1 min-h-[200px] resize-none" />
         </div>
-        <div className="flex flex-col gap-1.5 flex-1 min-h-[140px]">
+        <div className="flex flex-col gap-1.5 flex-1 min-h-[200px]">
           <div className="flex items-center justify-between">
             <Label htmlFor="jd">Target job description</Label>
             <FileUploadButton onText={setJobDescription} disabled={loading} label="Upload JD" />
           </div>
-          <Textarea id="jd" value={jobDescription} onChange={(e) => setJobDescription(e.target.value)} placeholder="Paste the JD here, or upload a PDF/DOCX…" className="flex-1 min-h-[140px] resize-none" />
+          <Textarea id="jd" value={jobDescription} onChange={(e) => setJobDescription(e.target.value)} placeholder="Paste the JD here, or upload a PDF/DOCX…" className="flex-1 min-h-[200px] resize-none" />
         </div>
-        <Button onClick={run} disabled={loading} className="mt-auto w-full sm:w-auto bg-gradient-premium text-white border-0 hover:opacity-95">
-          {loading ? <Loader2 className="h-4 w-4 animate-spin" /> : <Briefcase className="h-4 w-4" />}
+        <Button onClick={run} disabled={loading} className="mt-auto w-full h-11 text-sm font-semibold bg-gradient-premium text-white border-0 hover:opacity-95 disabled:opacity-50">
+          {loading ? <Loader2 className="h-4 w-4 animate-spin mr-2" /> : <Briefcase className="h-4 w-4 mr-2" />}
           Translate skills
         </Button>
       </div>
@@ -317,9 +317,9 @@ export function PolishTool() {
             <span className="text-sm text-foreground">{t("assistant.polish.businessGerman")}</span>
           </label>
         )}
-        <Textarea id="polish-text" value={text} onChange={(e) => setText(e.target.value)} placeholder="Paste an email, CV bullet point, or message — or upload a PDF/DOCX…" className="flex-1 min-h-[240px] resize-none" />
-        <Button onClick={run} disabled={loading} className="mt-auto w-full sm:w-auto bg-gradient-premium text-white border-0 hover:opacity-95">
-          {loading ? <Loader2 className="h-4 w-4 animate-spin" /> : <Sparkles className="h-4 w-4" />}
+        <Textarea id="polish-text" value={text} onChange={(e) => setText(e.target.value)} placeholder="Paste an email, CV bullet point, or message — or upload a PDF/DOCX…" className="flex-1 min-h-[300px] resize-none" />
+        <Button onClick={run} disabled={loading} className="mt-auto w-full h-11 text-sm font-semibold bg-gradient-premium text-white border-0 hover:opacity-95 disabled:opacity-50">
+          {loading ? <Loader2 className="h-4 w-4 animate-spin mr-2" /> : <Sparkles className="h-4 w-4 mr-2" />}
           Polish
         </Button>
       </div>
@@ -408,8 +408,9 @@ export function InterviewPrep() {
             </Select>
           )}
         </div>
-        <Button onClick={run} disabled={loading || !selectedId} className="mt-auto w-full sm:w-auto bg-gradient-premium text-white border-0 hover:opacity-95">
-          {loading ? <Loader2 className="h-4 w-4 animate-spin" /> : <MessageSquare className="h-4 w-4" />}
+        <div className="flex-1" />
+        <Button onClick={run} disabled={loading || !selectedId} className="mt-auto w-full h-11 text-sm font-semibold bg-gradient-premium text-white border-0 hover:opacity-95 disabled:opacity-50">
+          {loading ? <Loader2 className="h-4 w-4 animate-spin mr-2" /> : <MessageSquare className="h-4 w-4 mr-2" />}
           {t("assistant.interview.generate")}
         </Button>
       </div>

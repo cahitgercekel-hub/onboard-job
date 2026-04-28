@@ -1,43 +1,56 @@
-# Fix Premium Tools rail (Career Chat + collapsed state)
+# Align primary action buttons across all assistant tools
 
-## Problems found
+## Problem
 
-1. **Career Chat (`src/pages/assistant/ChatAssistant.tsx`)** uses its own custom inline rail markup instead of the shared `PremiumRail` component used by every other assistant page (CV Analyzer, Skill Translator, etc.). Result: it isn't collapsible and looks slightly different from the rest.
-2. **Collapsed state of `PremiumRail`** (`src/components/assistant/PremiumRail.tsx`) renders a narrow purple bar that looks bad: vertical text uses an awkward CSS rotation, the chevron sits alone at top, and there is no rounded corner consistency with the expanded card.
-3. **Chevron direction is inverted** when expanded. Currently it shows `ChevronRight` rotated 180° (= pointing left) when expanded, but the rail is on the right side, so the "collapse" affordance should point **right** (toward the edge it collapses to). When collapsed, the bar should show a chevron pointing **left** (toward the content it expands into).
+Each assistant tool (Corporate Tone, Skill Translator, Grammar & Polish, Interview Prep, CV Analyzer) renders a primary CTA button in the left column, but they end up at different vertical positions because:
 
-## Changes
+- **CV Analyzer** uses `w-full h-11` gradient button pinned to the bottom via `mt-auto`, with the textarea (`flex-1`) and other cards growing to fill the column → button sits flush at the bottom edge of the right column.
+- **Other four tools** use `w-full sm:w-auto` (smaller auto-width on desktop) and their textareas have small `min-h` values without aggressive growth, so the button sits well above the bottom of the right column. Interview Prep is worst (no textarea at all → button floats near the top).
 
-### 1. `src/components/assistant/PremiumRail.tsx`
+## Goal
 
-**Fix chevron logic:**
-- Expanded state: show `ChevronRight` (no rotation) — clicking collapses the rail to the right.
-- Collapsed state: show `ChevronLeft` — clicking expands the rail back to the left. (Already `ChevronLeft`, so just remove the wrong rotation in expanded state.)
+Make the CTA button on Corporate Tone, Skill Translator, Grammar & Polish, and Interview Prep visually identical (size + bottom-edge alignment) to the **Analyze CV** button on CV Analyzer, and grow the input fields to fill the freed vertical space so the layout looks intentional.
 
-**Polish collapsed bar:**
-- Keep the same `surface-card` rounded container so it visually matches the expanded card's outer shape.
-- Replace the rotated-span vertical text trick with a cleaner layout: chevron at top, crown icon, then "PREMIUM TOOLS" using `writing-mode: vertical-rl` only (drop the extra `rotate(180deg)` — currently the combination makes it read bottom-to-top awkwardly; we'll keep it readable top-to-bottom).
-- Slightly widen from `w-11` to `w-10` and center contents with even vertical spacing for a cleaner pill look.
-- Add `rounded-md` to the inner button so the gradient fills the card cleanly.
+## Reference button (CV Analyzer, line 673-680)
 
-### 2. `src/pages/assistant/ChatAssistant.tsx`
+```tsx
+<Button
+  onClick={run}
+  disabled={loading || limitReached}
+  className="mt-auto w-full h-11 text-sm font-semibold bg-gradient-premium text-white border-0 hover:opacity-95 disabled:opacity-50"
+>
+  {loading ? <Loader2 ... /> : <Icon ... />}
+  Label
+</Button>
+```
 
-**Replace inline rail with shared `PremiumRail` + collapsible state:**
-- Import `PremiumRail` and reuse the same `localStorage` key (`jat.premiumRail.collapsed`) used by `AssistantToolShell` so collapsed/expanded state persists consistently across all assistant pages.
-- Add `collapsed` state with localStorage init/sync (same logic as `AssistantToolShell`).
-- Change the outer grid from a static `lg:grid-cols-[1fr_300px]` to a dynamic `gridTemplateColumns` that switches between `minmax(0,1fr) 300px` (expanded) and `minmax(0,1fr) 44px` (collapsed), with a `transition-[grid-template-columns] duration-300` for smooth animation — matching `AssistantToolShell`.
-- Remove the entire custom `<aside>` block (lines ~412–459) and replace with `<PremiumRail tools={PREMIUM_TOOLS} collapsed={collapsed} onToggle={() => setCollapsed(c => !c)} />`.
-- Remove the now-unused `ChevronRight`, `Lock`, and `PlanBadge` imports (PlanBadge is still used elsewhere — verify before removing; if used only in the rail, drop it).
-- `PREMIUM_TOOLS` already matches the `PremiumTool` shape (`id`, `icon`, `title`, `desc`) — no data changes needed.
+Key tokens to standardize: `mt-auto w-full h-11 text-sm font-semibold bg-gradient-premium text-white border-0 hover:opacity-95 disabled:opacity-50`.
 
-### Behavior after changes
+## Changes (all in `src/pages/Assistant.tsx`)
 
-- Career Chat right rail looks identical to CV Analyzer / Skill Translator / etc.
-- Collapsing on any assistant page persists across all of them via shared localStorage key.
-- Chevron always points the correct way: right when expanded (collapses toward the right edge), left when collapsed (expands back toward content).
-- Collapsed bar is a clean rounded gradient pill with vertical "PREMIUM TOOLS" label that reads naturally.
+### 1. ToneAnalyzer (~line 128–146)
+- Promote the cover-letter Textarea to fill all available space: change its wrapper to `flex flex-col gap-1.5 flex-1 min-h-[260px]` (already has `flex-1`, just bump min-h so the column stretches more).
+- Replace the button className with the standard one above. Icon stays `Wand2`, label stays "Analyze tone".
+
+### 2. SkillTranslator (~line 246–266)
+- Both textareas already share `flex-1`. Keep them, but bump each `min-h-[140px]` → `min-h-[200px]` so the column stretches like CV Analyzer's column.
+- Replace button className with the standard one. Icon stays `Briefcase`, label stays "Translate skills".
+
+### 3. PolishTool (~line 291–325)
+- The Textarea has `flex-1 min-h-[240px]` — keep `flex-1`, bump min-h to `min-h-[300px]` so the textarea visibly grows and pushes the button down.
+- Replace button className with the standard one. Icon stays `Sparkles`, label stays "Polish".
+
+### 4. InterviewPrep (~line 390–415)
+- This is the most off-position because the left column only contains a short job picker. Add a flex spacer (`<div className="flex-1" />`) between the picker block and the button so `mt-auto` actually pushes the button to the bottom of the column (which is sized by the right-column results panel).
+- Replace button className with the standard one. Icon stays `MessageSquare`, label stays from i18n.
+
+### 5. CV Analyzer
+- No change — this is the reference.
+
+## Result
+
+All five tools will show a full-width, 44px-tall gradient primary button anchored to the bottom edge of the left column, exactly matching the right column's bottom edge. The freed vertical space is absorbed by the input textareas (or a spacer in Interview Prep's case), so nothing looks empty or floating.
 
 ## Files touched
 
-- `src/components/assistant/PremiumRail.tsx` — chevron fix + collapsed bar polish
-- `src/pages/assistant/ChatAssistant.tsx` — swap custom rail for shared `PremiumRail` with collapsible grid
+- `src/pages/Assistant.tsx` — 4 button classNames + a few `min-h` bumps + 1 spacer div in InterviewPrep.
