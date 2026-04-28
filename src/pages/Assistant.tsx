@@ -139,7 +139,7 @@ export function ToneAnalyzer() {
           </div>
           <Textarea id="draft" rows={14} value={draft} onChange={(e) => setDraft(e.target.value)} placeholder="Paste your draft here, or upload a PDF/DOCX…" />
         </div>
-        <Button onClick={run} disabled={loading} className="w-full sm:w-auto">
+        <Button onClick={run} disabled={loading} className="w-full sm:w-auto bg-gradient-premium text-white border-0 hover:opacity-95">
           {loading ? <Loader2 className="h-4 w-4 animate-spin" /> : <Wand2 className="h-4 w-4" />}
           Analyze tone
         </Button>
@@ -257,7 +257,7 @@ export function SkillTranslator() {
           </div>
           <Textarea id="jd" rows={7} value={jobDescription} onChange={(e) => setJobDescription(e.target.value)} placeholder="Paste the JD here, or upload a PDF/DOCX…" />
         </div>
-        <Button onClick={run} disabled={loading}>
+        <Button onClick={run} disabled={loading} className="w-full sm:w-auto bg-gradient-premium text-white border-0 hover:opacity-95">
           {loading ? <Loader2 className="h-4 w-4 animate-spin" /> : <Briefcase className="h-4 w-4" />}
           Translate skills
         </Button>
@@ -318,7 +318,7 @@ export function PolishTool() {
           </label>
         )}
         <Textarea id="polish-text" rows={12} value={text} onChange={(e) => setText(e.target.value)} placeholder="Paste an email, CV bullet point, or message — or upload a PDF/DOCX…" />
-        <Button onClick={run} disabled={loading}>
+        <Button onClick={run} disabled={loading} className="w-full sm:w-auto bg-gradient-premium text-white border-0 hover:opacity-95">
           {loading ? <Loader2 className="h-4 w-4 animate-spin" /> : <Sparkles className="h-4 w-4" />}
           Polish
         </Button>
@@ -407,7 +407,7 @@ export function InterviewPrep() {
             </Select>
           )}
         </div>
-        <Button onClick={run} disabled={loading || !selectedId} variant="ai">
+        <Button onClick={run} disabled={loading || !selectedId} className="bg-gradient-premium text-white border-0 hover:opacity-95">
           {loading ? <Loader2 className="h-4 w-4 animate-spin" /> : <MessageSquare className="h-4 w-4" />}
           {t("assistant.interview.generate")}
         </Button>
