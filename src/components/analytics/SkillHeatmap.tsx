@@ -100,7 +100,7 @@ export function SkillHeatmap({ jobs }: Props) {
           <Target className="h-4 w-4 text-accent" /> Skill Heatmap
         </h2>
         <span className="text-[11px] text-muted-foreground">
-          Top {stats.length} skills across {jobs.filter((j) => j.jobDescription).length} JDs
+          Top {stats.length} skills across {jobs.filter((j) => j.jobDescription).length} Job Postings
         </span>
       </div>
 
