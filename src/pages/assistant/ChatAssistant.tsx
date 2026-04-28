@@ -367,25 +367,26 @@ export default function ChatAssistant() {
                         <Briefcase className="h-3.5 w-3.5" /> Attach a job
                       </div>
 
-                      {attachedJob && (
-                        <div className="mb-2 flex items-start gap-2 w-full rounded-md border border-accent/20 bg-accent/15 text-accent px-3 py-2">
-                          <div className="flex-1 min-w-0 text-xs leading-snug">
-                            <div className="font-semibold truncate">{attachedJob.company}</div>
-                            <div className="text-accent/80 break-words">{attachedJob.role}</div>
-                          </div>
-                          <button
-                            onClick={() => setAttachedJobId("")}
-                            className="shrink-0 hover:bg-background/50 rounded p-0.5 mt-0.5"
-                            aria-label="Remove job"
-                          >
-                            <X className="h-3.5 w-3.5" />
-                          </button>
-                        </div>
-                      )}
-
                       <Select value={attachedJobId} onValueChange={setAttachedJobId}>
-                        <SelectTrigger className="h-8 text-xs">
-                          <SelectValue placeholder={attachedJob ? "Switch to another job…" : "Select a job (optional)"} />
+                        <SelectTrigger
+                          className={
+                            attachedJob
+                              ? "h-auto w-full items-start text-left rounded-md border-accent/20 bg-accent/15 text-accent hover:bg-accent/20 px-3 py-2 [&>span]:line-clamp-none [&>span]:block [&>span]:text-left"
+                              : "h-auto w-full items-start text-left px-3 py-2 [&>span]:block [&>span]:text-left"
+                          }
+                        >
+                          <SelectValue
+                            placeholder={
+                              <span className="text-xs text-muted-foreground">Select a job…</span>
+                            }
+                          >
+                            {attachedJob && (
+                              <span className="block text-xs leading-snug">
+                                <span className="block font-semibold truncate">{attachedJob.company}</span>
+                                <span className="block text-accent/80 break-words">{attachedJob.role}</span>
+                              </span>
+                            )}
+                          </SelectValue>
                         </SelectTrigger>
                         <SelectContent>
                           {jobOptions.length === 0 ? (
