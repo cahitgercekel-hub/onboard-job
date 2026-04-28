@@ -57,6 +57,7 @@ function rowToJob(r: JobRow): Job {
     rejectionReason: r.rejection_reason ?? null,
     rejectionTag: r.rejection_tag ?? null,
     archivedAt: r.archived_at ?? null,
+    rejectedAt: r.rejected_at ?? null,
     previousStatus: r.previous_status ?? null,
     cvVersionId: r.cv_version_id ?? null,
     createdAt: r.created_at,
