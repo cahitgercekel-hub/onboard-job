@@ -48,6 +48,7 @@ export default function Settings() {
   const { plan } = usePlan();
   const [confirmOpen, setConfirmOpen] = useState(false);
   const [importOpen, setImportOpen] = useState(false);
+  const [deleteAccountOpen, setDeleteAccountOpen] = useState(false);
 
   const planLabel = plan === "free" ? "Free Plan" : plan === "pro" ? "Pro" : "Business";
 
