@@ -360,41 +360,45 @@ export default function ChatAssistant() {
                     {attachedJob ? `${attachedJob.company}` : "Select a Job"}
                   </Button>
                 </PopoverTrigger>
-                <PopoverContent align="end" className="w-72">
+                <PopoverContent align="end" className="w-80">
                   <div className="space-y-3">
                     <div>
                       <div className="text-xs font-medium mb-1.5 flex items-center gap-1.5">
                         <Briefcase className="h-3.5 w-3.5" /> Attach a job
                       </div>
-                      {attachedJob ? (
-                        <Badge variant="secondary" className="bg-accent/15 text-accent border-accent/20 gap-1">
-                          {attachedJob.company} — {attachedJob.role}
+
+                      {attachedJob && (
+                        <div className="mb-2 flex items-start gap-2 w-full rounded-md border border-accent/20 bg-accent/15 text-accent px-3 py-2">
+                          <div className="flex-1 min-w-0 text-xs leading-snug">
+                            <div className="font-semibold truncate">{attachedJob.company}</div>
+                            <div className="text-accent/80 break-words">{attachedJob.role}</div>
+                          </div>
                           <button
                             onClick={() => setAttachedJobId("")}
-                            className="ml-1 hover:bg-background/50 rounded p-0.5"
+                            className="shrink-0 hover:bg-background/50 rounded p-0.5 mt-0.5"
                             aria-label="Remove job"
                           >
-                            <X className="h-3 w-3" />
+                            <X className="h-3.5 w-3.5" />
                           </button>
-                        </Badge>
-                      ) : (
-                        <Select value={attachedJobId} onValueChange={setAttachedJobId}>
-                          <SelectTrigger className="h-8 text-xs">
-                            <SelectValue placeholder="Select a job (optional)" />
-                          </SelectTrigger>
-                          <SelectContent>
-                            {jobOptions.length === 0 ? (
-                              <div className="px-2 py-1.5 text-xs text-muted-foreground">No saved jobs yet</div>
-                            ) : (
-                              jobOptions.map((j) => (
-                                <SelectItem key={j.id} value={j.id}>
-                                  {j.company} — {j.role}
-                                </SelectItem>
-                              ))
-                            )}
-                          </SelectContent>
-                        </Select>
+                        </div>
                       )}
+
+                      <Select value={attachedJobId} onValueChange={setAttachedJobId}>
+                        <SelectTrigger className="h-8 text-xs">
+                          <SelectValue placeholder={attachedJob ? "Switch to another job…" : "Select a job (optional)"} />
+                        </SelectTrigger>
+                        <SelectContent>
+                          {jobOptions.length === 0 ? (
+                            <div className="px-2 py-1.5 text-xs text-muted-foreground">No saved jobs yet</div>
+                          ) : (
+                            jobOptions.map((j) => (
+                              <SelectItem key={j.id} value={j.id}>
+                                {j.company} — {j.role}
+                              </SelectItem>
+                            ))
+                          )}
+                        </SelectContent>
+                      </Select>
                     </div>
                     {messages.length > 0 && (
                       <Button variant="ghost" size="sm" onClick={reset} className="w-full h-8 text-xs">
