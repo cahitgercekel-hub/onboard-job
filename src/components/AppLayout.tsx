@@ -77,8 +77,9 @@ export default function AppLayout() {
   const allNav = [...trackerNav, assistantNav[0], ...footerNav];
 
   // Single row style used in BOTH expanded & collapsed so Y-positions stay identical.
+  // Icon is absolutely positioned at left:12px so its X stays locked regardless of label visibility.
   const navItem =
-    "flex items-center gap-2.5 rounded-md h-10 px-3 text-sm transition-colors";
+    "relative flex items-center rounded-md h-10 pl-10 pr-3 text-sm transition-colors";
   const navInactive =
     "text-sidebar-foreground/80 hover:bg-sidebar-accent/60 hover:text-sidebar-foreground";
   const navActive =
@@ -90,6 +91,42 @@ export default function AppLayout() {
   // Section header — same height in both modes (text hidden when collapsed).
   const sectionHeader =
     "h-7 flex items-end px-3 pb-1 text-[10px] font-semibold uppercase tracking-wider text-muted-foreground overflow-hidden";
+
+  // Render a nav row. Identical DOM in both modes; icon X/Y locked via absolute positioning.
+  const renderNavLink = (n: { to: string; label: string; icon: any; end?: boolean }) => (
+    <NavLink
+      to={n.to}
+      end={n.end as boolean}
+      className={({ isActive }) => cn(navItem, isActive ? navActive : navInactive)}
+      aria-label={n.label}
+    >
+      <span className="absolute left-3 top-1/2 -translate-y-1/2 flex h-4 w-4 items-center justify-center">
+        <n.icon className="h-4 w-4 shrink-0" data-nav-icon />
+      </span>
+      <span
+        className={cn(
+          "truncate transition-opacity duration-150",
+          collapsed && "opacity-0 pointer-events-none"
+        )}
+      >
+        {n.label}
+      </span>
+    </NavLink>
+  );
+
+  const renderNavRow = (n: { to: string; label: string; icon: any; end?: boolean }) => {
+    const link = renderNavLink(n);
+    return collapsed ? (
+      <Tooltip key={n.to}>
+        <TooltipTrigger asChild>
+          <div>{link}</div>
+        </TooltipTrigger>
+        <TooltipContent side="right">{n.label}</TooltipContent>
+      </Tooltip>
+    ) : (
+      <div key={n.to}>{link}</div>
+    );
+  };
 
   const toggleBtn = (
     <button
