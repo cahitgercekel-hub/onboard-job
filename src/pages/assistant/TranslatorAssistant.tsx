@@ -1,16 +1,18 @@
-import { Languages } from "lucide-react";
+import { Layers, Briefcase } from "lucide-react";
 import { SkillTranslator } from "@/pages/Assistant";
-import { AssistantPageHeader } from "@/components/assistant/AssistantPageHeader";
+import { AssistantToolShell } from "@/components/assistant/AssistantToolShell";
 
 export default function TranslatorAssistant() {
   return (
-    <div className="px-4 md:px-6 py-4 md:py-6 max-w-6xl mx-auto">
-      <AssistantPageHeader
-        icon={<Languages className="h-5 w-5 text-accent" />}
-        title="Skill Translator"
-        subtitle="Turn unconventional experience into corporate-ready resume bullets, tailored to a job description."
-      />
+    <AssistantToolShell
+      title="Skill Translator"
+      subtitle="Turn unconventional experience into corporate-ready resume bullets, tailored to a job description."
+      premiumTools={[
+        { id: "jd-batch", icon: Layers, title: "JD Batch Translation", desc: "Translate one experience against many JDs at once." },
+        { id: "industry-packs", icon: Briefcase, title: "Industry-specific Packs", desc: "Tone packs for finance, tech, consulting & more." },
+      ]}
+    >
       <SkillTranslator />
-    </div>
+    </AssistantToolShell>
   );
 }
