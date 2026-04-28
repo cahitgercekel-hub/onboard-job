@@ -612,18 +612,17 @@ export function CvAnalyzer() {
   const scanPct = Math.min(100, Math.round((scansUsed / SCAN_LIMIT) * 100));
 
   return (
-    <div className="grid lg:grid-cols-2 gap-5">
+    <div className="grid lg:grid-cols-2 gap-5 min-h-[640px]">
       {/* LEFT — Input */}
-      <div className="space-y-4">
-        <div className="surface-card p-4">
+      <div className="flex flex-col gap-4 h-full">
+        <div className="surface-card p-4 flex flex-col flex-1 min-h-[200px]">
           <Label htmlFor="cv-text" className="text-sm font-semibold mb-2 block">Paste CV Text</Label>
           <Textarea
             id="cv-text"
-            rows={10}
             value={text}
             onChange={(e) => setText(e.target.value)}
             placeholder="Paste your full CV here…"
-            className="resize-none"
+            className="resize-none flex-1 min-h-[160px]"
           />
         </div>
 
@@ -674,7 +673,7 @@ export function CvAnalyzer() {
         <Button
           onClick={run}
           disabled={loading || limitReached}
-          className="w-full h-11 text-sm font-semibold bg-gradient-premium text-white border-0 hover:opacity-95 disabled:opacity-50"
+          className="mt-auto w-full h-11 text-sm font-semibold bg-gradient-premium text-white border-0 hover:opacity-95 disabled:opacity-50"
         >
           {loading ? <Loader2 className="h-4 w-4 animate-spin mr-2" /> : <Target className="h-4 w-4 mr-2" />}
           Analyze CV
