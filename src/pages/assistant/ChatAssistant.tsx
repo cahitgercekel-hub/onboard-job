@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import { Link } from "react-router-dom";
 import ReactMarkdown from "react-markdown";
+import remarkGfm from "remark-gfm";
 import {
   Loader2, Send, Square, Sparkles, X, Briefcase, Bot, FileText,
   CalendarCheck, Plus, Smile, MessagesSquare,
