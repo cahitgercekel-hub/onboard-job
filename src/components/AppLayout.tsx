@@ -204,9 +204,10 @@ export default function AppLayout() {
           <div className="p-3 border-t border-sidebar-border space-y-1">
             {footerNav.map((n) => renderNavRow(n))}
             <div
+              aria-hidden={collapsed}
               className={cn(
-                "px-3 pt-2 text-[11px] text-muted-foreground transition-opacity duration-150",
-                collapsed && "opacity-0 pointer-events-none"
+                "px-3 pt-2 h-6 text-[11px] leading-4 whitespace-nowrap overflow-hidden text-muted-foreground transition-opacity duration-150",
+                collapsed && "invisible"
               )}
             >
               Synced to your account.
