@@ -126,20 +126,20 @@ export function ToneAnalyzer() {
   const tone = result ? scoreTone(result.toneScore) : null;
 
   return (
-    <div className="grid lg:grid-cols-2 gap-5">
-      <div className="space-y-3">
+    <div className="grid lg:grid-cols-2 gap-5 min-h-[560px]">
+      <div className="flex flex-col gap-3 h-full">
         <div className="grid gap-1.5">
           <Label htmlFor="company">Target company</Label>
           <Input id="company" value={company} onChange={(e) => setCompany(e.target.value)} placeholder="e.g. Deutsche Bank, Stripe, BMW" />
         </div>
-        <div className="grid gap-1.5">
+        <div className="flex flex-col gap-1.5 flex-1 min-h-[200px]">
           <div className="flex items-center justify-between">
             <Label htmlFor="draft">Cover letter draft</Label>
             <FileUploadButton onText={setDraft} disabled={loading} label="Upload cover letter" />
           </div>
-          <Textarea id="draft" rows={14} value={draft} onChange={(e) => setDraft(e.target.value)} placeholder="Paste your draft here, or upload a PDF/DOCX…" />
+          <Textarea id="draft" value={draft} onChange={(e) => setDraft(e.target.value)} placeholder="Paste your draft here, or upload a PDF/DOCX…" className="flex-1 min-h-[200px] resize-none" />
         </div>
-        <Button onClick={run} disabled={loading} className="w-full sm:w-auto bg-gradient-premium text-white border-0 hover:opacity-95">
+        <Button onClick={run} disabled={loading} className="mt-auto w-full sm:w-auto bg-gradient-premium text-white border-0 hover:opacity-95">
           {loading ? <Loader2 className="h-4 w-4 animate-spin" /> : <Wand2 className="h-4 w-4" />}
           Analyze tone
         </Button>
@@ -244,20 +244,20 @@ export function SkillTranslator() {
   };
 
   return (
-    <div className="grid lg:grid-cols-2 gap-5">
-      <div className="space-y-3">
-        <div className="grid gap-1.5">
+    <div className="grid lg:grid-cols-2 gap-5 min-h-[560px]">
+      <div className="flex flex-col gap-3 h-full">
+        <div className="flex flex-col gap-1.5 flex-1 min-h-[140px]">
           <Label htmlFor="exp">Unconventional experience</Label>
-          <Textarea id="exp" rows={7} value={experience} onChange={(e) => setExperience(e.target.value)} placeholder="e.g. Led a 30-person volunteer cleanup, coordinated logistics across 5 districts…" />
+          <Textarea id="exp" value={experience} onChange={(e) => setExperience(e.target.value)} placeholder="e.g. Led a 30-person volunteer cleanup, coordinated logistics across 5 districts…" className="flex-1 min-h-[140px] resize-none" />
         </div>
-        <div className="grid gap-1.5">
+        <div className="flex flex-col gap-1.5 flex-1 min-h-[140px]">
           <div className="flex items-center justify-between">
             <Label htmlFor="jd">Target job description</Label>
             <FileUploadButton onText={setJobDescription} disabled={loading} label="Upload JD" />
           </div>
-          <Textarea id="jd" rows={7} value={jobDescription} onChange={(e) => setJobDescription(e.target.value)} placeholder="Paste the JD here, or upload a PDF/DOCX…" />
+          <Textarea id="jd" value={jobDescription} onChange={(e) => setJobDescription(e.target.value)} placeholder="Paste the JD here, or upload a PDF/DOCX…" className="flex-1 min-h-[140px] resize-none" />
         </div>
-        <Button onClick={run} disabled={loading} className="w-full sm:w-auto bg-gradient-premium text-white border-0 hover:opacity-95">
+        <Button onClick={run} disabled={loading} className="mt-auto w-full sm:w-auto bg-gradient-premium text-white border-0 hover:opacity-95">
           {loading ? <Loader2 className="h-4 w-4 animate-spin" /> : <Briefcase className="h-4 w-4" />}
           Translate skills
         </Button>
@@ -289,22 +289,22 @@ export function PolishTool() {
   };
 
   return (
-    <div className="grid lg:grid-cols-2 gap-5">
-      <div className="space-y-3">
-        <div className="flex items-end justify-between gap-3">
-          <div className="grid gap-1.5 flex-1">
-            <Label htmlFor="polish-text">Text</Label>
-          </div>
-          <FileUploadButton onText={setText} disabled={loading} label="Upload file" />
-          <div className="grid gap-1.5 w-40">
-            <Label className="flex items-center gap-1"><Languages className="h-3.5 w-3.5" /> Language</Label>
-            <Select value={language} onValueChange={setLanguage}>
-              <SelectTrigger><SelectValue /></SelectTrigger>
-              <SelectContent>
-                <SelectItem value="English">English</SelectItem>
-                <SelectItem value="German">German</SelectItem>
-              </SelectContent>
-            </Select>
+    <div className="grid lg:grid-cols-2 gap-5 min-h-[560px]">
+      <div className="flex flex-col gap-3 h-full">
+        <div className="flex items-end justify-between gap-3 flex-wrap">
+          <Label htmlFor="polish-text" className="mb-0">Text</Label>
+          <div className="flex items-end gap-2 ml-auto">
+            <FileUploadButton onText={setText} disabled={loading} label="Upload file" />
+            <div className="grid gap-1.5 w-36">
+              <Label className="flex items-center gap-1 text-xs"><Languages className="h-3.5 w-3.5" /> Language</Label>
+              <Select value={language} onValueChange={setLanguage}>
+                <SelectTrigger><SelectValue /></SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="English">English</SelectItem>
+                  <SelectItem value="German">German</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
           </div>
         </div>
         {language === "German" && (
@@ -317,8 +317,8 @@ export function PolishTool() {
             <span className="text-sm text-foreground">{t("assistant.polish.businessGerman")}</span>
           </label>
         )}
-        <Textarea id="polish-text" rows={12} value={text} onChange={(e) => setText(e.target.value)} placeholder="Paste an email, CV bullet point, or message — or upload a PDF/DOCX…" />
-        <Button onClick={run} disabled={loading} className="w-full sm:w-auto bg-gradient-premium text-white border-0 hover:opacity-95">
+        <Textarea id="polish-text" value={text} onChange={(e) => setText(e.target.value)} placeholder="Paste an email, CV bullet point, or message — or upload a PDF/DOCX…" className="flex-1 min-h-[240px] resize-none" />
+        <Button onClick={run} disabled={loading} className="mt-auto w-full sm:w-auto bg-gradient-premium text-white border-0 hover:opacity-95">
           {loading ? <Loader2 className="h-4 w-4 animate-spin" /> : <Sparkles className="h-4 w-4" />}
           Polish
         </Button>
@@ -388,12 +388,13 @@ export function InterviewPrep() {
   };
 
   return (
-    <div className="space-y-5">
-      <div className="surface-card p-4 flex flex-wrap items-end gap-3">
-        <div className="grid gap-1.5 flex-1 min-w-[240px]">
+    <div className="grid lg:grid-cols-2 gap-5 min-h-[560px]">
+      {/* LEFT — picker + button */}
+      <div className="flex flex-col gap-3 h-full">
+        <div className="grid gap-1.5">
           <Label className="text-xs">{t("assistant.interview.pickJob")}</Label>
           {interviewJobs.length === 0 ? (
-            <div className="text-sm text-muted-foreground border border-dashed border-border rounded-md px-3 py-2">
+            <div className="text-sm text-muted-foreground border border-dashed border-border rounded-md px-3 py-3">
               {t("assistant.interview.noJobs")}
             </div>
           ) : (
@@ -407,24 +408,26 @@ export function InterviewPrep() {
             </Select>
           )}
         </div>
-        <Button onClick={run} disabled={loading || !selectedId} className="bg-gradient-premium text-white border-0 hover:opacity-95">
+        <Button onClick={run} disabled={loading || !selectedId} className="mt-auto w-full sm:w-auto bg-gradient-premium text-white border-0 hover:opacity-95">
           {loading ? <Loader2 className="h-4 w-4 animate-spin" /> : <MessageSquare className="h-4 w-4" />}
           {t("assistant.interview.generate")}
         </Button>
       </div>
 
-      {!result && !loading && (
-        <div className="surface-card p-6 text-sm text-muted-foreground">{t("assistant.interview.empty")}</div>
-      )}
-
-      {loading && (
-        <div className="surface-card p-6 flex items-center gap-2 text-sm text-muted-foreground">
-          <Loader2 className="h-4 w-4 animate-spin" /> Thinking…
-        </div>
-      )}
-
-      {result && (
-        <div className="grid md:grid-cols-2 gap-4">
+      {/* RIGHT — results / placeholder */}
+      <div className="min-h-[260px]">
+        {!result && !loading && (
+          <div className="surface-card p-6 text-sm text-muted-foreground min-h-[260px] flex items-center justify-center text-center">
+            {t("assistant.interview.empty")}
+          </div>
+        )}
+        {loading && (
+          <div className="surface-card p-6 flex items-center gap-2 text-sm text-muted-foreground">
+            <Loader2 className="h-4 w-4 animate-spin" /> Thinking…
+          </div>
+        )}
+        {result && (
+          <div className="grid gap-4">
           {result.questions.map((q, i) => (
             <div key={i} className="surface-card p-5">
               <div className="flex items-center gap-2 mb-2">
@@ -448,8 +451,9 @@ export function InterviewPrep() {
               </div>
             </div>
           ))}
-        </div>
-      )}
+          </div>
+        )}
+      </div>
     </div>
   );
 }
@@ -608,18 +612,17 @@ export function CvAnalyzer() {
   const scanPct = Math.min(100, Math.round((scansUsed / SCAN_LIMIT) * 100));
 
   return (
-    <div className="grid lg:grid-cols-2 gap-5">
+    <div className="grid lg:grid-cols-2 gap-5 min-h-[640px]">
       {/* LEFT — Input */}
-      <div className="space-y-4">
-        <div className="surface-card p-4">
+      <div className="flex flex-col gap-4 h-full">
+        <div className="surface-card p-4 flex flex-col flex-1 min-h-[200px]">
           <Label htmlFor="cv-text" className="text-sm font-semibold mb-2 block">Paste CV Text</Label>
           <Textarea
             id="cv-text"
-            rows={10}
             value={text}
             onChange={(e) => setText(e.target.value)}
             placeholder="Paste your full CV here…"
-            className="resize-none"
+            className="resize-none flex-1 min-h-[160px]"
           />
         </div>
 
@@ -670,7 +673,7 @@ export function CvAnalyzer() {
         <Button
           onClick={run}
           disabled={loading || limitReached}
-          className="w-full h-11 text-sm font-semibold bg-gradient-premium text-white border-0 hover:opacity-95 disabled:opacity-50"
+          className="mt-auto w-full h-11 text-sm font-semibold bg-gradient-premium text-white border-0 hover:opacity-95 disabled:opacity-50"
         >
           {loading ? <Loader2 className="h-4 w-4 animate-spin mr-2" /> : <Target className="h-4 w-4 mr-2" />}
           Analyze CV

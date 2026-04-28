@@ -27,13 +27,24 @@ const WORK_MODEL_STYLES: Record<WorkModel, string> = {
 
 const LOGO_CACHE = new Map<string, string>();
 
+const COMPANY_SUFFIXES = /\b(group|holdings?|holding|gmbh|ag|kg|se|inc|incorporated|ltd|limited|llc|plc|co|company|corp|corporation|sa|nv|bv|oy|ab|spa|srl|germany|deutschland|usa|uk|europe|emea|emeia|international|global|labs|technologies|technology|tech|digital|studios?|solutions|services|partners?|ventures?)\b/gi;
+
 function slugifyToDomain(company: string): string | null {
-  const slug = company
+  // Cut at common separators that mark sub-brands or suffixes.
+  let base = company.split(/[-–—|/(),]/)[0] || company;
+  // Strip company-form suffixes ("Group", "GmbH", ...).
+  base = base.replace(COMPANY_SUFFIXES, " ");
+  // Take first significant token (>= 2 chars), fall back to whole cleaned string.
+  const tokens = base
     .toLowerCase()
     .normalize("NFD")
     .replace(/[\u0300-\u036f]/g, "")
     .replace(/&/g, "and")
-    .replace(/[^a-z0-9]+/g, "");
+    .split(/[^a-z0-9]+/)
+    .filter((w) => w.length >= 2);
+  if (tokens.length === 0) return null;
+  // Single most-distinctive token works best for logo CDNs.
+  const slug = tokens[0];
   if (!slug) return null;
   return `${slug}.com`;
 }
@@ -60,6 +71,7 @@ function CompanyLogo({ company, url, size = 28 }: { company: string; url?: strin
     if (!domain) return [] as string[];
     if (LOGO_CACHE.has(domain)) return [LOGO_CACHE.get(domain)!];
     return [
+      `https://cdn.brandfetch.io/${domain}/w/80/h/80?c=1idV74_default`,
       `https://img.logo.dev/${domain}?token=pk_X-1ZO13GSgeOoUrIuJ6GMQ&size=80`,
       `https://logo.clearbit.com/${domain}`,
       `https://www.google.com/s2/favicons?domain=${domain}&sz=64`,
@@ -152,17 +164,16 @@ export function JobCard({ job, onClick, onArchive: _onArchive, onDelete, overlay
         overlay && "shadow-lg ring-1 ring-accent/40"
       )}
     >
-      {/* Top: title + match ring */}
+      {/* Top: title + match ring (fixed-width slot keeps title width stable) */}
       <div className="flex items-start justify-between gap-2">
         <div className="min-w-0 flex-1">
           <div className="text-sm font-semibold text-foreground leading-snug line-clamp-2">{job.role}</div>
         </div>
-        {(job.fitnessScore ?? null) !== null && (
-          <div className="flex flex-col items-center shrink-0 -mt-0.5">
+        <div className="w-12 h-12 shrink-0 flex items-center justify-center" title="Match score">
+          {(job.fitnessScore ?? null) !== null && (
             <FitnessRing score={job.fitnessScore} variant="lg" />
-            <span className="text-[9px] text-muted-foreground mt-0.5 leading-none">Match score</span>
-          </div>
-        )}
+          )}
+        </div>
       </div>
 
       {/* Company row */}
@@ -210,7 +221,7 @@ export function JobCard({ job, onClick, onArchive: _onArchive, onDelete, overlay
               <MapPin className="h-3 w-3 shrink-0" />
               <span className="truncate">
                 {job.location}
-                {alarm === "none" && job.updatedAt && ` — ${daysSince(job.updatedAt)}d ago`}
+                {alarm === "none" && job.updatedAt && job.status !== "saved" && ` — ${daysSince(job.updatedAt)}d ago`}
               </span>
             </span>
           )}
@@ -246,7 +257,7 @@ export function JobCard({ job, onClick, onArchive: _onArchive, onDelete, overlay
                 e.preventDefault();
                 window.open(job.url, "_blank", "noopener,noreferrer");
               }}
-              className="inline-flex items-center gap-1 text-muted-foreground hover:text-accent transition-colors"
+              className="inline-flex items-center gap-1 text-accent hover:text-accent/80 font-medium transition-colors"
             >
               <ExternalLink className="h-3 w-3" /> Link
             </a>
@@ -257,7 +268,7 @@ export function JobCard({ job, onClick, onArchive: _onArchive, onDelete, overlay
               <button
                 type="button"
                 onClick={(e) => { e.stopPropagation(); onDelete(); }}
-                className="inline-flex items-center gap-1 text-muted-foreground hover:text-destructive transition-colors"
+                className="inline-flex items-center gap-1 text-destructive hover:text-destructive/80 font-medium transition-colors"
                 aria-label="Delete job"
                 title="Delete"
               >
