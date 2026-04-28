@@ -339,6 +339,7 @@ function DeleteAccountDialog({
               try {
                 // Wipe local data first
                 await clearAllJobs().catch(() => {});
+                clearAllChats();
                 toast.success("Account deletion requested. You've been signed out.");
                 onOpenChange(false);
                 setText("");
