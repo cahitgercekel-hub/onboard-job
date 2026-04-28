@@ -116,7 +116,7 @@ export default function AppLayout() {
           )}
         >
           {/* Header — identical 69px height in both modes; only contents fade */}
-          <div className="flex items-center gap-2 border-b border-sidebar-border h-[69px] px-2">
+          <div className={cn("flex items-center gap-2 border-b border-sidebar-border h-[69px] px-2", collapsed && "justify-center")}>
             <div className="flex h-10 w-10 items-center justify-center shrink-0">
               {collapsed ? (
                 toggleBtn
