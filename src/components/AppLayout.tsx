@@ -225,6 +225,52 @@ export default function AppLayout() {
               </div>
             )}
           </div>
+
+          {/* Sidebar alignment-check toggle (dev) — also Shift+G */}
+          <button
+            type="button"
+            onClick={() => setAlignCheck((v) => !v)}
+            aria-label="Toggle sidebar alignment check"
+            title="Sidebar alignment check (Shift+G)"
+            className={cn(
+              "absolute -right-3 top-1/2 -translate-y-1/2 z-30 h-6 w-6 rounded-full border bg-card shadow-sm flex items-center justify-center transition-colors",
+              alignCheck
+                ? "border-accent text-accent"
+                : "border-border text-muted-foreground hover:text-foreground"
+            )}
+          >
+            <Ruler className="h-3 w-3" />
+          </button>
+
+          {/* Alignment overlay */}
+          {alignCheck && (
+            <div
+              className="pointer-events-none absolute inset-0 z-20"
+              aria-hidden="true"
+            >
+              {/* 8px grid background */}
+              <div
+                className="absolute inset-0 opacity-40"
+                style={{
+                  backgroundImage:
+                    "repeating-linear-gradient(to bottom, hsl(var(--accent) / 0.18) 0 1px, transparent 1px 8px)",
+                }}
+              />
+              {/* Per-icon Y guide lines */}
+              {iconYs.map((y, i) => (
+                <div key={i} className="absolute left-0 right-0" style={{ top: y }}>
+                  <div className="h-px w-full bg-accent/80" />
+                  <div className="absolute -top-2 left-1 px-1 rounded bg-accent text-[9px] font-bold text-accent-foreground leading-tight">
+                    {y}
+                  </div>
+                </div>
+              ))}
+              {/* Mode label */}
+              <div className="absolute top-2 right-2 rounded-md bg-accent text-accent-foreground text-[10px] font-semibold px-1.5 py-0.5 shadow">
+                {collapsed ? "COLLAPSED" : "EXPANDED"}
+              </div>
+            </div>
+          )}
         </aside>
 
         <div className="flex-1 flex flex-col min-w-0 transition-all duration-300 ease-in-out">
