@@ -293,3 +293,61 @@ function ClearAllDialog({ open, onOpenChange }: { open: boolean; onOpenChange: (
     </Dialog>
   );
 }
+
+function DeleteAccountDialog({
+  open, onOpenChange, onDeleted,
+}: { open: boolean; onOpenChange: (v: boolean) => void; onDeleted: () => void | Promise<void> }) {
+  const [text, setText] = useState("");
+  const [busy, setBusy] = useState(false);
+  const ready = text === "DELETE";
+
+  return (
+    <Dialog
+      open={open}
+      onOpenChange={(v) => { onOpenChange(v); if (!v) setText(""); }}
+    >
+      <DialogContent>
+        <DialogHeader>
+          <DialogTitle className="text-destructive">Delete your account?</DialogTitle>
+          <DialogDescription>
+            This permanently removes your account and all associated data (jobs, CVs, tokens). This cannot be undone.
+          </DialogDescription>
+        </DialogHeader>
+        <div className="grid gap-2 py-2">
+          <Label htmlFor="confirm-delete-account" className="text-xs">Type DELETE to confirm</Label>
+          <Input
+            id="confirm-delete-account"
+            value={text}
+            onChange={(e) => setText(e.target.value)}
+            placeholder="DELETE"
+            autoComplete="off"
+          />
+        </div>
+        <DialogFooter>
+          <Button variant="outline" onClick={() => onOpenChange(false)}>Cancel</Button>
+          <Button
+            variant="destructive"
+            disabled={!ready || busy}
+            onClick={async () => {
+              setBusy(true);
+              try {
+                // Wipe local data first
+                await clearAllJobs().catch(() => {});
+                toast.success("Account deletion requested. You've been signed out.");
+                onOpenChange(false);
+                setText("");
+                await onDeleted();
+              } catch (e: any) {
+                toast.error(e?.message || "Failed to delete account");
+              } finally {
+                setBusy(false);
+              }
+            }}
+          >
+            {busy ? "Deleting…" : "Delete account"}
+          </Button>
+        </DialogFooter>
+      </DialogContent>
+    </Dialog>
+  );
+}
