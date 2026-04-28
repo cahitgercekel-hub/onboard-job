@@ -51,8 +51,10 @@ function highestStage(job: Job): "saved" | "applied" | "interviewing" | "offer" 
     return (prev as any) || "saved";
   }
   if (job.status === "rejected") {
-    // legacy 'rejected' column — treat as having reached "applied" at minimum
-    return "applied";
+    // Use previousStatus to know the highest stage reached before rejection
+    // (e.g. Interviewing → Rejected should still credit Interviewing).
+    const prev = job.previousStatus && RANK[job.previousStatus] ? job.previousStatus : "applied";
+    return (prev as any) || "applied";
   }
   return job.status as "saved" | "applied" | "interviewing" | "offer";
 }

@@ -76,6 +76,7 @@ export interface Job {
   rejectionReason?: string | null;
   rejectionTag?: string | null;
   archivedAt?: string | null;
+  rejectedAt?: string | null;
   previousStatus?: JobStatus | null;
   cvVersionId?: string | null;
   createdAt: string;
