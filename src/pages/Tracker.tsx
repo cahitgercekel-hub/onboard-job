@@ -371,7 +371,21 @@ export default function Tracker() {
             if (dialog.job) updateJob(dialog.job.id, data);
             else addJob(data);
           }}
-          onDelete={dialog.job ? () => removeJob(dialog.job!.id) : undefined}
+          onDelete={dialog.job ? () => {
+            const snapshot = dialog.job!;
+            removeJob(snapshot.id);
+            toast(`"${snapshot.role}" at ${snapshot.company} deleted`, {
+              action: {
+                label: "Undo",
+                onClick: () => {
+                  const { id, createdAt, updatedAt, ...rest } = snapshot;
+                  addJob(rest);
+                },
+              },
+              duration: 6000,
+              position: "bottom-right",
+            });
+          } : undefined}
           onArchive={dialog.job ? () => { setArchiveTarget(dialog.job!); setDialog((d) => ({ ...d, open: false })); } : undefined}
         />
       )}
