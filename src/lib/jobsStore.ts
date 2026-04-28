@@ -32,6 +32,7 @@ type JobRow = {
   rejection_reason: string | null;
   rejection_tag: string | null;
   archived_at: string | null;
+  rejected_at: string | null;
   previous_status: JobStatus | null;
   cv_version_id: string | null;
 };
