@@ -4,7 +4,7 @@ import { useTranslation } from "react-i18next";
 import {
   Download, Upload, Trash2, Sun, Moon, Monitor, Languages,
   Calendar as CalendarIcon, LogOut, User as UserIcon, FileText,
-  Settings2, Shield,
+  Settings2, Shield, Palette, Hourglass,
 } from "lucide-react";
 import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
@@ -120,7 +120,9 @@ export default function Settings() {
 
           {/* Appearance */}
           <div className="space-y-1.5">
-            <Label className="text-sm font-medium">{t("settings.appearance")}</Label>
+            <Label className="text-sm font-medium flex items-center gap-1.5">
+              <Palette className="h-3.5 w-3.5" /> {t("settings.appearance")}
+            </Label>
             <div className="inline-flex w-full rounded-md border border-border bg-muted/40 p-0.5">
               {themeOptions.map((o) => {
                 const active = theme === o.value;
@@ -172,7 +174,9 @@ export default function Settings() {
               </Select>
             </div>
             <div className="space-y-1.5">
-              <Label className="text-sm font-medium">Ghosting threshold</Label>
+              <Label className="text-sm font-medium flex items-center gap-1.5">
+                <Hourglass className="h-3.5 w-3.5" /> Ghosting threshold
+              </Label>
               <Select value={String(ghostingDays)} onValueChange={(v) => setGhostingDays(Number(v))}>
                 <SelectTrigger className="w-full"><SelectValue /></SelectTrigger>
                 <SelectContent>
