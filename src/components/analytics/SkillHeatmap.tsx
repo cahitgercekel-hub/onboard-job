@@ -156,7 +156,7 @@ export function SkillHeatmap({ jobs }: Props) {
             </ResponsiveContainer>
           </div>
 
-          <div className="mt-3 flex flex-col md:flex-row gap-3 md:items-center md:justify-between">
+          <div className="mt-auto pt-3 flex flex-col md:flex-row gap-3 md:items-center md:justify-between">
             <div className="flex flex-wrap items-center gap-2 text-xs">
               <span className="text-muted-foreground inline-flex items-center gap-1">
                 <AlertCircle className="h-3.5 w-3.5 text-warning" /> Top missing:
