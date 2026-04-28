@@ -434,53 +434,11 @@ export default function ChatAssistant() {
         </div>
 
         {/* RIGHT RAIL — Premium Tools */}
-        <aside className="hidden lg:flex flex-col surface-card overflow-hidden">
-          <div className="px-4 py-3 border-b border-border bg-gradient-premium text-white">
-            <div className="flex items-center justify-between">
-              <div className="flex items-center gap-2">
-                <ChevronRight className="h-4 w-4 -ml-1 opacity-80" />
-                <h2 className="text-sm font-semibold">Premium Tools</h2>
-              </div>
-              <PlanBadge plan={isPro ? plan : "pro"} />
-            </div>
-            <p className="text-[11px] opacity-90 mt-0.5">{isPro ? "Active features" : "Pro features"}</p>
-          </div>
-
-          <div className="flex-1 overflow-y-auto p-3 space-y-3">
-            {PREMIUM_TOOLS.map((tool) => (
-              <div key={tool.id} className="rounded-lg border border-border p-3 bg-card relative">
-                {!isPro && (
-                  <Lock className="h-3.5 w-3.5 text-muted-foreground absolute top-2.5 right-2.5" />
-                )}
-                <div className="flex items-start gap-2.5 mb-2">
-                  <div className="h-8 w-8 rounded-md bg-premium-soft flex items-center justify-center shrink-0">
-                    <tool.icon className="h-4 w-4 text-premium" />
-                  </div>
-                  <div className="min-w-0 pr-4">
-                    <div className="text-sm font-semibold leading-tight">{tool.title}</div>
-                    <p className="text-[11px] text-muted-foreground leading-snug mt-0.5">{tool.desc}</p>
-                  </div>
-                </div>
-                <div className="flex items-center justify-between mt-2">
-                  <PlanBadge plan="pro" />
-                  <Switch checked={isPro} disabled={!isPro} />
-                </div>
-              </div>
-            ))}
-          </div>
-
-          <div className="p-3 border-t border-border">
-            {isPro ? (
-              <Button asChild variant="outline" className="w-full">
-                <Link to="/billing">Manage plan</Link>
-              </Button>
-            ) : (
-              <Button asChild className="w-full bg-gradient-premium text-white border-0 hover:opacity-95">
-                <Link to="/billing">Upgrade to Pro for Access</Link>
-              </Button>
-            )}
-          </div>
-        </aside>
+        <PremiumRail
+          tools={PREMIUM_TOOLS}
+          collapsed={railCollapsed}
+          onToggle={() => setRailCollapsed((c) => !c)}
+        />
       </div>
     </div>
   );
