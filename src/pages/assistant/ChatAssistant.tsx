@@ -227,7 +227,7 @@ export default function ChatAssistant() {
                 <Logo size={22} className="rounded" />
               </div>
               <div className="min-w-0">
-                <h1 className="text-sm md:text-base font-semibold leading-tight truncate">AI Career Assistant</h1>
+                <h1 className="text-sm md:text-base font-semibold leading-tight truncate">AI Assistant</h1>
                 <p className="text-[11px] text-muted-foreground leading-tight truncate">Your personal career strategist</p>
               </div>
             </div>
