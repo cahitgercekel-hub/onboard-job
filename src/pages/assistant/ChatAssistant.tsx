@@ -3,7 +3,7 @@ import { Link } from "react-router-dom";
 import ReactMarkdown from "react-markdown";
 import {
   Loader2, Send, Square, Sparkles, X, Briefcase, Bot, FileText,
-  CalendarCheck, Plus, Smile, MessagesSquare, Lock, ChevronRight,
+  CalendarCheck, Plus, Smile, MessagesSquare,
 } from "lucide-react";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
@@ -16,7 +16,7 @@ import { useJobs } from "@/lib/jobsStore";
 import { supabase } from "@/integrations/supabase/client";
 import { cn } from "@/lib/utils";
 import { Logo } from "@/components/Logo";
-import { PlanBadge } from "@/components/PlanBadge";
+import { PremiumRail } from "@/components/assistant/PremiumRail";
 import { usePlan } from "@/lib/usePlan";
 import { useAuth } from "@/lib/auth";
 
