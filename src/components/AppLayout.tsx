@@ -1,7 +1,7 @@
-import { useState } from "react";
+import { useEffect, useLayoutEffect, useRef, useState } from "react";
 import { NavLink, Outlet } from "react-router-dom";
 import {
-  LayoutGrid, BarChart3, Settings as SettingsIcon, Menu,
+  LayoutGrid, BarChart3, Settings as SettingsIcon, Menu, Ruler,
   MessageSquare, Sparkles, Languages, Wand2, Target, FileText, CreditCard,
 } from "lucide-react";
 import { useTranslation } from "react-i18next";
@@ -15,6 +15,48 @@ export default function AppLayout() {
   const { t } = useTranslation();
   const [collapsed, setCollapsed] = useState(false);
   const { plan } = usePlan();
+
+  // Dev-only "Sidebar alignment check" — draws Y-position guide lines for every nav icon.
+  const [alignCheck, setAlignCheck] = useState(false);
+  const asideRef = useRef<HTMLElement>(null);
+  const [iconYs, setIconYs] = useState<number[]>([]);
+
+  // Toggle with keyboard shortcut: Shift + G
+  useEffect(() => {
+    const onKey = (e: KeyboardEvent) => {
+      if (e.shiftKey && (e.key === "G" || e.key === "g") && !e.metaKey && !e.ctrlKey && !e.altKey) {
+        const tag = (e.target as HTMLElement)?.tagName;
+        if (tag === "INPUT" || tag === "TEXTAREA") return;
+        setAlignCheck((v) => !v);
+      }
+    };
+    window.addEventListener("keydown", onKey);
+    return () => window.removeEventListener("keydown", onKey);
+  }, []);
+
+  // Measure each nav icon's Y center relative to the sidebar.
+  useLayoutEffect(() => {
+    if (!alignCheck) return;
+    const measure = () => {
+      const aside = asideRef.current;
+      if (!aside) return;
+      const baseTop = aside.getBoundingClientRect().top;
+      const icons = aside.querySelectorAll<SVGSVGElement>("[data-nav-icon]");
+      const ys: number[] = [];
+      icons.forEach((el) => {
+        const r = el.getBoundingClientRect();
+        ys.push(Math.round(r.top - baseTop + r.height / 2));
+      });
+      setIconYs(ys);
+    };
+    measure();
+    const t1 = window.setTimeout(measure, 320);
+    window.addEventListener("resize", measure);
+    return () => {
+      window.clearTimeout(t1);
+      window.removeEventListener("resize", measure);
+    };
+  }, [alignCheck, collapsed]);
 
   const trackerNav = [
     { to: "/", label: t("nav.board"), icon: LayoutGrid, end: true },
@@ -64,8 +106,9 @@ export default function AppLayout() {
     <TooltipProvider delayDuration={150}>
       <div className="flex h-full min-h-screen w-full bg-background">
         <aside
+          ref={asideRef}
           className={cn(
-            "hidden md:flex shrink-0 flex-col border-r border-sidebar-border bg-sidebar transition-[width] duration-300 ease-in-out",
+            "hidden md:flex shrink-0 flex-col border-r border-sidebar-border bg-sidebar transition-[width] duration-300 ease-in-out relative",
             collapsed ? "w-16" : "w-60"
           )}
         >
@@ -108,7 +151,7 @@ export default function AppLayout() {
                   }
                   aria-label={n.label}
                 >
-                  <n.icon className="h-4 w-4 shrink-0" />
+                  <n.icon className="h-4 w-4 shrink-0" data-nav-icon />
                   {!collapsed && <span className="truncate">{n.label}</span>}
                 </NavLink>
               );
@@ -137,7 +180,7 @@ export default function AppLayout() {
                   }
                   aria-label={n.label}
                 >
-                  <n.icon className="h-4 w-4 shrink-0" />
+                  <n.icon className="h-4 w-4 shrink-0" data-nav-icon />
                   {!collapsed && <span className="truncate">{n.label}</span>}
                 </NavLink>
               );
@@ -163,7 +206,7 @@ export default function AppLayout() {
                   }
                   aria-label={n.label}
                 >
-                  <n.icon className="h-4 w-4 shrink-0" />
+                  <n.icon className="h-4 w-4 shrink-0" data-nav-icon />
                   {!collapsed && <span className="truncate">{n.label}</span>}
                 </NavLink>
               );
@@ -182,6 +225,52 @@ export default function AppLayout() {
               </div>
             )}
           </div>
+
+          {/* Sidebar alignment-check toggle (dev) — also Shift+G */}
+          <button
+            type="button"
+            onClick={() => setAlignCheck((v) => !v)}
+            aria-label="Toggle sidebar alignment check"
+            title="Sidebar alignment check (Shift+G)"
+            className={cn(
+              "absolute -right-3 top-1/2 -translate-y-1/2 z-30 h-6 w-6 rounded-full border bg-card shadow-sm flex items-center justify-center transition-colors",
+              alignCheck
+                ? "border-accent text-accent"
+                : "border-border text-muted-foreground hover:text-foreground"
+            )}
+          >
+            <Ruler className="h-3 w-3" />
+          </button>
+
+          {/* Alignment overlay */}
+          {alignCheck && (
+            <div
+              className="pointer-events-none absolute inset-0 z-20"
+              aria-hidden="true"
+            >
+              {/* 8px grid background */}
+              <div
+                className="absolute inset-0 opacity-40"
+                style={{
+                  backgroundImage:
+                    "repeating-linear-gradient(to bottom, hsl(var(--accent) / 0.18) 0 1px, transparent 1px 8px)",
+                }}
+              />
+              {/* Per-icon Y guide lines */}
+              {iconYs.map((y, i) => (
+                <div key={i} className="absolute left-0 right-0" style={{ top: y }}>
+                  <div className="h-px w-full bg-accent/80" />
+                  <div className="absolute -top-2 left-1 px-1 rounded bg-accent text-[9px] font-bold text-accent-foreground leading-tight">
+                    {y}
+                  </div>
+                </div>
+              ))}
+              {/* Mode label */}
+              <div className="absolute top-2 right-2 rounded-md bg-accent text-accent-foreground text-[10px] font-semibold px-1.5 py-0.5 shadow">
+                {collapsed ? "COLLAPSED" : "EXPANDED"}
+              </div>
+            </div>
+          )}
         </aside>
 
         <div className="flex-1 flex flex-col min-w-0 transition-all duration-300 ease-in-out">
