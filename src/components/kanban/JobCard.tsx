@@ -27,13 +27,24 @@ const WORK_MODEL_STYLES: Record<WorkModel, string> = {
 
 const LOGO_CACHE = new Map<string, string>();
 
+const COMPANY_SUFFIXES = /\b(group|holdings?|holding|gmbh|ag|kg|se|inc|incorporated|ltd|limited|llc|plc|co|company|corp|corporation|sa|nv|bv|oy|ab|spa|srl|germany|deutschland|usa|uk|europe|emea|emeia|international|global|labs|technologies|technology|tech|digital|studios?|solutions|services|partners?|ventures?)\b/gi;
+
 function slugifyToDomain(company: string): string | null {
-  const slug = company
+  // Cut at common separators that mark sub-brands or suffixes.
+  let base = company.split(/[-–—|/(),]/)[0] || company;
+  // Strip company-form suffixes ("Group", "GmbH", ...).
+  base = base.replace(COMPANY_SUFFIXES, " ");
+  // Take first significant token (>= 2 chars), fall back to whole cleaned string.
+  const tokens = base
     .toLowerCase()
     .normalize("NFD")
     .replace(/[\u0300-\u036f]/g, "")
     .replace(/&/g, "and")
-    .replace(/[^a-z0-9]+/g, "");
+    .split(/[^a-z0-9]+/)
+    .filter((w) => w.length >= 2);
+  if (tokens.length === 0) return null;
+  // Single most-distinctive token works best for logo CDNs.
+  const slug = tokens[0];
   if (!slug) return null;
   return `${slug}.com`;
 }
