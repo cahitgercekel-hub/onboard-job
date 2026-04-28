@@ -42,7 +42,7 @@ export default function AppLayout() {
     "bg-sidebar-accent text-sidebar-accent-foreground font-medium";
 
   const iconBtn =
-    "flex h-11 w-11 items-center justify-center rounded-md transition-colors";
+    "flex h-10 w-10 items-center justify-center rounded-md transition-colors";
 
   const toggleBtn = (
     <button
@@ -88,8 +88,29 @@ export default function AppLayout() {
 
           {collapsed ? (
             <>
-              <nav className="flex-1 p-2 space-y-1 flex flex-col items-center">
-                {[...trackerNav, ...assistantNav].map((n) => (
+              <nav className="flex-1 p-3 space-y-1 flex flex-col items-center overflow-y-auto">
+                {/* spacer matches expanded "Tracker" section header height */}
+                <div className="h-[22px] w-full" aria-hidden="true" />
+                {trackerNav.map((n) => (
+                  <Tooltip key={n.to}>
+                    <TooltipTrigger asChild>
+                      <NavLink
+                        to={n.to}
+                        end={n.end as boolean}
+                        className={({ isActive }) =>
+                          cn(iconBtn, isActive ? navActive : navInactive)
+                        }
+                        aria-label={n.label}
+                      >
+                        <n.icon className="h-4 w-4" />
+                      </NavLink>
+                    </TooltipTrigger>
+                    <TooltipContent side="right">{n.label}</TooltipContent>
+                  </Tooltip>
+                ))}
+                {/* spacer matches expanded "Assistant" section header height */}
+                <div className="h-[30px] w-full" aria-hidden="true" />
+                {assistantNav.map((n) => (
                   <Tooltip key={n.to}>
                     <TooltipTrigger asChild>
                       <NavLink
@@ -107,7 +128,7 @@ export default function AppLayout() {
                   </Tooltip>
                 ))}
               </nav>
-              <div className="p-2 border-t border-sidebar-border flex flex-col items-center gap-1 py-3">
+              <div className="p-3 border-t border-sidebar-border flex flex-col items-center gap-1">
                 {footerNav.map((n) => (
                   <Tooltip key={n.to}>
                     <TooltipTrigger asChild>
