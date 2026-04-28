@@ -341,6 +341,18 @@ export default function ChatAssistant() {
               </div>
             </div>
             <div className="flex items-center gap-2 shrink-0">
+              <Button
+                variant="outline"
+                size="sm"
+                className="h-8 text-xs gap-1.5"
+                onClick={() => setSearchOpen((o) => !o)}
+                disabled={messages.length === 0}
+                aria-label="Search in chat"
+                aria-pressed={searchOpen}
+              >
+                <Search className="h-3.5 w-3.5" />
+                <span className="hidden sm:inline">Search</span>
+              </Button>
               <Popover>
                 <PopoverTrigger asChild>
                   <Button variant="outline" size="sm" className="h-8 text-xs gap-1.5">
