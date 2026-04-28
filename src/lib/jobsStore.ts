@@ -398,22 +398,38 @@ export function useJobs() {
     if (status !== "rejected") {
       patch.rejection_tag = null;
       patch.rejection_reason = null;
+      patch.rejected_at = null;
+    } else {
+      // Entering Rejected: capture where it came from + when (for analytics)
+      const current = jobs.find((j) => j.id === id);
+      const prev = current?.status;
+      if (prev && prev !== "rejected" && prev !== "archived") {
+        patch.previous_status = prev;
+      }
+      patch.rejected_at = new Date().toISOString();
     }
     const { error } = await supabase.from("jobs").update(patch as any).eq("id", id);
     if (error) toast.error(error.message);
-  }, []);
+  }, [jobs]);
 
   const setRejection = useCallback(async (id: string, tag: string, reason?: string) => {
+    const current = jobs.find((j) => j.id === id);
+    const prev = current?.status;
+    const update: Record<string, unknown> = {
+      status: "rejected",
+      rejection_tag: tag,
+      rejection_reason: reason ?? null,
+      rejected_at: current?.rejectedAt ?? new Date().toISOString(),
+    };
+    if (prev && prev !== "rejected" && prev !== "archived") {
+      update.previous_status = prev;
+    }
     const { error } = await supabase
       .from("jobs")
-      .update({
-        status: "rejected",
-        rejection_tag: tag,
-        rejection_reason: reason ?? null,
-      } as any)
+      .update(update as any)
       .eq("id", id);
     if (error) toast.error(error.message);
-  }, []);
+  }, [jobs]);
 
   const archiveJob = useCallback(async (
     id: string,
