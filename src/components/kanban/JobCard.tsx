@@ -71,6 +71,7 @@ function CompanyLogo({ company, url, size = 28 }: { company: string; url?: strin
     if (!domain) return [] as string[];
     if (LOGO_CACHE.has(domain)) return [LOGO_CACHE.get(domain)!];
     return [
+      `https://cdn.brandfetch.io/${domain}/w/80/h/80?c=1idV74_default`,
       `https://img.logo.dev/${domain}?token=pk_X-1ZO13GSgeOoUrIuJ6GMQ&size=80`,
       `https://logo.clearbit.com/${domain}`,
       `https://www.google.com/s2/favicons?domain=${domain}&sz=64`,
