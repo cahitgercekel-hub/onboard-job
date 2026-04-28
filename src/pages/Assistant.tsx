@@ -681,9 +681,9 @@ export function CvAnalyzer() {
       </div>
 
       {/* RIGHT — Results */}
-      <div className="space-y-4">
+      <div className="space-y-4 h-full flex flex-col">
         {!aiResult && !loading && (
-          <div className="surface-card p-8 text-sm text-muted-foreground min-h-[260px] flex items-center justify-center text-center">
+          <div className="surface-card p-8 text-sm text-muted-foreground min-h-[260px] flex-1 flex items-center justify-center text-center">
             Paste or upload your CV, then run the analyzer to see scores, keywords, and personalized tips.
           </div>
         )}
