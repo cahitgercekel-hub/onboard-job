@@ -100,6 +100,71 @@ export default function ChatAssistant() {
 
   const userInitial = (user?.email || "U").slice(0, 1).toUpperCase();
 
+  // ---- In-thread search ----
+  const [searchOpen, setSearchOpen] = useState(false);
+  const [searchQuery, setSearchQuery] = useState("");
+  const [activeMatchIdx, setActiveMatchIdx] = useState(0);
+  const searchInputRef = useRef<HTMLInputElement>(null);
+
+  const matchedIndices = useMemo(() => {
+    const q = searchQuery.trim().toLowerCase();
+    if (!q) return [];
+    const out: number[] = [];
+    messages.forEach((m, i) => {
+      if (m.content.toLowerCase().includes(q)) out.push(i);
+    });
+    return out;
+  }, [messages, searchQuery]);
+
+  // Reset / clamp the active match when matches change
+  useEffect(() => {
+    if (matchedIndices.length === 0) {
+      setActiveMatchIdx(0);
+      return;
+    }
+    setActiveMatchIdx((prev) => (prev >= matchedIndices.length ? 0 : prev));
+  }, [matchedIndices]);
+
+  // Scroll the active match into view
+  useEffect(() => {
+    if (!searchOpen || matchedIndices.length === 0) return;
+    const msgIdx = matchedIndices[activeMatchIdx];
+    const el = document.getElementById(`chat-msg-${msgIdx}`);
+    if (el) el.scrollIntoView({ behavior: "smooth", block: "center" });
+  }, [activeMatchIdx, matchedIndices, searchOpen]);
+
+  // Clear search when switching threads
+  useEffect(() => {
+    setSearchOpen(false);
+    setSearchQuery("");
+    setActiveMatchIdx(0);
+  }, [user?.id, attachedJobId]);
+
+  // Focus input when opening
+  useEffect(() => {
+    if (searchOpen) {
+      const t = setTimeout(() => searchInputRef.current?.focus(), 0);
+      return () => clearTimeout(t);
+    }
+  }, [searchOpen]);
+
+  const gotoNextMatch = () => {
+    if (matchedIndices.length === 0) return;
+    setActiveMatchIdx((i) => (i + 1) % matchedIndices.length);
+  };
+  const gotoPrevMatch = () => {
+    if (matchedIndices.length === 0) return;
+    setActiveMatchIdx((i) => (i - 1 + matchedIndices.length) % matchedIndices.length);
+  };
+  const closeSearch = () => {
+    setSearchOpen(false);
+    setSearchQuery("");
+    setActiveMatchIdx(0);
+  };
+  const matchSet = useMemo(() => new Set(matchedIndices), [matchedIndices]);
+  const activeMatchMsgIdx = matchedIndices[activeMatchIdx] ?? -1;
+
+
   useEffect(() => {
     (async () => {
       const { data } = await supabase.from("cv_baseline").select("cv_text").maybeSingle();
