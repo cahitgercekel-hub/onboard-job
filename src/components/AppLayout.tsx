@@ -76,10 +76,13 @@ export default function AppLayout() {
   ];
   const allNav = [...trackerNav, assistantNav[0], ...footerNav];
 
-  // Single row style used in BOTH expanded & collapsed so Y-positions stay identical.
-  // Icon is absolutely positioned at left:12px so its X stays locked regardless of label visibility.
-  const navItem =
-    "relative flex items-center rounded-md h-10 pl-10 pr-3 text-sm transition-colors";
+  // Row height is locked at h-10 in both modes so Y-positions never shift.
+  // Collapsed: row becomes a centered 40x40 pill (matches hamburger toggle).
+  // Expanded: row spans full width with icon absolutely positioned at left:12px.
+  const navItemBase =
+    "relative flex items-center rounded-md h-10 text-sm transition-colors";
+  const navItemExpanded = "pl-10 pr-3";
+  const navItemCollapsed = "w-10 mx-auto justify-center px-0";
   const navInactive =
     "text-sidebar-foreground/80 hover:bg-sidebar-accent/60 hover:text-sidebar-foreground";
   const navActive =
@@ -88,29 +91,34 @@ export default function AppLayout() {
   const iconBtn =
     "flex h-10 w-10 items-center justify-center rounded-md transition-colors";
 
-  // Section header — same height in both modes (text hidden when collapsed).
+  // Section header — same height (h-7) in both modes so the vertical rhythm
+  // (and downstream icon Y positions) stays identical.
   const sectionHeader =
     "h-7 flex items-end px-3 pb-1 text-[10px] font-semibold uppercase tracking-wider text-muted-foreground overflow-hidden";
 
-  // Render a nav row. Identical DOM in both modes; icon X/Y locked via absolute positioning.
   const renderNavLink = (n: { to: string; label: string; icon: any; end?: boolean }) => (
     <NavLink
       to={n.to}
       end={n.end as boolean}
-      className={({ isActive }) => cn(navItem, isActive ? navActive : navInactive)}
+      className={({ isActive }) =>
+        cn(
+          navItemBase,
+          collapsed ? navItemCollapsed : navItemExpanded,
+          isActive ? navActive : navInactive
+        )
+      }
       aria-label={n.label}
     >
-      <span className="absolute left-3 top-1/2 -translate-y-1/2 flex h-4 w-4 items-center justify-center">
+      {collapsed ? (
         <n.icon className="h-4 w-4 shrink-0" data-nav-icon />
-      </span>
-      <span
-        className={cn(
-          "truncate transition-opacity duration-150",
-          collapsed && "opacity-0 pointer-events-none"
-        )}
-      >
-        {n.label}
-      </span>
+      ) : (
+        <>
+          <span className="absolute left-3 top-1/2 -translate-y-1/2 flex h-4 w-4 items-center justify-center">
+            <n.icon className="h-4 w-4 shrink-0" data-nav-icon />
+          </span>
+          <span className="truncate">{n.label}</span>
+        </>
+      )}
     </NavLink>
   );
 
@@ -174,17 +182,21 @@ export default function AppLayout() {
 
           {/* Unified nav — same DOM in both modes; labels/headers fade away when collapsed */}
           <nav className="flex-1 p-3 space-y-1 overflow-y-auto overflow-x-hidden">
-            <div className={sectionHeader}>
-              <span className={cn("transition-opacity duration-150", collapsed && "opacity-0")}>
-                {t("nav.tracker")}
-              </span>
+            <div className={cn(sectionHeader, collapsed && "items-center justify-center pb-0")}>
+              {collapsed ? (
+                <div className="h-px w-6 bg-sidebar-border" aria-hidden="true" />
+              ) : (
+                <span>{t("nav.tracker")}</span>
+              )}
             </div>
             {trackerNav.map((n) => renderNavRow(n))}
 
-            <div className={sectionHeader}>
-              <span className={cn("transition-opacity duration-150", collapsed && "opacity-0")}>
-                {t("nav.assistant")}
-              </span>
+            <div className={cn(sectionHeader, collapsed && "items-center justify-center pb-0")}>
+              {collapsed ? (
+                <div className="h-px w-6 bg-sidebar-border" aria-hidden="true" />
+              ) : (
+                <span>{t("nav.assistant")}</span>
+              )}
             </div>
             {assistantNav.map((n) => renderNavRow(n))}
           </nav>

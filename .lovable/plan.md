@@ -1,43 +1,22 @@
-Plan to fix the collapsed sidebar icon alignment
+Center collapsed sidebar items and replace section-header gaps with dividers.
 
-1. Make the sidebar navigation rows always render with the same vertical structure
-- Keep the same section header slots, nav row heights, row gaps, and footer spacing in both expanded and collapsed states.
-- Hide text visually when collapsed instead of removing layout space where that can affect measurement.
-- Avoid separate collapsed-only layouts that change vertical flow.
+Changes to `src/components/AppLayout.tsx`:
 
-2. Lock icon X/Y placement inside fixed rows
-- Use one shared nav item component/style for expanded and collapsed states.
-- Set every row to a fixed height and every icon to a fixed wrapper size.
-- In collapsed mode, center the fixed icon wrapper horizontally without changing row height, row margin, or row gap.
-- Keep the actual SVG icon size identical across states.
+1. Collapsed nav rows become a centered 40x40 pill
+- Keep row height fixed at `h-10` so Y-positions stay locked.
+- When collapsed, switch the row to `w-10 mx-auto justify-center px-0` (same shape as the hamburger toggle) so the icon and the active/hover background are centered in the rail.
+- When expanded, keep the current `pl-10 pr-3` layout with the icon absolutely positioned at left:12px.
+- Render the icon directly (no absolute positioning) when collapsed, since the row itself is centered.
 
-3. Fix the header/toggle area so it does not change downstream icon positions
-- The top header is currently different when collapsed: collapsed mode shows only the menu button, expanded mode shows logo/text/menu.
-- I will make the header maintain the same height and internal alignment in both modes, with hidden placeholders as needed, so the nav starts at the same Y position.
+2. Section headers become centered dividers when collapsed
+- Keep the `h-7` slot in both modes so vertical rhythm is preserved (icons stay at the same Y).
+- Expanded: show the uppercase label ("Job Tracker", "Assistant") as today.
+- Collapsed: hide the text and render a short centered horizontal divider line (e.g. `h-px w-6 bg-sidebar-border` centered) to visually separate the two icon groups.
 
-4. Fix footer icons so they also stay locked
-- Make the footer reserve the same vertical footprint in collapsed and expanded states, including the “Synced to your account.” line area if needed.
-- Keep Plans & Billing and Settings at the same Y positions when toggling.
+3. Footer "Synced to your account." line
+- Keep it visually hidden (`opacity-0`) when collapsed so the footer reserves the same vertical footprint and the Plans/Settings icons stay at the same Y.
 
-5. Improve the alignment-check overlay
-- Keep the pixel-grid mode, but make it easier to compare by showing the same icon centers after toggle.
-- Ensure it measures icon wrappers/centers consistently, not text or tooltip wrappers.
-
-Technical details
-
-- Primary file: `src/components/AppLayout.tsx`.
-- Replace repeated nav markup with a small reusable render function/component so tracker, assistant, and footer items use exactly the same row DOM/classes.
-- Use a fixed pattern like:
-
-```text
-sidebar header: fixed 69px
-nav section header: fixed 28px
-nav row: fixed 40px
-row gap: fixed 4px
-icon wrapper: fixed 16px or 40px center target
-svg icon: fixed 16px
-footer: fixed spacing model
-```
-
-- Collapsed state should change only width/label visibility, not vertical layout.
-- The expected result: toggling collapsed/expanded changes only sidebar width and text visibility; all nav icons remain the same size and at the same Y-axis locations.
+Result
+- Collapsed rail shows perfectly centered icons with selection backgrounds matching the hamburger button shape.
+- Between Tracker and Assistant groups there is now a small centered divider instead of an empty gap.
+- Toggling collapsed/expanded changes only width and label visibility — never icon Y or size.
