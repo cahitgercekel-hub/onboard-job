@@ -94,7 +94,7 @@ export function SkillHeatmap({ jobs }: Props) {
   };
 
   return (
-    <div className="surface-card p-3 md:p-5 overflow-hidden">
+    <div className="surface-card p-3 md:p-5 overflow-hidden flex flex-col h-full">
       <div className="flex items-center justify-between mb-4 flex-wrap gap-2">
         <h2 className="text-sm font-medium text-foreground flex items-center gap-2">
           <Target className="h-4 w-4 text-accent" /> Skill Heatmap
@@ -156,7 +156,7 @@ export function SkillHeatmap({ jobs }: Props) {
             </ResponsiveContainer>
           </div>
 
-          <div className="mt-3 flex flex-col md:flex-row gap-3 md:items-center md:justify-between">
+          <div className="mt-auto pt-3 flex flex-col md:flex-row gap-3 md:items-center md:justify-between">
             <div className="flex flex-wrap items-center gap-2 text-xs">
               <span className="text-muted-foreground inline-flex items-center gap-1">
                 <AlertCircle className="h-3.5 w-3.5 text-warning" /> Top missing:
