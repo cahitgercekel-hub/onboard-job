@@ -283,6 +283,7 @@ function ClearAllDialog({ open, onOpenChange }: { open: boolean; onOpenChange: (
             onClick={async () => {
               try {
                 await clearAllJobs();
+                clearAllChats();
                 onOpenChange(false);
                 setText("");
                 toast.success("All data cleared");
