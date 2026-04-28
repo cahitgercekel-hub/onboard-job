@@ -1,56 +1,79 @@
-## Job Card Redesign — Logo, Match Ring, Link & Delete actions
+## Goal
 
-Restyle `JobCard` to match the screenshot. Same data, new layout.
+Make **Corporate Tone**, **Skill Translator**, **Grammar & Polish**, **Interview Prep**, and **CV Analyzer** feel like siblings of the redesigned **Career Chat** — same chrome, colors, gradients, buttons, and "Premium Tools" rail.
 
-### New layout
+## What changes (visual only — logic untouched)
+
+### 1. Shared page shell — new `AssistantToolShell`
+Replace the plain `AssistantPageHeader` + bare content layout with a chat-style 2-column shell:
 
 ```text
-┌──────────────────────────────────────────────────┐
-│ Quality Assurance Specialist               ╭───╮ │
-│                                            │40%│ │
-│ [G] Gameforge                              ╰───╯ │
-│                                          Match   │
-│ [Part-time] [Tech]                               │
-│                                                  │
-│ 📍 Karlsruhe, Baden-Württemberg — 1 week ago     │
-│ ──────────────────────────────────────────────── │
-│ ✓ Applied 25.04.2026          🔗 Link · 🗑 Delete │
-└──────────────────────────────────────────────────┘
+┌─────────────────────────────────────┬──────────────────┐
+│  [logo tile] Tool Name              │ ▸ Premium Tools  │
+│  subtitle                           │   Pro features   │
+├─────────────────────────────────────┤                  │
+│                                     │  ┌────────────┐  │
+│   tool body (inputs + results)      │  │ Premium    │  │
+│   on muted/30 background            │  │ feature 1  │  │
+│                                     │  └────────────┘  │
+│                                     │  ┌────────────┐  │
+│                                     │  │ Premium    │  │
+│                                     │  │ feature 2  │  │
+│                                     │  └────────────┘  │
+│                                     │                  │
+│                                     │ [Upgrade to Pro] │
+└─────────────────────────────────────┴──────────────────┘
 ```
 
-### Changes to `src/components/kanban/JobCard.tsx`
+Same header treatment as chat:
+- Square gradient logo tile (`bg-gradient-premium`) with the Logo on the left
+- Title + subtitle stacked tight
+- Wrapped in `surface-card` with rounded corners and border
+- Body area uses `bg-muted/30` like the chat message panel
 
-1. **Company logo** (new): small 28px rounded-square avatar to the left of the company name.
-   - Resolve via Logo.dev's free Clearbit-style endpoint: `https://img.logo.dev/{domain}?token=pk_X-1ZO13GSgeOoUrIuJ6GMQ&size=80` — works without an API key for low volume; falls back to Clearbit `https://logo.clearbit.com/{domain}` and finally to a colored placeholder tile with the company's first letter.
-   - Domain resolution order:
-     a. If `job.url` is set → parse hostname (strip `www.`), use that domain.
-     b. Else slugify `job.company` to `<slug>.com` (lowercase, alphanumeric, no spaces). Good enough for most well-known companies (gameforge.com, samsung.com, etc.).
-   - Implement as a tiny `<CompanyLogo company url size />` component with `<img onError>` fallback chain → final fallback is an initials tile colored from a hash of the name (uses existing premium/accent palette tokens).
-   - Cached per-session via a module-level `Map<domain, resolvedSrc>` so re-renders don't re-fetch.
+### 2. Per-tool premium rail
+Each tool gets 2 contextual "Pro" upsell cards in the right rail (locked toggles + Pro badge, identical to chat):
 
-2. **Match score ring** moved to the **top-right corner**, larger (~44px), with the percentage text **inside** the ring and a small "Match score" caption below it (matching the screenshot). Reuses existing `FitnessRing` with a `size="lg"` variant — small additive change to `src/components/FitnessRing.tsx` to accept a size prop.
+| Tool | Premium teaser 1 | Premium teaser 2 |
+|------|------------------|------------------|
+| Corporate Tone | Multi-company tone presets | Bulk cover-letter rewrite |
+| Skill Translator | JD batch translation | Industry-specific tone packs |
+| Grammar & Polish | Track-changes export (DOCX) | Tone presets (formal/friendly/exec) |
+| Interview Prep | Live mock interview (voice) | Recruiter-style follow-ups |
+| CV Analyzer | Detailed ATS simulation | Unlimited daily scans |
 
-3. **Footer row** becomes two clear actions instead of icon-only:
-   - Left: `✓ Applied 25.04.2026` (or status-aware label, e.g. `📌 Saved`, `📞 Interviewing 3.05.2026`) — keeps the existing `formatDate`.
-   - Right: **`🔗 Link`** (text + icon, only if `job.url`) and **`🗑 Delete`** (text + icon, red on hover).
-   - Replace the current Archive icon button with a **Delete** action that calls a new optional `onDelete` prop. Tracker page wires it up to the existing delete flow (or, to keep the destructive UX safer, opens the existing archive/delete dialog — I'll use whichever the Tracker already exposes so behavior matches the rest of the app).
-   - A subtle horizontal divider (`border-t`) above this row, like the screenshot.
+Each rail ends with the same gradient **"Upgrade to Pro for Access"** button linking to `/billing`. Rail hidden on `<lg` breakpoints (collapses to a single CTA card under the tool body).
 
-4. **Tag pills** — keep current set (workModel, applicationType, industry, cvVersion, rejectionTag) but render them with the lighter pastel look from the screenshot (slightly larger, rounded-full).
+### 3. Buttons & accents — match chat
+- Primary action buttons (Analyze tone, Translate, Polish, Generate questions, Analyze CV) → `bg-gradient-premium text-white` with `Sparkles` / tool icon, full-width on mobile, rounded
+- Secondary buttons → outline pill style
+- Quick-action style chips reused for Polish language toggle and Interview job picker shortcuts
+- Replace plain `Upload` boxes with the chat-style dashed dropzone already present in CV Analyzer (extend to Tone, Translator, Polish via a shared `DropZone` component) — kept compact next to inputs
 
-5. **Stale-update warning chip** stays, but moves to a small icon next to the date (so it doesn't fight with the new top-right ring).
+### 4. Result panel polish
+- All result cards already use `surface-card` — add the subtle gradient ring (`ring-1 ring-accent/20`) used on chat bot bubbles, plus a small avatar tile (Bot / FileText / Sparkles) next to result section titles for visual continuity with chat
+- Tone score gauge → restyle to match the `ScoreGauge` radial used in CV Analyzer for consistency
+- Interview Q cards → keep STAR layout but add the gradient `Q1`/`Q2` numbered chip used in chat bubbles
 
-### Changes to `src/pages/Tracker.tsx` (small)
+### 5. Background
+- Page wrapper switches from default body to the same soft `bg-muted/30` outer fill used by the chat page so everything sits on the same canvas
+- Outer max-width raised from `max-w-6xl` → `max-w-7xl` to align with chat
 
-- Pass an `onDelete` handler to each `<JobCard>` (uses the existing delete-job action already available in `useJobs`). Confirm with a quick `toast` + undo, OR open the existing rejection/delete dialog — will match what the current archive icon does today so no UX regression.
+## Files to edit
 
-### Changes to `src/components/FitnessRing.tsx`
+- `src/components/assistant/AssistantPageHeader.tsx` — replace with `AssistantToolShell` (header + 2-col grid + premium rail props)
+- `src/components/assistant/PremiumRail.tsx` *(new)* — the right-side rail (toggles, lock icons, gradient CTA), data-driven from a `tools` prop
+- `src/components/assistant/DropZone.tsx` *(new, optional)* — extracted from CV Analyzer's drag/drop block, reused by Tone / Translator / Polish
+- `src/pages/assistant/ToneAssistant.tsx` — wrap in shell + premium rail
+- `src/pages/assistant/TranslatorAssistant.tsx` — wrap in shell + premium rail
+- `src/pages/assistant/PolishAssistant.tsx` — wrap in shell + premium rail
+- `src/pages/assistant/InterviewAssistant.tsx` — wrap in shell + premium rail
+- `src/pages/assistant/CvAssistant.tsx` — wrap in shell (CvAnalyzer already has its own scan-rail; the right rail will replace/absorb it so we don't double up)
+- `src/pages/Assistant.tsx` — within `ToneAnalyzer`, `SkillTranslator`, `PolishTool`, `InterviewPrep`, `CvAnalyzer`: swap primary buttons to `bg-gradient-premium`, refresh badge/chip styles, add small bot avatar tiles to result section headers. **No logic, state, or API calls change.**
 
-- Add a `size?: "sm" | "lg"` prop (default `sm` = today's look). `lg` renders ~44px ring with the percentage centered.
+## Out of scope
 
-### Files touched
-- edit: `src/components/kanban/JobCard.tsx` (layout + new `CompanyLogo` subcomponent)
-- edit: `src/components/FitnessRing.tsx` (size prop)
-- edit: `src/pages/Tracker.tsx` (wire `onDelete`)
-
-No new dependencies, no DB changes, no API keys needed (logo.dev public token is free and rate-limited per-IP; Clearbit is the fallback).
+- No backend / edge function changes
+- No new routes
+- No copy rewrites beyond the new premium-rail teaser labels
+- No changes to `ChatAssistant.tsx` itself (it's the reference)

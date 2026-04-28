@@ -1,16 +1,18 @@
-import { Wand2 } from "lucide-react";
+import { FileEdit, SlidersHorizontal } from "lucide-react";
 import { PolishTool } from "@/pages/Assistant";
-import { AssistantPageHeader } from "@/components/assistant/AssistantPageHeader";
+import { AssistantToolShell } from "@/components/assistant/AssistantToolShell";
 
 export default function PolishAssistant() {
   return (
-    <div className="px-4 md:px-6 py-4 md:py-6 max-w-6xl mx-auto">
-      <AssistantPageHeader
-        icon={<Wand2 className="h-5 w-5 text-accent" />}
-        title="Grammar & Polish"
-        subtitle="Fix grammar, tighten wording, and adapt tone — in English or German (with optional Geschäftsdeutsch mode)."
-      />
+    <AssistantToolShell
+      title="Grammar & Polish"
+      subtitle="Fix grammar, tighten wording, and adapt tone — in English or German (with optional Geschäftsdeutsch mode)."
+      premiumTools={[
+        { id: "track-changes", icon: FileEdit, title: "Track-changes Export", desc: "Download polished text as DOCX with edit marks." },
+        { id: "tone-presets", icon: SlidersHorizontal, title: "Tone Presets", desc: "Switch between formal, friendly, and executive voices." },
+      ]}
+    >
       <PolishTool />
-    </div>
+    </AssistantToolShell>
   );
 }
