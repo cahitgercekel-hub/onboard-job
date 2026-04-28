@@ -22,7 +22,7 @@ export default function AppLayout() {
     { to: "/analytics", label: t("nav.analytics"), icon: BarChart3, end: true },
   ];
   const assistantNav = [
-    { to: "/assistant/chat", label: "Career Chat", icon: MessageSquare, end: true },
+    { to: "/assistant/chat", label: "AI Assistant", icon: MessageSquare, end: true },
     { to: "/assistant/tone", label: "Corporate Tone", icon: Sparkles, end: true },
     { to: "/assistant/translator", label: "Skill Translator", icon: Languages, end: true },
     { to: "/assistant/polish", label: "Grammar & Polish", icon: Wand2, end: true },
