@@ -163,7 +163,7 @@ export async function downloadJobsCsv() {
   const url = URL.createObjectURL(blob);
   const a = document.createElement("a");
   a.href = url;
-  a.download = `jobby-jobs-${new Date().toISOString().slice(0, 10)}.csv`;
+  a.download = `onboard-jobs-${new Date().toISOString().slice(0, 10)}.csv`;
   document.body.appendChild(a);
   a.click();
   document.body.removeChild(a);

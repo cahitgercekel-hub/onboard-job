@@ -12,7 +12,7 @@ const SYSTEM: Record<Tool, string> = {
   tone:
     "You are an expert career coach and corporate communications analyst. Given a cover letter draft and a target company, infer the company's likely culture and evaluate whether the draft's tone matches it. Always call the report_tone function with structured fields. Be specific and concrete.",
   translate:
-    "You are an expert resume writer specializing in translating unconventional experience into precise corporate language. Given the user's experience and a target job description, return STRICT markdown with ONLY a single top-level section header `## Resume Bullets` followed by 3-5 unordered list items prefixed with `- `. Each bullet: one line, starts with a strong action verb, quantified where possible, mirrors JD vocabulary. No preamble, no closing remarks, no other sections.",
+    "You are an expert resume writer specializing in translating unconventional experience into precise corporate language. Given the user's experience and a target job description, translate their background into 3-5 high-impact resume bullet points. For each bullet, explain the strategic reason for the wording (e.g. which JD keywords it targets). Always call the report_translate function.",
   polish:
     "You are a professional editor. Improve the user's text for grammar, clarity, conciseness, and professional business tone in the requested language. Preserve meaning. Always call the report_polish function with structured fields.",
   extract:
@@ -20,7 +20,7 @@ const SYSTEM: Record<Tool, string> = {
   interview:
     "You are an interview coach. Given a role, company, and job description, generate exactly 5 highly probable interview questions tailored to the role. For each, provide a suggested answer structure using the STAR method (Situation, Task, Action, Result) — each section a short sentence. Always call the report_interview function.",
   cv:
-    "You are a senior recruiter and CV reviewer. Holistically evaluate the user's CV across four dimensions on a 0-100 scale: 1) Professional Language (clarity, action verbs, no fluff), 2) Length & Formatting (appropriate length, structure, scannability), 3) ATS Appropriateness (parseable, no fancy graphics, standard headings), 4) Keyword Optimization (impactful nouns/verbs). Return scores plus 4-7 actionable tips and 4-8 strong/impactful keywords found. Always call the report_cv function.",
+    "You are a senior recruiter and ATS specialist. Holistically evaluate the user's CV. Provide elite-level feedback focusing on: 1) Impact over Tasks (quantifiable results like '%', '$', or time saved), 2) Professional Narrative (strong active verbs, no fluff), 3) Format & Scannability (standard headings, clear hierarchy), and 4) Technical/Keyword alignment. Return scores plus 5-8 highly actionable, recruiter-grade tips. Tips should be specific (e.g. 'Instead of \"helped with sales\", use \"Generated $50k in new revenue by...\"'). Always call the report_cv function.",
   optimize_cv:
     "You are a senior resume writer. The user's CV is missing several skills that are in high demand across the jobs they are targeting. Rewrite 5 resume bullet points that authentically incorporate the missing skills — never fabricate experience, but reframe and emphasize plausible adjacent work. Each bullet must start with a strong action verb, be one line, and include a metric where reasonable. Always call the report_optimize function.",
 };
@@ -156,6 +156,33 @@ const CV_TOOL = {
   },
 };
 
+const TRANSLATE_TOOL = {
+  type: "function",
+  function: {
+    name: "report_translate",
+    description: "Return translated resume bullets with reasoning.",
+    parameters: {
+      type: "object",
+      properties: {
+        bullets: {
+          type: "array",
+          items: {
+            type: "object",
+            properties: {
+              text: { type: "string", description: "The corporate-translated resume bullet." },
+              reason: { type: "string", description: "Strategic reasoning/keywords targeted." },
+            },
+            required: ["text", "reason"],
+            additionalProperties: false,
+          },
+        },
+      },
+      required: ["bullets"],
+      additionalProperties: false,
+    },
+  },
+};
+
 const OPTIMIZE_TOOL = {
   type: "function",
   function: {
@@ -232,6 +259,7 @@ serve(async (req) => {
     const toolMap: Record<string, [unknown, string]> = {
       extract: [EXTRACT_TOOL, "save_job"],
       tone: [TONE_TOOL, "report_tone"],
+      translate: [TRANSLATE_TOOL, "report_translate"],
       polish: [POLISH_TOOL, "report_polish"],
       interview: [INTERVIEW_TOOL, "report_interview"],
       cv: [CV_TOOL, "report_cv"],

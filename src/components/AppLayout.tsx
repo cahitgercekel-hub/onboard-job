@@ -115,27 +115,26 @@ export default function AppLayout() {
             collapsed ? "w-16" : "w-60"
           )}
         >
-          {/* Header — identical 69px height in both modes; only contents fade */}
-          <div className={cn("flex items-center gap-2 border-b border-sidebar-border h-[69px] px-2", collapsed && "justify-center")}>
-            <div className="flex h-10 w-10 items-center justify-center shrink-0">
-              {collapsed ? (
-                toggleBtn
-              ) : (
-                <Logo size={32} />
-              )}
-            </div>
-            <div
-              className={cn(
-                "leading-tight min-w-0 flex-1 transition-opacity duration-150",
-                collapsed && "opacity-0 pointer-events-none"
-              )}
-            >
-              <div className="text-sm font-semibold text-sidebar-foreground truncate flex items-center gap-1.5">
-                {t("app.name")} <PlanBadge plan={plan} />
+          {/* Header — identical 87px height in both modes; only contents fade */}
+          <div className={cn("flex items-center gap-2 border-b border-sidebar-border min-h-[87px] px-2", collapsed && "justify-center")}>
+            {collapsed ? (
+              <div className="flex h-10 w-10 items-center justify-center shrink-0">
+                {toggleBtn}
               </div>
-              <div className="text-[11px] text-muted-foreground truncate">{t("app.tagline")}</div>
-            </div>
-            {!collapsed && toggleBtn}
+            ) : (
+              <>
+                <Logo size={64} src="/onboard_logo.png" />
+                <div className="min-w-0 flex-1 flex flex-col justify-between h-[64px] py-1.5 ml-1">
+                  <div className="flex items-start">
+                    <PlanBadge plan={plan} />
+                  </div>
+                  <div className="text-[11px] font-medium text-muted-foreground leading-tight">
+                    {t("app.tagline")}
+                  </div>
+                </div>
+                {toggleBtn}
+              </>
+            )}
           </div>
 
           {/* Unified nav — same DOM in both modes; labels/headers fade away when collapsed */}

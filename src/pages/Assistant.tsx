@@ -227,20 +227,50 @@ export function ToneAnalyzer() {
 
 /* ----------------------------- Skill Translator --------------------------- */
 
+interface TranslateResult {
+  bullets: { text: string; reason: string }[];
+}
+
 export function SkillTranslator() {
   const [experience, setExperience] = useState("");
   const [jobDescription, setJobDescription] = useState("");
-  const [out, setOut] = useState("");
+  const [result, setResult] = useState<TranslateResult | null>(null);
   const [loading, setLoading] = useState(false);
 
   const run = async () => {
     if (!experience.trim() || !jobDescription.trim()) return toast.error("Add both fields.");
-    setLoading(true); setOut("");
+    setLoading(true); setResult(null);
     try {
-      const r = await runStructured<never>("translate", { experience, jobDescription });
-      if (typeof r === "string") setOut(r);
-    } catch (e: any) { toast.error(e.message); }
-    finally { setLoading(false); }
+      const r = await runStructured<TranslateResult>("translate", { experience, jobDescription });
+      
+      if (typeof r === "object" && r !== null && "bullets" in r) {
+        setResult(r as TranslateResult);
+      } else if (typeof r === "string") {
+        // Fallback: If AI returns plain text or markdown bullets, parse them into our card format
+        const lines = r.split("\n");
+        const bullets = lines
+          .map(l => l.trim())
+          .filter(l => l.startsWith("-") || l.startsWith("*") || /^\d+\./.test(l))
+          .map(l => ({
+            text: l.replace(/^[-*\d.]+\s*/, "").trim(),
+            reason: "Tailored to job requirements."
+          }));
+
+        if (bullets.length > 0) {
+          setResult({ bullets });
+        } else {
+          // If no bullet-like lines found, treat the whole thing as one bullet
+          const clean = r.replace(/##\s*Resume Bullets/gi, "").trim();
+          if (clean) setResult({ bullets: [{ text: clean, reason: "Direct translation." }] });
+          else throw new Error("AI returned an empty response.");
+        }
+      } else {
+        throw new Error("Unexpected response format");
+      }
+    } catch (e: any) { 
+      console.error("Translation error:", e);
+      toast.error(e.message); 
+    } finally { setLoading(false); }
   };
 
   return (
@@ -262,7 +292,40 @@ export function SkillTranslator() {
           Translate skills
         </Button>
       </div>
-      <ResultPanel loading={loading} content={out} empty="3–5 corporate-ready bullets, tailored to the JD." />
+
+      <div className="min-h-[260px] h-full">
+        {loading ? (
+          <div className="surface-card p-5 flex items-center gap-2 text-sm text-muted-foreground h-full">
+            <Loader2 className="h-4 w-4 animate-spin" /> Thinking…
+          </div>
+        ) : !result ? (
+          <div className="surface-card p-5 text-sm text-muted-foreground min-h-[260px] h-full">
+            3–5 corporate-ready bullets, tailored to the JD.
+          </div>
+        ) : (
+          <div className="space-y-4">
+            <div className="text-sm font-semibold text-foreground px-1">Suggested Resume Bullets</div>
+            {result.bullets.map((b, i) => (
+              <div key={i} className="surface-card overflow-hidden border-l-4 border-l-accent shadow-sm">
+                <div className="p-4 bg-card">
+                  <div className="flex gap-3">
+                    <div className="mt-0.5 h-5 w-5 shrink-0 rounded-full bg-accent/10 text-accent flex items-center justify-center">
+                      <ListChecks className="h-3 w-3" />
+                    </div>
+                    <p className="text-[13.5px] font-medium text-foreground leading-relaxed">{b.text}</p>
+                  </div>
+                </div>
+                <div className="px-4 py-2.5 bg-muted/30 border-t border-border flex items-start gap-2">
+                  <Sparkles className="h-3.5 w-3.5 text-accent mt-0.5 shrink-0" />
+                  <div className="text-[11.5px] text-muted-foreground leading-snug italic">
+                    <span className="font-semibold text-foreground/70 not-italic">Strategy:</span> {b.reason}
+                  </div>
+                </div>
+              </div>
+            ))}
+          </div>
+        )}
+      </div>
     </div>
   );
 }
@@ -302,6 +365,10 @@ export function PolishTool() {
                 <SelectContent>
                   <SelectItem value="English">English</SelectItem>
                   <SelectItem value="German">German</SelectItem>
+                  <SelectItem value="Turkish">Turkish</SelectItem>
+                  <SelectItem value="Spanish">Spanish</SelectItem>
+                  <SelectItem value="French">French</SelectItem>
+                  <SelectItem value="Chinese">Chinese</SelectItem>
                 </SelectContent>
               </Select>
             </div>
@@ -334,8 +401,8 @@ export function PolishTool() {
             Polished version + a short list of key changes will appear here.
           </div>
         ) : (
-          <div className="grid xl:grid-cols-5 gap-4">
-            <div className="xl:col-span-3 surface-card p-5 shadow-md ring-1 ring-accent/30 bg-card">
+          <div className="space-y-4">
+            <div className="surface-card p-5 shadow-md ring-1 ring-accent/30 bg-card">
               <div className="flex items-center gap-2 mb-3">
                 <Badge variant="secondary" className="bg-accent/15 text-accent border-accent/20">
                   <Sparkles className="h-3 w-3" /> Polished Version
@@ -343,11 +410,12 @@ export function PolishTool() {
               </div>
               <div className="text-sm text-foreground/90 whitespace-pre-wrap leading-relaxed">{result.polished}</div>
             </div>
-            <div className="xl:col-span-2 surface-card p-5 bg-muted/40">
+            
+            <div className="surface-card p-5 bg-muted/40">
               <div className="text-[11px] font-medium uppercase tracking-wider text-muted-foreground mb-2">
                 Key Changes ({result.changes.length})
               </div>
-              <ul className="space-y-2">
+              <ul className="grid sm:grid-cols-2 gap-x-6 gap-y-2">
                 {result.changes.map((c, i) => (
                   <li key={i} className="text-sm text-foreground/90 flex gap-2">
                     <span className="text-accent mt-0.5">•</span><span>{c}</span>
@@ -506,12 +574,27 @@ function ScoreGauge({ label, score }: { label: string; score: number }) {
 }
 
 function ruleCheckCv(text: string) {
+  const normalized = text.toLowerCase();
   const words = text.trim().split(/\s+/).filter(Boolean).length;
   const hasEmail = /\S+@\S+\.\S+/.test(text);
   const hasPhone = /(\+?\d[\d\s().-]{7,})/.test(text);
   const fancyChars = (text.match(/[│■◆●★✦✓→]/g) || []).length;
   const lines = text.split(/\r?\n/);
   const longLines = lines.filter((l) => l.length > 200).length;
+
+  // 1. Quantification check (Numbers, %, $, etc.)
+  const metrics = (text.match(/\d+|%|\$|€|£|plus|increase|decrease|reduced|saved/gi) || []).length;
+  const quantificationScore = Math.min(100, (metrics / 8) * 100);
+
+  // 2. Weak Verbs / Passive Voice check
+  const weakPhrases = ["responsible for", "helped with", "assisted in", "duties included", "familiar with", "worked on"];
+  const weakCount = weakPhrases.filter(p => normalized.includes(p)).length;
+  const verbScore = Math.max(0, 100 - (weakCount * 20));
+
+  // 3. Section Header check
+  const sections = ["experience", "education", "skills", "projects", "summary", "profile", "work"];
+  const foundSections = sections.filter(s => normalized.includes(s)).length;
+  const sectionScore = Math.min(100, (foundSections / 4) * 100);
 
   let lengthScore = 100;
   if (words < 200) lengthScore = 40;
@@ -524,17 +607,22 @@ function ruleCheckCv(text: string) {
   if (longLines > 3) atsScore -= 10;
   if (!hasEmail) atsScore -= 20;
   if (!hasPhone) atsScore -= 10;
+  if (sectionScore < 60) atsScore -= 15;
   atsScore = Math.max(20, atsScore);
 
-  return { words, hasEmail, hasPhone, fancyChars, lengthScore, atsScore };
+  return { 
+    words, hasEmail, hasPhone, fancyChars, 
+    lengthScore, atsScore, quantificationScore, 
+    verbScore, foundSections, metrics 
+  };
 }
 
 function combineScores(ai: CvAiResult["scores"], rules: ReturnType<typeof ruleCheckCv>) {
   return {
-    language: ai.language,
+    language: Math.round((ai.language + rules.verbScore) / 2),
     formatting: Math.round((ai.formatting + rules.lengthScore) / 2),
     ats: Math.round((ai.ats + rules.atsScore) / 2),
-    keywords: ai.keywords,
+    keywords: Math.round((ai.keywords + rules.quantificationScore) / 2),
   };
 }
 
@@ -603,11 +691,14 @@ export function CvAnalyzer() {
 
   const extraTips: string[] = [];
   if (rules) {
-    if (!rules.hasEmail) extraTips.push("Add an email address to your contact section.");
-    if (!rules.hasPhone) extraTips.push("Add a phone number to your contact section.");
-    if (rules.fancyChars > 5) extraTips.push("Replace decorative bullet characters with plain '-' or '•' for better ATS parsing.");
-    if (rules.words < 350) extraTips.push(`Your CV is short (${rules.words} words). Aim for 350-900.`);
-    if (rules.words > 1200) extraTips.push(`Your CV is long (${rules.words} words). Trim to under 1200 for impact.`);
+    if (!rules.hasEmail) extraTips.push("Critical: Add an email address for recruiters to contact you.");
+    if (!rules.hasPhone) extraTips.push("Critical: Add a phone number to avoid being skipped for phone screens.");
+    if (rules.metrics < 5) extraTips.push(`Add more metrics. Your CV only has ${rules.metrics} numbers/results. Recruiters look for %, $, and scale.`);
+    if (rules.verbScore < 70) extraTips.push("Replace weak phrases like 'responsible for' with active verbs like 'Spearheaded', 'Engineered', or 'Optimized'.");
+    if (rules.foundSections < 4) extraTips.push("Standardize your headers. Ensure you have clearly labeled 'Experience', 'Education', and 'Skills' sections.");
+    if (rules.fancyChars > 5) extraTips.push("ATS Alert: Remove complex graphics or non-standard bullet symbols that might break parsing.");
+    if (rules.words < 350) extraTips.push(`Brevity alert: Your CV is only ${rules.words} words. Expand on your high-impact achievements.`);
+    if (rules.words > 1200) extraTips.push(`Length alert: ${rules.words} words is too long for most roles. Aim for 2 pages (approx. 900 words).`);
   }
 
   const scanPct = Math.min(100, Math.round((scansUsed / SCAN_LIMIT) * 100));

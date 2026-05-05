@@ -1,7 +1,6 @@
 import { useEffect, useState } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
 import { z } from "zod";
-import { BriefcaseBusiness } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { lovable } from "@/integrations/lovable/index";
 import { useAuth } from "@/lib/auth";
@@ -10,6 +9,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import { PasswordStrength, getPasswordScore } from "@/components/PasswordStrength";
+import { Logo } from "@/components/Logo";
 import { toast } from "sonner";
 
 const emailSchema = z.string().trim().email({ message: "Enter a valid email" }).max(255);
@@ -93,12 +93,10 @@ export default function AuthPage() {
   return (
     <div className="min-h-screen flex items-center justify-center bg-background px-4">
       <div className="w-full max-w-md surface-card p-6 md:p-8">
-        <div className="flex items-center gap-2 mb-6">
-          <div className="flex h-9 w-9 items-center justify-center rounded-md bg-cyan-500 text-primary-foreground">
-            <BriefcaseBusiness className="h-4 w-4" />
-          </div>
+        <div className="flex items-center gap-3 mb-6">
+          <Logo size={64} />
           <div>
-            <h1 className="text-lg font-semibold">Jobby</h1>
+            <h1 className="text-lg font-semibold">ONboard</h1>
             <p className="text-xs text-muted-foreground">Track Job & CV Assist</p>
           </div>
         </div>

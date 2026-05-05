@@ -22,18 +22,18 @@ function pickMilestone(jobs: Job[]): Milestone {
   const aiOptimized = jobs.filter((j) => typeof j.fitnessScore === "number").length;
 
   if (offers >= 1) {
-    return { emoji: "🎯", headline: `${offers} offer${offers === 1 ? "" : "s"} on the table`, subline: "Tracking, analyzing and optimizing my way to my dream job with Jobby." };
+    return { emoji: "🎯", headline: `${offers} offer${offers === 1 ? "" : "s"} on the table`, subline: "Tracking, analyzing and optimizing my way to my dream job with ONboard." };
   }
   if (total >= 100) {
-    return { emoji: "📊", headline: `I just tracked my ${total}th opportunity`, subline: "Using Jobby to stay organized and let AI sharpen my CV." };
+    return { emoji: "📊", headline: `I just tracked my ${total}th opportunity`, subline: "Using ONboard to stay organized and let AI sharpen my CV." };
   }
   if (interviewing >= 5) {
-    return { emoji: "🚀", headline: `${interviewing} active interviews this round`, subline: "My Jobby AI-optimized CV is opening doors." };
+    return { emoji: "🚀", headline: `${interviewing} active interviews this round`, subline: "My ONboard AI-optimized CV is opening doors." };
   }
   if (aiOptimized >= 10) {
-    return { emoji: "✨", headline: `${aiOptimized} jobs AI-analyzed`, subline: "Tailoring my approach with Jobby's fitness scoring." };
+    return { emoji: "✨", headline: `${aiOptimized} jobs AI-analyzed`, subline: "Tailoring my approach with ONboard's fitness scoring." };
   }
-  return { emoji: "📈", headline: `Tracking ${total} opportunities`, subline: "Analyzing my way to my dream job with Jobby." };
+  return { emoji: "📈", headline: `Tracking ${total} opportunities`, subline: "Analyzing my way to my dream job with ONboard." };
 }
 
 function resolveCssVar(name: string, fallback = "#ffffff"): string {
@@ -71,7 +71,7 @@ async function shareOrDownload(blob: Blob, filename: string, text: string) {
   const nav = navigator as any;
   if (nav.share && nav.canShare?.({ files: [file] })) {
     try {
-      await nav.share({ files: [file], title: "Jobby", text });
+      await nav.share({ files: [file], title: "ONboard", text });
       return;
     } catch {/* user cancelled or error — fall through to download */}
   }
@@ -106,7 +106,7 @@ export function ShareProgress({ jobs, funnelRef }: Props) {
       const bg = resolveCssVar("--card");
       const blob = await captureNode(funnelRef.current, { backgroundColor: bg });
       if (!blob) throw new Error("Couldn't capture image");
-      await shareOrDownload(blob, `jobby-funnel-${Date.now()}.png`, "My job-search funnel from Jobby 📊");
+      await shareOrDownload(blob, `onboard-funnel-${Date.now()}.png`, "My job-search funnel from ONboard 📊");
     } catch (e: any) {
       toast.error(e?.message || "Share failed");
     } finally {
@@ -124,7 +124,7 @@ export function ShareProgress({ jobs, funnelRef }: Props) {
     try {
       const blob = await captureNode(milestoneRef.current);
       if (!blob) throw new Error("Couldn't capture image");
-      await shareOrDownload(blob, `jobby-milestone-${Date.now()}.png`, milestone.headline);
+      await shareOrDownload(blob, `onboard-milestone-${Date.now()}.png`, milestone.headline);
       setMilestoneOpen(false);
     } catch (e: any) {
       toast.error(e?.message || "Share failed");
@@ -157,7 +157,7 @@ export function ShareProgress({ jobs, funnelRef }: Props) {
         <DialogContent className="sm:max-w-[680px]">
           <DialogHeader>
             <DialogTitle>Share milestone</DialogTitle>
-            <DialogDescription>Jobby helps you track and AI-optimize — never auto-apply. This card celebrates your effort.</DialogDescription>
+            <DialogDescription>ONboard helps you track and AI-optimize — never auto-apply. This card celebrates your effort.</DialogDescription>
           </DialogHeader>
           <div className="overflow-auto max-h-[60vh] flex justify-center bg-muted/30 rounded-md py-4">
             {/* Visible preview — scaled down for display only */}

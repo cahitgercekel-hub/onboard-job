@@ -66,7 +66,7 @@ export default function Settings() {
             <p className="text-sm text-muted-foreground mt-1">
               {plan === "free"
                 ? "Upgrade for unlimited job tracking and advanced AI features."
-                : "Thanks for supporting Jobby."}
+                : "Thanks for supporting ONboard."}
             </p>
             <div className="mt-4 space-y-2">
               {plan === "free" && (

@@ -11,6 +11,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { FitnessRing } from "@/components/FitnessRing";
 import { CoverLetterStudio } from "@/components/kanban/CoverLetterStudio";
 import { useCvVersions } from "@/lib/cvVersionsStore";
+import { CompanyLogo } from "@/components/CompanyLogo";
 import { toast } from "sonner";
 import {
   APPLICATION_TYPES,
@@ -108,7 +109,10 @@ export function JobDialog({ open, onOpenChange, initialStatus = "saved", job, on
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="sm:max-w-[560px] max-h-[90vh] overflow-y-auto">
         <DialogHeader>
-          <DialogTitle>{job ? t("common.edit") : t("common.add")}</DialogTitle>
+          <div className="flex items-center gap-3">
+            <CompanyLogo company={company} url={url} size={32} />
+            <DialogTitle>{job ? t("common.edit") : t("common.add")}</DialogTitle>
+          </div>
         </DialogHeader>
         <div className="grid gap-3 py-1">
           <div className="grid grid-cols-2 gap-3">

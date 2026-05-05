@@ -36,26 +36,24 @@ export function AssistantToolShell({
   }, [collapsed]);
 
   return (
-    <div className="px-4 md:px-6 py-4 md:py-6 mx-auto max-w-7xl">
+    <div className="px-4 md:px-6 py-4 md:py-6 w-full">
       <div
-        className="grid gap-4 lg:gap-6 min-h-[calc(100vh-6rem)] transition-[grid-template-columns] duration-300"
+        className="grid gap-4 lg:gap-6 min-h-[calc(100vh-6.5rem)] transition-[grid-template-columns] duration-300"
         style={{
           gridTemplateColumns: collapsed
-            ? "minmax(0,1fr) 44px"
-            : "minmax(0,1fr) 300px",
+            ? "1fr 44px"
+            : "1fr 300px",
         }}
       >
         {/* MAIN COLUMN */}
         <div className="flex flex-col surface-card overflow-hidden min-w-0">
           {/* Header */}
-          <div className="flex items-center justify-between gap-3 px-4 md:px-5 py-3 border-b border-border">
-            <div className="flex items-center gap-3 min-w-0">
-              <div className="h-9 w-9 rounded-md bg-gradient-premium flex items-center justify-center shadow-sm shrink-0">
-                <Logo size={22} className="rounded" />
-              </div>
+          <div className="flex items-center justify-between gap-3 px-4 md:px-5 py-4 border-b border-border">
+            <div className="flex items-center gap-4 min-w-0">
+              <Logo size={64} className="shrink-0" />
               <div className="min-w-0">
-                <h1 className="text-sm md:text-base font-semibold leading-tight truncate">{title}</h1>
-                <p className="text-[11px] text-muted-foreground leading-tight truncate">{subtitle}</p>
+                <h1 className="text-base md:text-lg font-semibold leading-tight truncate">{title}</h1>
+                <p className="text-xs text-muted-foreground leading-tight truncate mt-1">{subtitle}</p>
               </div>
             </div>
             {headerRight && <div className="flex items-center gap-2 shrink-0">{headerRight}</div>}

@@ -7,6 +7,7 @@ import { ARCHIVE_TYPE_LABEL, STATUS_LABEL, type Job } from "@/lib/types";
 import { Archive, RotateCcw, Search, Trash2, ExternalLink } from "lucide-react";
 import { usePrefs } from "@/lib/preferences";
 import { cn } from "@/lib/utils";
+import { CompanyLogo } from "@/components/CompanyLogo";
 
 interface Props {
   open: boolean;
@@ -67,6 +68,7 @@ export function ArchiveView({ open, onOpenChange, jobs, onUnarchive, onDelete }:
             const tone = TYPE_TONE[j.archiveType ?? "closed"] ?? TYPE_TONE.closed;
             return (
               <div key={j.id} className="surface-card p-3 flex items-start gap-3">
+                <CompanyLogo company={j.company} url={j.url} size={32} className="mt-0.5" />
                 <div className="min-w-0 flex-1">
                   <div className="flex items-start justify-between gap-2">
                     <div className="min-w-0">

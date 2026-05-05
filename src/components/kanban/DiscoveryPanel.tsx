@@ -11,6 +11,7 @@ import { useCvVersions } from "@/lib/cvVersionsStore";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import { cn } from "@/lib/utils";
+import { CompanyLogo } from "@/components/CompanyLogo";
 import type { Job, JobStatus, WorkModel, ApplicationType } from "@/lib/types";
 
 interface DiscoveredJob {
@@ -281,10 +282,11 @@ export function DiscoveryPanel({ collapsed, onToggle, onAdd }: Props) {
           const linkUrl = j.url || buildSearchUrl(j);
           return (
             <div key={i} className="rounded-md border border-border bg-card p-3 space-y-2 hover:border-accent/50 transition-colors">
-              <div className="flex items-start justify-between gap-2">
+              <div className="flex items-start gap-3">
+                <CompanyLogo company={j.company} url={j.url} size={32} />
                 <div className="min-w-0 flex-1">
                   <div className="text-sm font-semibold text-foreground leading-tight truncate">{j.role}</div>
-                  <div className="text-xs text-muted-foreground truncate">{j.company}</div>
+                  <div className="text-xs text-muted-foreground truncate mt-0.5">{j.company}</div>
                 </div>
                 <div className={cn("inline-flex items-center px-1.5 py-0.5 rounded text-[10px] font-semibold border shrink-0", tone.cls)}>
                   {j.matchScore}

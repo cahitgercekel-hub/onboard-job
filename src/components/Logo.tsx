@@ -1,13 +1,13 @@
 import { cn } from "@/lib/utils";
 
-export function Logo({ className, size = 32 }: { className?: string; size?: number }) {
+export function Logo({ className, size = 64, src = "/onboard_kanban.png" }: { className?: string; size?: number; src?: string }) {
   return (
     <img
-      src="/favicon.ico"
-      alt="Jobby logo"
+      src={src}
+      alt="ONboard logo"
       width={size}
       height={size}
-      className={cn("rounded-md shrink-0 object-contain", className)}
+      className={cn("shrink-0 object-contain", className)}
     />
   );
 }

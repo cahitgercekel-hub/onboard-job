@@ -20,14 +20,14 @@ export function RecalculateFitnessSection() {
         .from("jobs")
         .select("id, job_description")
         .eq("user_id", user.id)
-        .eq("status", "saved");
+        .neq("status", "archived");
 
       if (error) throw error;
 
       const eligible = (jobs ?? []).filter((j) => (j.job_description ?? "").trim().length > 0);
 
       if (eligible.length === 0) {
-        toast.info("No saved jobs with a description to score.");
+        toast.info("No active jobs with a description to score.");
         return;
       }
 
@@ -63,7 +63,7 @@ export function RecalculateFitnessSection() {
     <div>
       <h3 className="text-sm font-semibold text-foreground mb-1">Fitness Scoring</h3>
       <p className="text-xs text-muted-foreground mb-3">
-        Re-runs AI fitness scoring against your current baseline CV for every job in the Saved column with a description.
+        Re-runs AI fitness scoring against your current baseline CV for every job in your active board with a description.
         {progress && running && ` Processing ${progress.done}/${progress.total}…`}
       </p>
       <Button variant="outline" size="sm" onClick={handleRecalculate} disabled={running}>
