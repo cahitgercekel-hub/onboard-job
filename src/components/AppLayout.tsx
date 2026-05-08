@@ -22,15 +22,15 @@ export default function AppLayout() {
     { to: "/analytics", label: t("nav.analytics"), icon: BarChart3, end: true },
   ];
   const assistantNav = [
-    { to: "/assistant/chat", label: "AI Assistant", icon: MessageSquare, end: true },
-    { to: "/assistant/tone", label: "Corporate Tone", icon: Sparkles, end: true },
-    { to: "/assistant/translator", label: "Skill Translator", icon: Languages, end: true },
-    { to: "/assistant/polish", label: "Grammar & Polish", icon: Wand2, end: true },
-    { to: "/assistant/interview", label: "Interview Prep", icon: Target, end: true },
-    { to: "/assistant/cv", label: "CV Analyzer", icon: FileText, end: true },
+    { to: "/assistant/chat", label: t("nav.aiAssistant"), icon: MessageSquare, end: true },
+    { to: "/assistant/tone", label: t("assistant.tabs.tone"), icon: Sparkles, end: true },
+    { to: "/assistant/translator", label: t("assistant.tabs.translate"), icon: Languages, end: true },
+    { to: "/assistant/polish", label: t("assistant.tabs.polish"), icon: Wand2, end: true },
+    { to: "/assistant/interview", label: t("assistant.tabs.interview"), icon: Target, end: true },
+    { to: "/assistant/cv", label: t("assistant.tabs.cv"), icon: FileText, end: true },
   ];
   const footerNav = [
-    { to: "/billing", label: "Plans & Billing", icon: CreditCard, end: true },
+    { to: "/billing", label: t("nav.billing", { defaultValue: "Plans & Billing" }), icon: CreditCard, end: true },
     { to: "/settings", label: t("nav.settings"), icon: SettingsIcon, end: false },
   ];
   const allNav = [...trackerNav, assistantNav[0], ...footerNav];
@@ -167,7 +167,7 @@ export default function AppLayout() {
                 collapsed && "invisible"
               )}
             >
-              Synced to your account.
+              {t("app.syncedStatus", { defaultValue: "Synced to your account." })}
             </div>
           </div>
 

@@ -124,12 +124,12 @@ export default function Tracker() {
     const job = fresh[0];
     notified.add(job.id);
     sessionStorage.setItem(SESSION_KEY, JSON.stringify([...notified]));
-    toast(`No news from ${job.company}?`, {
-      description: `${job.role} has been in ${job.status} for ${ghostingDays}+ days. Mark as ghosted to clean up your board.`,
+    toast(t("tracker.ghostingTitle", { company: job.company }), {
+      description: t("tracker.ghostingDesc", { role: job.role, status: job.status, days: ghostingDays }),
       icon: <Ghost className="h-4 w-4" />,
       duration: 8000,
       action: {
-        label: "Archive as Ghosted",
+        label: t("tracker.archiveAsGhosted"),
         onClick: () => archiveJob(job.id, "ghosted"),
       },
     });
@@ -191,21 +191,21 @@ export default function Tracker() {
                   autoFocus
                   value={search}
                   onChange={(e) => setSearch(e.target.value)}
-                  placeholder={t("tracker.searchPlaceholder", { defaultValue: "Search company or role…" })}
+                  placeholder={t("tracker.searchPlaceholder")}
                   className="h-11 md:h-9 pl-8 pr-9"
                 />
                 <button
                   onClick={() => { setSearch(""); setSearchOpen(false); }}
-                  aria-label="Close search"
+                  aria-label={t("common.close")}
                   className="absolute right-1.5 top-1/2 -translate-y-1/2 p-1.5 rounded-md text-muted-foreground hover:text-foreground hover:bg-muted"
                 >
                   <X className="h-4 w-4" />
                 </button>
               </div>
             ) : (
-              <Button variant="outline" size="sm" className="h-11 md:h-9" onClick={() => setSearchOpen(true)} aria-label="Search jobs">
+              <Button variant="outline" size="sm" className="h-11 md:h-9" onClick={() => setSearchOpen(true)} aria-label={t("common.search")}>
                 <Search className="h-3.5 w-3.5" />
-                <span className="hidden sm:inline">Search</span>
+                <span className="hidden sm:inline">{t("common.search")}</span>
               </Button>
             )}
             <SortMenu sortKey={sortKey} onChange={setSortKey} />
@@ -300,10 +300,10 @@ export default function Tracker() {
               size="sm"
               className="h-11 md:h-9"
               onClick={() => setArchiveOpen(true)}
-              aria-label="View archive"
+              aria-label={t("common.archive")}
             >
               <Archive className="h-3.5 w-3.5" />
-              <span className="hidden sm:inline">Archive</span>
+              <span className="hidden sm:inline">{t("common.archive")}</span>
             </Button>
             <Button variant="ai" onClick={() => setAutoOpen(true)} className="group h-11 md:h-9 px-3" aria-label={t("tracker.autoAdd")}>
               <Sparkles className="h-4 w-4 transition-transform group-hover:rotate-12" />
@@ -333,9 +333,9 @@ export default function Tracker() {
                   onDeleteCard={(j) => {
                     const snapshot = j;
                     removeJob(j.id);
-                    toast(`"${j.role}" at ${j.company} deleted`, {
+                    toast(t("tracker.deletedToast", { role: j.role, company: j.company, defaultValue: `"${j.role}" at ${j.company} deleted` }), {
                       action: {
-                        label: "Undo",
+                        label: t("common.undo"),
                         onClick: () => {
                           const { id, createdAt, updatedAt, ...rest } = snapshot;
                           addJob(rest);
@@ -441,11 +441,12 @@ function DateRangeField({ label, value, onChange }: { label: string; value?: Dat
 }
 
 function SortMenu({ sortKey, onChange }: { sortKey: SortKey; onChange: (k: SortKey) => void }) {
+  const { t } = useTranslation();
   const options: { key: SortKey; label: string }[] = [
-    { key: "score-desc", label: "Match Score: High to Low" },
-    { key: "date-desc", label: "Date: Newest First" },
-    { key: "date-asc", label: "Date: Oldest First" },
-    { key: "company-asc", label: "Company: A–Z" },
+    { key: "score-desc", label: t("tracker.sortScoreDesc") },
+    { key: "date-desc", label: t("tracker.sortDateDesc") },
+    { key: "date-asc", label: t("tracker.sortDateAsc") },
+    { key: "company-asc", label: t("tracker.sortCompanyAsc") },
   ];
   const active = options.find((o) => o.key === sortKey);
   return (
@@ -453,7 +454,7 @@ function SortMenu({ sortKey, onChange }: { sortKey: SortKey; onChange: (k: SortK
       <DropdownMenuTrigger asChild>
         <Button variant="outline" size="sm" className="h-11 md:h-9">
           <ArrowUpDown className="h-3.5 w-3.5" />
-          Sort
+          {t("tracker.sort")}
           {active && (
             <span className="ml-1 hidden sm:inline text-xs text-muted-foreground truncate max-w-[120px]">
               · {active.label.split(":")[0]}
@@ -478,7 +479,7 @@ function SortMenu({ sortKey, onChange }: { sortKey: SortKey; onChange: (k: SortK
           className={cn("cursor-pointer", sortKey === "default" && "font-semibold")}
         >
           <Check className={cn("h-4 w-4 mr-2", sortKey === "default" ? "opacity-100" : "opacity-0")} />
-          Default order
+          {t("tracker.sortDefault")}
         </DropdownMenuItem>
       </DropdownMenuContent>
     </DropdownMenu>

@@ -78,7 +78,7 @@ export default function Analytics() {
         </div>
         {roleFilter && (
           <Badge variant="secondary" className="cursor-pointer" onClick={() => setRoleFilter(null)}>
-            Filtered: {roleFilter} ✕
+            {t("analytics.filteredBy", { value: roleFilter })}
           </Badge>
         )}
       </div>
@@ -128,7 +128,7 @@ export default function Analytics() {
       <div className="surface-card p-3 md:p-5 overflow-hidden mb-5 md:mb-6">
         <div className="flex items-center justify-between mb-4 gap-2 flex-wrap">
           <h2 className="text-sm font-medium text-foreground flex items-center gap-2">
-            <GitBranch className="h-4 w-4 text-accent" /> Application Funnel
+            <GitBranch className="h-4 w-4 text-accent" /> {t("analytics.funnelTitle")}
           </h2>
           <ShareProgress jobs={jobs} funnelRef={funnelRef} />
         </div>
@@ -136,7 +136,7 @@ export default function Analytics() {
           <FunnelChart jobs={jobs} />
         </div>
         <p className="text-[11px] text-muted-foreground mt-2">
-          Hover any flow to see exact counts and conversion rates. Archived jobs are routed by the highest stage they reached.
+          {t("analytics.funnelHint")}
         </p>
       </div>
 
@@ -152,13 +152,13 @@ export default function Analytics() {
       <div className="surface-card p-3 md:p-5 overflow-hidden">
         <div className="flex items-center justify-between mb-4">
           <h2 className="text-sm font-medium text-foreground flex items-center gap-2">
-            <Sparkles className="h-4 w-4 text-accent" /> Fitness score vs. outcome
+            <Sparkles className="h-4 w-4 text-accent" /> {t("analytics.fitnessTitle")}
           </h2>
-          <span className="text-[11px] text-muted-foreground">{scoredCount} scored</span>
+          <span className="text-[11px] text-muted-foreground">{t("analytics.scoredCount", { count: scoredCount })}</span>
         </div>
         {scoredCount === 0 ? (
           <p className="text-xs text-muted-foreground py-8 text-center">
-            No fitness scores yet. Open a job, paste its description, and click "Calculate fitness".
+            {t("analytics.noScores")}
           </p>
         ) : (
           <div className="w-full h-[260px] md:h-[360px]">
@@ -166,14 +166,14 @@ export default function Analytics() {
               <ScatterChart margin={{ top: 8, right: 16, left: 0, bottom: 8 }}>
                 <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" />
                 <XAxis
-                  type="number" dataKey="x" name="Score" domain={[0, 100]}
+                  type="number" dataKey="x" name={t("analytics.score")} domain={[0, 100]}
                   tick={{ fill: "hsl(var(--muted-foreground))", fontSize: 11 }}
                   axisLine={{ stroke: "hsl(var(--border))" }}
                   tickLine={false}
-                  label={{ value: "Fitness score", position: "insideBottom", offset: -2, fill: "hsl(var(--muted-foreground))", fontSize: 11 }}
+                  label={{ value: t("analytics.score"), position: "insideBottom", offset: -2, fill: "hsl(var(--muted-foreground))", fontSize: 11 }}
                 />
                 <YAxis
-                  type="number" dataKey="y" name="Status"
+                  type="number" dataKey="y" name={t("common.status")}
                   domain={[-0.5, STATUS_AXIS.length - 0.5]}
                   ticks={STATUS_AXIS.map((_, i) => i)}
                   tickFormatter={(i: number) => STATUS_LABEL[STATUS_AXIS[i]] ?? ""}
@@ -199,8 +199,8 @@ export default function Analytics() {
                       <div className="rounded-md border border-border bg-popover px-3 py-2 text-xs text-popover-foreground shadow-md">
                         <div className="font-semibold">{p.role}</div>
                         <div className="text-muted-foreground">{p.company}</div>
-                        <div className="mt-1">Score: <span className="font-medium text-foreground">{p.x}</span></div>
-                        <div>Status: <span className="font-medium text-foreground">{p.status}</span></div>
+                        <div className="mt-1">{t("analytics.score")}: <span className="font-medium text-foreground">{p.x}</span></div>
+                        <div>{t("common.status")}: <span className="font-medium text-foreground">{p.status}</span></div>
                       </div>
                     );
                   }}

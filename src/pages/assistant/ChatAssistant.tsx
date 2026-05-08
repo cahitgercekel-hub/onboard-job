@@ -48,6 +48,7 @@ const CHAT_URL = `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/career-chat`
 const RAIL_STORAGE_KEY = "jat.premiumRail.collapsed";
 
 export default function ChatAssistant() {
+  const { t } = useTranslation();
   const { jobs } = useJobs();
   const { user } = useAuth();
   const { plan } = usePlan();
@@ -334,8 +335,8 @@ export default function ChatAssistant() {
             <div className="flex items-center gap-4 min-w-0">
               <Logo size={64} className="shrink-0" />
               <div className="min-w-0">
-                <h1 className="text-base md:text-lg font-semibold leading-tight truncate">AI Assistant</h1>
-                <p className="text-xs text-muted-foreground leading-tight truncate mt-1">Your personal career strategist</p>
+                <h1 className="text-base md:text-lg font-semibold leading-tight truncate">{t("assistant.chat.title")}</h1>
+                <p className="text-xs text-muted-foreground leading-tight truncate mt-1">{t("assistant.chat.tagline")}</p>
               </div>
             </div>
             <div className="flex items-center gap-2 shrink-0">

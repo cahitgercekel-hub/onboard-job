@@ -42,6 +42,7 @@ async function runStructured<T>(tool: Tool, payload: Record<string, unknown>): P
 /* ------------------------------- File Upload ------------------------------ */
 
 function FileUploadButton({ onText, disabled, label = "Upload PDF / DOCX" }: { onText: (text: string) => void; disabled?: boolean; label?: string }) {
+  const { t } = useTranslation();
   const inputRef = useRef<HTMLInputElement>(null);
   const [busy, setBusy] = useState(false);
   const [fileName, setFileName] = useState<string | null>(null);
@@ -69,7 +70,7 @@ function FileUploadButton({ onText, disabled, label = "Upload PDF / DOCX" }: { o
         className="hidden" onChange={onChange} />
       <Button type="button" variant="outline" size="sm" onClick={() => inputRef.current?.click()} disabled={disabled || busy}>
         {busy ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <Upload className="h-3.5 w-3.5" />}
-        {label}
+        {label === "Upload PDF / DOCX" ? t("assistant.uploadFile") : label}
       </Button>
       {fileName && (
         <span className="text-xs text-muted-foreground inline-flex items-center gap-1 max-w-[200px] truncate">
@@ -81,11 +82,12 @@ function FileUploadButton({ onText, disabled, label = "Upload PDF / DOCX" }: { o
 }
 
 function ResultPanel({ loading, content, empty }: { loading: boolean; content: string; empty: ReactNode }) {
+  const { t } = useTranslation();
   return (
     <div className="surface-card p-5 min-h-[260px] h-full">
       {loading ? (
         <div className="flex items-center gap-2 text-sm text-muted-foreground">
-          <Loader2 className="h-4 w-4 animate-spin" /> Thinking…
+          <Loader2 className="h-4 w-4 animate-spin" /> {t("assistant.thinking")}
         </div>
       ) : content ? (
         <article className="prose prose-sm max-w-none dark:prose-invert prose-headings:text-foreground prose-strong:text-foreground prose-p:text-foreground/90 prose-li:text-foreground/90 prose-ul:list-disc prose-ul:pl-5 marker:text-accent">

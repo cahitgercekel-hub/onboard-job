@@ -1,15 +1,17 @@
-import { useState } from "react";
+import { useState, useRef, useEffect } from "react";
 import { Link } from "react-router-dom";
 import { useTranslation } from "react-i18next";
 import {
   Download, Upload, Trash2, Sun, Moon, Monitor, Languages,
   Calendar as CalendarIcon, LogOut, User as UserIcon, FileText,
-  Settings2, Shield, Palette, Hourglass,
+  Settings2, Shield, Palette, Hourglass, MessageSquare, HelpCircle,
+  ExternalLink,
 } from "lucide-react";
 import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea";
 import {
   Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle,
 } from "@/components/ui/dialog";
@@ -33,7 +35,7 @@ const themeOptions: { value: Theme; icon: typeof Sun }[] = [
   { value: "system", icon: Monitor },
 ];
 
-function CardHeader({ icon: Icon, title }: { icon: typeof UserIcon; title: string }) {
+function CardHeader({ icon: Icon, title }: { icon: any; title: string }) {
   return (
     <div className="flex items-center gap-2 mb-5">
       <Icon className="h-4 w-4 text-muted-foreground" />
@@ -50,6 +52,8 @@ export default function Settings() {
   const [confirmOpen, setConfirmOpen] = useState(false);
   const [importOpen, setImportOpen] = useState(false);
   const [deleteAccountOpen, setDeleteAccountOpen] = useState(false);
+  const [feedbackOpen, setFeedbackOpen] = useState(false);
+  const [legalOpen, setLegalOpen] = useState<{ open: boolean; type: "privacy" | "terms" }>({ open: false, type: "privacy" });
 
   const planLabel = plan === "free" ? "Free Plan" : plan === "pro" ? "Pro" : "Business";
 
@@ -241,12 +245,199 @@ export default function Settings() {
             </Button>
           </div>
         </section>
+
+        {/* 5. Feedback & Support */}
+        <section className="surface-card p-6 space-y-6">
+          <CardHeader icon={MessageSquare} title={t("settings.feedback")} />
+          <div className="space-y-2">
+            <p className="text-sm text-muted-foreground">
+              {t("settings.feedbackHint")}
+            </p>
+            <Button onClick={() => setFeedbackOpen(true)} className="w-full gap-2">
+              <MessageSquare className="h-4 w-4" />
+              {t("settings.feedbackBtn")}
+            </Button>
+          </div>
+
+          <div className="border-t border-border pt-6 space-y-4">
+            <CardHeader icon={HelpCircle} title={t("settings.legal")} />
+            <div className="grid grid-cols-2 gap-3">
+              <Button 
+                variant="outline" 
+                size="sm" 
+                className="justify-start gap-2"
+                onClick={() => setLegalOpen({ open: true, type: "privacy" })}
+              >
+                <Shield className="h-4 w-4 text-muted-foreground" />
+                {t("settings.privacyPolicy")}
+              </Button>
+              <Button 
+                variant="outline" 
+                size="sm" 
+                className="justify-start gap-2"
+                onClick={() => setLegalOpen({ open: true, type: "terms" })}
+              >
+                <FileText className="h-4 w-4 text-muted-foreground" />
+                {t("settings.termsOfUse")}
+              </Button>
+            </div>
+          </div>
+        </section>
       </div>
 
       <ClearAllDialog open={confirmOpen} onOpenChange={setConfirmOpen} />
       <ImportCsvDialog open={importOpen} onOpenChange={setImportOpen} />
       <DeleteAccountDialog open={deleteAccountOpen} onOpenChange={setDeleteAccountOpen} onDeleted={signOut} />
+      <FeedbackDialog open={feedbackOpen} onOpenChange={setFeedbackOpen} />
+      <LegalDialog 
+        open={legalOpen.open} 
+        onOpenChange={(v) => setLegalOpen(prev => ({ ...prev, open: v }))} 
+        type={legalOpen.type} 
+      />
     </div>
+  );
+}
+
+function FeedbackDialog({ open, onOpenChange }: { open: boolean; onOpenChange: (v: boolean) => void }) {
+  const { t } = useTranslation();
+  const [text, setText] = useState("");
+  const [isSending, setIsSending] = useState(false);
+  const textareaRef = useRef<HTMLTextAreaElement>(null);
+
+  // Auto-resize textarea
+  useEffect(() => {
+    if (textareaRef.current) {
+      textareaRef.current.style.height = "auto";
+      textareaRef.current.style.height = `${textareaRef.current.scrollHeight}px`;
+    }
+  }, [text]);
+
+  const handleSend = async () => {
+    if (!text.trim()) return;
+    setIsSending(true);
+    
+    // Simulate sending feedback
+    // In a real app, this would call a Supabase function or an API
+    try {
+      // Mocking the behavior of sending an email to info@cahitgercekel.com
+      await new Promise(resolve => setTimeout(resolve, 1000));
+      toast.success("Feedback sent! Thank you for your contribution.");
+      setText("");
+      onOpenChange(false);
+    } catch (e) {
+      toast.error("Failed to send feedback. Please try again later.");
+    } finally {
+      setIsSending(false);
+    }
+  };
+
+  return (
+    <Dialog open={open} onOpenChange={onOpenChange}>
+      <DialogContent className="sm:max-w-[500px]">
+        <DialogHeader>
+          <DialogTitle>{t("feedback.title")}</DialogTitle>
+          <DialogDescription>
+            {t("settings.feedbackHint")}
+          </DialogDescription>
+        </DialogHeader>
+        <div className="py-4">
+          <Textarea
+            ref={textareaRef}
+            value={text}
+            onChange={(e) => setText(e.target.value)}
+            placeholder={t("feedback.placeholder")}
+            className="min-h-[120px] resize-none overflow-hidden transition-[height] duration-200"
+          />
+        </div>
+        <DialogFooter className="gap-2 sm:gap-0">
+          <Button variant="ghost" onClick={() => onOpenChange(false)}>
+            {t("feedback.cancel")}
+          </Button>
+          <Button onClick={handleSend} disabled={!text.trim() || isSending}>
+            {isSending ? "Sending..." : t("feedback.send")}
+          </Button>
+        </DialogFooter>
+      </DialogContent>
+    </Dialog>
+  );
+}
+
+function LegalDialog({ open, onOpenChange, type }: { open: boolean; onOpenChange: (v: boolean) => void; type: "privacy" | "terms" }) {
+  const title = type === "privacy" ? "Privacy Policy" : "Terms of Use";
+  
+  return (
+    <Dialog open={open} onOpenChange={onOpenChange}>
+      <DialogContent className="max-w-3xl max-h-[80vh] overflow-y-auto">
+        <DialogHeader>
+          <DialogTitle>{title}</DialogTitle>
+        </DialogHeader>
+        <div className="prose prose-sm dark:prose-invert max-w-none py-4 space-y-4 text-muted-foreground">
+          {type === "privacy" ? (
+            <>
+              <p>Last updated: May 07, 2026</p>
+              <h3 className="text-foreground font-semibold">1. Introduction</h3>
+              <p>Welcome to ONboard. We value your privacy and are committed to protecting your personal data. This Privacy Policy explains how we collect, use, and safeguard your information when you use our application.</p>
+              
+              <h3 className="text-foreground font-semibold">2. Data We Collect</h3>
+              <p>ONboard is designed to give you full control over your data. Most of your job application data is stored locally in your browser or within your secure Supabase account if you are signed in.</p>
+              <ul className="list-disc pl-5 space-y-1">
+                <li><strong>Account Information:</strong> Email address and authentication details if you create an account.</li>
+                <li><strong>Application Data:</strong> Job details, status, company names, and notes you enter.</li>
+                <li><strong>CV Content:</strong> Text or files you upload for analysis by our AI tools.</li>
+                <li><strong>Usage Data:</strong> Anonymous technical data to help us improve app performance.</li>
+              </ul>
+
+              <h3 className="text-foreground font-semibold">3. How We Use Your Data</h3>
+              <p>We use your data strictly to provide the services offered by ONboard, including:</p>
+              <ul className="list-disc pl-5 space-y-1">
+                <li>Syncing your job tracker across devices.</li>
+                <li>Powering AI features like the Career Assistant and CV Analyzer.</li>
+                <li>Generating analytics for your job search progress.</li>
+              </ul>
+
+              <h3 className="text-foreground font-semibold">4. Data Security</h3>
+              <p>We implement industry-standard security measures. When you use AI features, your data is processed through secure API endpoints. We do not sell your personal information to third parties.</p>
+
+              <h3 className="text-foreground font-semibold">5. Your Rights</h3>
+              <p>You have the right to access, export, or delete your data at any time through the Settings page. Choosing "Delete Account" or "Clear All Data" will permanently remove your information from our systems.</p>
+
+              <h3 className="text-foreground font-semibold">6. Contact Us</h3>
+              <p>If you have questions about this policy, contact us at info@cahitgercekel.com.</p>
+            </>
+          ) : (
+            <>
+              <p>Last updated: May 07, 2026</p>
+              <h3 className="text-foreground font-semibold">1. Acceptance of Terms</h3>
+              <p>By accessing or using ONboard, you agree to be bound by these Terms of Use. If you do not agree, please do not use the application.</p>
+
+              <h3 className="text-foreground font-semibold">2. Description of Service</h3>
+              <p>ONboard provides job application tracking, CV analysis, and AI-powered career assistance tools. Some features require a paid subscription.</p>
+
+              <h3 className="text-foreground font-semibold">3. User Responsibilities</h3>
+              <p>You are responsible for maintaining the confidentiality of your account and for all activities that occur under your account. You agree to use the service only for lawful purposes related to your personal job search.</p>
+
+              <h3 className="text-foreground font-semibold">4. Intellectual Property</h3>
+              <p>The application, including its original content, features, and functionality, is owned by ONboard and is protected by international copyright and other intellectual property laws.</p>
+
+              <h3 className="text-foreground font-semibold">5. Limitation of Liability</h3>
+              <p>ONboard is provided "as is" without any warranties. We are not responsible for any job search outcomes, data loss, or inaccuracies generated by AI features. In no event shall ONboard be liable for any indirect or consequential damages.</p>
+
+              <h3 className="text-foreground font-semibold">6. Subscription and Payments</h3>
+              <p>Subscription fees are non-refundable unless required by law. You may cancel your subscription at any time through the Billing page.</p>
+
+              <h3 className="text-foreground font-semibold">7. Changes to Terms</h3>
+              <p>We reserve the right to modify these terms at any time. We will notify users of significant changes via the application.</p>
+
+              <h3 className="text-foreground font-semibold">8. Governing Law</h3>
+              <p>These terms shall be governed by and construed in accordance with the laws of the jurisdiction in which the owner operates.</p>
+            </>
+          )}
+        </div>
+        <DialogFooter>
+          <Button onClick={() => onOpenChange(false)}>Close</Button>
+        </DialogFooter>
+      </DialogContent>
+    </Dialog>
   );
 }
 
