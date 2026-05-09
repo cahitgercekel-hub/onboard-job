@@ -2,6 +2,7 @@ import { useMemo } from "react";
 import { ResponsiveSankey } from "@nivo/sankey";
 import type { Job } from "@/lib/types";
 import { buildFunnelData } from "@/lib/funnelData";
+import { useTranslation } from "react-i18next";
 
 interface Props {
   jobs: Job[];
@@ -10,6 +11,7 @@ interface Props {
 // Custom layer that renders each node's label as two stacked lines:
 //   value (count) on top, stage name below — outside the node bar.
 function NodeLabelsLayer({ nodes }: any) {
+  const { t } = useTranslation();
   return (
     <g>
       {nodes.map((node: any) => {
@@ -21,6 +23,10 @@ function NodeLabelsLayer({ nodes }: any) {
         const anchor = isRightSide ? "start" : "end";
         const y = (node.y0 + node.y1) / 2;
         const value = Math.round(node.value || 0);
+
+        // Map internal node ID (e.g. "saved") to translation key
+        const label = t(`tracker.status.${node.id}`, { defaultValue: node.id });
+
         return (
           <text
             key={node.id}
@@ -31,7 +37,7 @@ function NodeLabelsLayer({ nodes }: any) {
             style={{ fill: "hsl(var(--foreground))", fontSize: 11, fontWeight: 500, pointerEvents: "none" }}
           >
             <tspan x={x} dy="-0.5em" style={{ fontSize: 13, fontWeight: 700 }}>{value}</tspan>
-            <tspan x={x} dy="1.2em" style={{ fill: "hsl(var(--muted-foreground))" }}>{node.id}</tspan>
+            <tspan x={x} dy="1.2em" style={{ fill: "hsl(var(--muted-foreground))", textTransform: "capitalize" }}>{label}</tspan>
           </text>
         );
       })}
@@ -40,12 +46,13 @@ function NodeLabelsLayer({ nodes }: any) {
 }
 
 export function FunnelChart({ jobs }: Props) {
+  const { t } = useTranslation();
   const data = useMemo(() => buildFunnelData(jobs), [jobs]);
 
   if (data.nodes.length === 0 || data.links.length === 0) {
     return (
       <div className="text-xs text-muted-foreground text-center py-12">
-        Not enough data yet. Move jobs through the pipeline to see your funnel.
+        {t("analytics.noScores").includes("funnel") ? t("analytics.noScores") : "Not enough data yet. Move jobs through the pipeline to see your funnel."}
       </div>
     );
   }
@@ -87,8 +94,10 @@ export function FunnelChart({ jobs }: Props) {
         }}
         nodeTooltip={({ node }: any) => (
           <div className="px-2 py-1">
-            <div className="font-semibold">{node.id}</div>
-            <div className="text-muted-foreground">{Math.round((node.value as number) || 0)} jobs</div>
+            <div className="font-semibold">{t(`tracker.status.${node.id}`, { defaultValue: node.id })}</div>
+            <div className="text-muted-foreground">
+              {t("tracker.jobs", { count: Math.round((node.value as number) || 0) })}
+            </div>
           </div>
         )}
         linkTooltip={({ link }: any) => {
@@ -100,10 +109,10 @@ export function FunnelChart({ jobs }: Props) {
           return (
             <div className="px-2 py-1">
               <div className="font-semibold">
-                {link.source.id} → {link.target.id}
+                {t(`tracker.status.${link.source.id}`, { defaultValue: link.source.id })} → {t(`tracker.status.${link.target.id}`, { defaultValue: link.target.id })}
               </div>
               <div className="text-muted-foreground">
-                {link.value} job{link.value === 1 ? "" : "s"} · {pct}% conversion
+                {t("tracker.jobs", { count: link.value })} · {pct}% conversion
               </div>
             </div>
           );
@@ -112,3 +121,4 @@ export function FunnelChart({ jobs }: Props) {
     </div>
   );
 }
+

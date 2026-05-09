@@ -1,15 +1,48 @@
 export const fr = {
-  app: { name: "ONboard", tagline: "Suivi et Assistant CV" },
+  app: { name: "ONboard", tagline: "Suivi et Assistant CV", syncedStatus: "Synchronisé avec votre compte." },
+  auth: {
+    googleBtn: "Continuer avec Google",
+    orWithEmail: "ou par e-mail",
+    loginTab: "Se connecter",
+    signupTab: "S'inscrire",
+    forgotTab: "Mot de passe oublié ?",
+    forgotHint: "Entrez votre e-mail et nous vous enverrons un lien de réinitialisation.",
+    sendResetLink: "Envoyer le lien",
+    backToLogin: "Retour à la connexion",
+    displayNameLabel: "Nom d'affichage (optionnel)",
+    emailLabel: "E-mail",
+    passwordLabel: "Mot de passe",
+    createAccount: "Créer un compte",
+    signingIn: "Connexion...",
+    sending: "Envoi...",
+    creatingAccount: "Création du compte...",
+    invalidEmail: "Entrez un e-mail valide"
+  },
+  resetPassword: {
+    title: "Réinitialiser votre mot de passe",
+    subtitle: "Choisissez un nouveau mot de passe",
+    validating: "Validation du lien de récupération...",
+    newPasswordLabel: "Nouveau mot de passe",
+    confirmPasswordLabel: "Confirmer le mot de passe",
+    updating: "Mise à jour...",
+    updateBtn: "Modifier le mot de passe",
+    matchError: "Les mots de passe ne correspondent pas",
+    strengthError: "Veuillez choisir un mot de passe plus fort",
+    successToast: "Mot de passe mis à jour"
+  },
   nav: { 
     tracker: "Suivi des postes", 
+
     board: "Tableau de bord", 
     analytics: "Analytique", 
     assistant: "Assistant", 
     aiAssistant: "Assistant IA", 
-    settings: "Paramètres" 
+    settings: "Paramètres",
+    billing: "Plans et Facturation"
   },
   common: {
     save: "Enregistrer", cancel: "Annuler", delete: "Supprimer", add: "Ajouter", edit: "Modifier",
+    link: "Lien",
     filter: "Filtrer", clear: "Effacer les filtres", all: "Tous",
     company: "Entreprise", role: "Poste", url: "URL de l'offre", date: "Date de candidature", status: "Statut",
     applicationType: "Type de candidature", industry: "Secteur", workModel: "Mode de travail",
@@ -22,15 +55,37 @@ export const fr = {
     close: "Fermer",
     send: "Envoyer",
     any: "N'importe quel",
-    optional: "optionnel"
+    optional: "optionnel",
+    plans: {
+      free: "Gratuit",
+      pro: "Pro",
+      business: "Business"
+    }
   },
   tracker: {
     title: "Tableau de bord",
     addJob: "Ajouter un poste",
+    addToSaved: "Ajouter aux Enregistrés",
+    addedToSaved: "{{company}} ajouté aux Enregistrés",
+    deletedToast: "\"{{role}}\" chez {{company}} supprimé",
     autoAdd: "Ajout auto avec l'IA",
     jobs_one: "{{count}} poste",
     jobs_other: "{{count}} postes",
     searchPlaceholder: "Rechercher entreprise ou poste...",
+    status: {
+      saved: "Enregistré",
+      applied: "Postulé",
+      interviewing: "Entretien",
+      offer: "Offre",
+      rejected: "Refusé",
+      archived: "Archivé",
+    },
+    archiveTypes: {
+      closed: "Poste clôturé",
+      rejected: "Refusé",
+      ghosted: "Ghosted (pas de réponse)",
+    },
+    appliedAt: "Postulé le {{date}}",
     ghostingTitle: "Pas de nouvelles de {{company}} ?",
     ghostingDesc: "{{role}} est en attente depuis {{days}}+ jours. Archivez-le comme 'Ghosted' pour nettoyer votre tableau.",
     archiveAsGhosted: "Archiver comme Ghosted",
@@ -40,6 +95,30 @@ export const fr = {
     sortDateDesc: "Date : plus récent en premier",
     sortDateAsc: "Date : plus ancien en premier",
     sortCompanyAsc: "Entreprise : A–Z"
+  },
+  discovery: {
+    title: "Match de Job IA",
+    searchPlaceholder: "Rôle, mots-clés...",
+    locationPlaceholder: "Emplacement",
+    searching: "Recherche...",
+    search: "Rechercher",
+    filters: "Filtres",
+    matches_one: "{{count}} correspondance",
+    matches_other: "{{count}} correspondances",
+    relevance: "Pertinence",
+    date: "Date",
+    empty: "Entrez une recherche et nous afficherons les correspondances notées par l'IA par rapport à votre CV.",
+    scoring: "Évaluation des correspondances...",
+    daysAgo: "il y a {{count}}j",
+    linkedinTooltip: "Rechercher sur LinkedIn",
+    baselineCv: "CV de base",
+    anyTime: "N'importe quand",
+    last24h: "Dernières 24 heures",
+    last7d: "7 derniers jours",
+    last30d: "30 derniers jours",
+    apply: "Appliquer",
+    collapse: "Réduire",
+    expand: "Match de Job IA"
   },
   analytics: {
     title: "Analytique",
@@ -54,7 +133,13 @@ export const fr = {
     score: "Score",
     roleDistribution: "Répartition des postes",
     avgMatchScore: "Score de match moyen",
-    clickToFilter: "Cliquez pour filtrer l'analytique"
+    noAppliedRoles: "Aucun rôle postulé pour le moment. Déplacez les emplois hors de 'Enregistré' pour commencer à suivre la distribution.",
+    clickToFilter: "Cliquez pour filtrer l'analytique",
+    insightScore: "où votre score de correspondance moyen est de {{score}}%",
+    insightNoScore: "avec aucune candidature évaluée pour le moment",
+    insightVolume: "Votre volume de candidatures le plus élevé est dans {{category}}, {{avg}}.",
+    barHint: "L'opacity des barres reflète la qualité moyenne des correspondances. Cliquez sur n'importe quelle barre pour filtrer la page.",
+    conversion: "conversion"
   },
   filters: {
     appType: "Type de candidature", industry: "Secteur", workModel: "Mode de travail", dateApplied: "Date de candidature",
@@ -64,6 +149,28 @@ export const fr = {
   },
   settings: {
     title: "Paramètres", subtitle: "Configurez les préférences et gérez vos données.",
+    accountTitle: "Compte et Abonnement",
+    freePlanDesc: "Passez à la version supérieure pour un suivi illimité des offres et des fonctionnalités IA avancées.",
+    proPlanDesc: "Merci de soutenir ONboard.",
+    manageSub: "Gérer l'abonnement",
+    planLabelFree: "Plan Gratuit",
+    upgradeToPro: "Passer à Pro",
+    cvTitle: "Gestion des CV",
+    workflowTitle: "Préférences de flux de travail",
+    ghostingThreshold: "Seuil de ghosting",
+    daysCount: "{{count}} jours",
+    dataTitle: "Données et Sécurité",
+    exportImportTitle: "Exportation et Importation de données",
+    exportBtn: "Exporter les données en CSV",
+    importBtn: "Importer les données depuis un CSV",
+    signedInAs: "Connecté en tant que {{email}}",
+    signOut: "Se déconnecter",
+    deleteAccount: "Supprimer le compte",
+    deleteAccountDesc: "Supprimez définitivement votre compte et toutes les données associées. Cette action est irréversible.",
+    deleteAccountTitle: "Supprimer votre compte ?",
+    deleteAccountConfirm: "Ceci supprime définitivement votre compte et toutes les données associées (emplois, CV, jetons). Cette action est irréversible.",
+    deleting: "Suppression...",
+    deleteAccountSuccess: "Suppression du compte demandée. Vous avez été déconnecté.",
     appearance: "Apparence", appearanceHint: "Choisissez l'apparence de l'interface.",
     light: "Clair", dark: "Sombre", system: "Système",
     language: "Langue", languageHint: "Langue de l'interface pour les menus et libellés.",
@@ -97,7 +204,13 @@ export const fr = {
     proFeatures: "Fonctions Pro",
     thinking: "En réflexion...",
     uploadFile: "Téléverser PDF / DOCX",
+    upgradeBtn: "Passer à Pro pour l'Accès",
     tone: {
+      subtitle: "Correspondez à la culture d'une entreprise. Collez un brouillon + l'entreprise cible ; obtenez un score de ton et des modifications concrètes.",
+      premium: {
+        presets: { title: "Préréglages de Ton Multi-entreprises", desc: "Enregistrez des profils de ton pour chaque entreprise que vous ciblez." },
+        rewrite: { title: "Réécriture en Masse de Lettres de Motivation", desc: "Réécrivez plusieurs lettres de motivation en une seule fois." }
+      },
       targetCompany: "Entreprise cible",
       draftLabel: "Brouillon de lettre de motivation",
       uploadLabel: "Téléverser lettre de motivation",
@@ -116,17 +229,29 @@ export const fr = {
       scoreWeak: "Faible"
     },
     translate: {
+      subtitle: "Transformez des expériences non conventionnelles en puces de CV prêtes pour le monde de l'entreprise, adaptées à une fiche de poste.",
+      premium: {
+        batch: { title: "Traduction par Lots de Fiches de Poste", desc: "Traduisez une expérience par rapport à plusieurs fiches de poste à la fois." },
+        packs: { title: "Packs Spécifiques à l'Industrie", desc: "Packs de ton pour la finance, la tech, le conseil et plus encore." }
+      },
       experienceLabel: "Expérience non conventionnelle",
       experiencePlaceholder: "ex. Dirigé un nettoyage bénévole de 30 personnes, coordonné la logistique dans 5 districts...",
       jdLabel: "Description du poste cible",
       jdPlaceholder: "Collez la description du poste ici ou téléversez un PDF/DOCX...",
+      uploadJd: "Charger la description du poste",
       translateBtn: "Traduire les compétences",
       empty: "3–5 points clés prêts pour l'entreprise, adaptés à la description du poste.",
       suggestedBullets: "Points clés suggérés pour le CV",
       strategy: "Stratégie"
     },
     polish: {
+      subtitle: "Corrigez la grammaire, resserrez la formulation et adaptez le ton — en anglais ou en allemand.",
+      premium: {
+        export: { title: "Exportation avec Suivi des Modifications", desc: "Téléchargez le texte poli au format DOCX avec les marques de révision." },
+        presets: { title: "Préréglages de Ton", desc: "Basculez entre les voix formelles, amicales et exécutives." }
+      },
       businessGerman: "Optimiser pour l'allemand des affaires (Geschäftsdeutsch)",
+      languageLabel: "Langue",
       textLabel: "Texte",
       placeholder: "Collez un e-mail, un point de CV ou un message, ou téléversez un PDF/DOCX...",
       polishBtn: "Perfectionner",
@@ -135,6 +260,11 @@ export const fr = {
       keyChanges: "Changements clés"
     },
     interview: {
+      subtitle: "Générez des questions probables et des réponses structurées STAR pour n'importe quel rôle pour lequel vous passez un entretien.",
+      premium: {
+        voice: { title: "Entretien Fictif en Direct (Voix)", desc: "Entraînez-vous à voix haute avec des commentaires en temps réel." },
+        followups: { title: "Suivis de Type Recruteur", desc: "Questions d'approfondissement adaptatives basées sur vos réponses." }
+      },
       pickJob: "Choisissez un poste pour l'entretien",
       noJobs: "Aucun poste en 'Entretien' pour le moment — déplacez d'abord une carte dans cette colonne.",
       generate: "Générer la préparation",
@@ -147,21 +277,40 @@ export const fr = {
       result: "Résultat"
     },
     cv: {
+      subtitle: "Notez votre CV sur la langue, le formatage, la compatibilité ATS et les mots-clés — avec des conseils exploitables.",
+      premium: {
+        ats: { title: "Simulation ATS Détaillée", desc: "Rapport d'analyse par section et carte de chaleur pour les recruteurs." },
+        scans: { title: "Scans Quotidiens Illimités", desc: "Ré-analysez aussi souvent que vous itérez sur votre CV." }
+      },
       paste: "Coller le texte du CV",
       upload: "Téléverser le CV",
+      uploadPdf: "Charger le PDF",
       analyze: "Analyser le CV",
+      analyzing: "Analyse en cours...",
       empty: "Téléversez ou collez votre CV pour voir les scores et des conseils pratiques.",
       language: "Langage professionnel",
       formatting: "Longueur et formatage",
       ats: "Adéquation ATS",
       keywords: "Optimisation des mots-clés",
       tips: "Conseils pratiques",
+      tipsList: {
+        noEmail: "Critique : Ajoutez une adresse e-mail pour que les recruteurs puissent vous contacter.",
+        noPhone: "Critique : Ajoutez un numéro de téléphone pour éviter d'être ignoré pour les entretiens téléphoniques.",
+        lowMetrics: "Ajoutez plus de métriques. Votre CV ne contient que {{count}} chiffres/résultats. Les recruteurs recherchent des %, des $ et de l'échelle.",
+        weakVerbs: "Remplacez les phrases faibles comme 'responsable de' par des verbes d'action comme 'Dirigé', 'Conçu' ou 'Optimisé'.",
+        fewSections: "Standardisez vos titres. Assurez-vous d'avoir des sections 'Expérience', 'Éducation' et 'Compétences' clairement identifiées.",
+        fancyChars: "Alerte ATS : Supprimez les graphiques complexes ou les symboles de puces non standard qui pourraient entraver l'analyse.",
+        shortCv: "Alerte brièveté : Votre CV ne contient que {{count}} mots. Développez vos réalisations marquantes.",
+        longCv: "Alerte longueur : {{count}} mots, c'est trop long pour la plupart des postes. Visez 2 pages (environ 900 mots).",
+      },
       strengths: "Mots-clés forts",
       dragDrop: "Glissez-déposez ou parcourez les fichiers",
       unlimitedScans: "Analyses illimitées",
       scanLimit: "Limite d'analyse quotidienne : {{used}}/{{limit}} analyses gratuites utilisées",
+      scanLimitLabel: "Limite de scan quotidienne : {{used}}/{{limit}} scans gratuits utilisés",
       limitReached: "Limite quotidienne atteinte. Passez à Pro pour des analyses illimitées.",
       atsSimulation: "Simulation ATS détaillée",
+      atsReportTitle: "Rapport ATS détaillé",
       atsProHint: "Le rapport ATS détaillé débloque un score de mots-clés plus approfondi, des heuristiques de lisibilité pour les recruteurs et des commentaires par section. Relancez l'analyseur pour mettre à jour.",
       unlockPro: "Débloquer avec Pro"
     },

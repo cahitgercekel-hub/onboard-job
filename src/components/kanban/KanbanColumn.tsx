@@ -1,9 +1,9 @@
 import { useDroppable } from "@dnd-kit/core";
 import { Plus } from "lucide-react";
 import type { Job, JobStatus } from "@/lib/types";
-import { STATUS_LABEL } from "@/lib/types";
 import { JobCard } from "./JobCard";
 import { cn } from "@/lib/utils";
+import { useTranslation } from "react-i18next";
 
 const COLUMN_DOT: Partial<Record<JobStatus, string>> = {
   saved: "bg-column-saved",
@@ -33,6 +33,9 @@ interface Props {
 
 export function KanbanColumn({ status, jobs, onAdd, onCardClick, onArchiveCard, onDeleteCard, hiddenId }: Props) {
   const { isOver, setNodeRef } = useDroppable({ id: status });
+  const { t } = useTranslation();
+
+  const label = t(`tracker.status.${status}`);
 
   return (
     <div
@@ -45,13 +48,13 @@ export function KanbanColumn({ status, jobs, onAdd, onCardClick, onArchiveCard, 
       <div className={cn("flex items-center justify-between px-3 py-2.5 border-b border-border rounded-t-lg", COLUMN_HEADER[status])}>
         <div className="flex items-center gap-2">
           <span className={cn("h-2 w-2 rounded-full", COLUMN_DOT[status])} />
-          <span className="text-sm font-medium text-foreground">{STATUS_LABEL[status]}</span>
+          <span className="text-sm font-medium text-foreground">{label}</span>
           <span className="text-xs text-foreground/60">{jobs.length}</span>
         </div>
         <button
           onClick={onAdd}
           className="text-foreground/60 hover:text-foreground rounded p-1 hover:bg-background/40"
-          aria-label={`Add to ${STATUS_LABEL[status]}`}
+          aria-label={t("tracker.addToSaved")}
         >
           <Plus className="h-4 w-4" />
         </button>
@@ -75,7 +78,7 @@ export function KanbanColumn({ status, jobs, onAdd, onCardClick, onArchiveCard, 
             onClick={onAdd}
             className="w-full text-xs text-muted-foreground hover:text-foreground border border-dashed border-border rounded-md py-6 hover:bg-secondary/50 transition"
           >
-            + Add job
+            + {t("tracker.addJob")}
           </button>
         )}
       </div>

@@ -1,15 +1,18 @@
 import { Mic, MessageSquare } from "lucide-react";
 import { InterviewPrep } from "@/pages/Assistant";
 import { AssistantToolShell } from "@/components/assistant/AssistantToolShell";
+import { useTranslation } from "react-i18next";
 
 export default function InterviewAssistant() {
+  const { t } = useTranslation();
+
   return (
     <AssistantToolShell
-      title="Interview Prep"
-      subtitle="Generate likely questions and STAR-structured answers for any role you're currently interviewing for."
+      title={t("assistant.tabs.interview")}
+      subtitle={t("assistant.interview.subtitle")}
       premiumTools={[
-        { id: "voice-mock", icon: Mic, title: "Live Mock Interview (Voice)", desc: "Practice out loud with real-time feedback." },
-        { id: "recruiter-followups", icon: MessageSquare, title: "Recruiter-style Follow-ups", desc: "Adaptive deep-dive questions based on your answers." },
+        { id: "voice-mock", icon: Mic, title: t("assistant.interview.premium.voice.title"), desc: t("assistant.interview.premium.voice.desc") },
+        { id: "recruiter-followups", icon: MessageSquare, title: t("assistant.interview.premium.followups.title"), desc: t("assistant.interview.premium.followups.desc") },
       ]}
     >
       <InterviewPrep />

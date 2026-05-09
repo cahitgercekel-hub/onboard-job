@@ -1,15 +1,47 @@
 export const de = {
-  app: { name: "ONboard", tagline: "Tracking & Assistenz" },
+  app: { name: "ONboard", tagline: "Tracking & Assistenz", syncedStatus: "Mit Ihrem Konto synchronisiert." },
+  auth: {
+    googleBtn: "Mit Google fortfahren",
+    orWithEmail: "oder per E-Mail",
+    loginTab: "Anmelden",
+    signupTab: "Registrieren",
+    forgotTab: "Passwort vergessen?",
+    forgotHint: "Geben Sie Ihre E-Mail-Adresse ein und wir senden Ihnen einen Link zum Zurücksetzen des Passworts.",
+    sendResetLink: "Link zum Zurücksetzen senden",
+    backToLogin: "Zurück zum Login",
+    displayNameLabel: "Anzeigename (optional)",
+    emailLabel: "E-Mail",
+    passwordLabel: "Passwort",
+    createAccount: "Konto erstellen",
+    signingIn: "Anmeldung...",
+    sending: "Senden...",
+    creatingAccount: "Konto wird erstellt...",
+    invalidEmail: "Gültige E-Mail eingeben"
+  },
+  resetPassword: {
+    title: "Passwort zurücksetzen",
+    subtitle: "Wählen Sie ein neues Passwort",
+    validating: "Wiederherstellungslink wird validiert...",
+    newPasswordLabel: "Neues Passwort",
+    confirmPasswordLabel: "Passwort bestätigen",
+    updating: "Wird aktualisiert...",
+    updateBtn: "Passwort aktualisieren",
+    matchError: "Passwörter stimmen nicht überein",
+    strengthError: "Bitte wählen Sie ein stärkeres Passwort",
+    successToast: "Passwort aktualisiert"
+  },
   nav: { 
     tracker: "Tracker", 
     board: "Board", 
     analytics: "Analyse", 
     assistant: "Assistent", 
     aiAssistant: "KI-Assistent", 
-    settings: "Einstellungen" 
+    settings: "Einstellungen",
+    billing: "Pläne & Abrechnung"
   },
   common: {
     save: "Speichern", cancel: "Abbrechen", delete: "Löschen", add: "Hinzufügen", edit: "Bearbeiten",
+    link: "Link",
     filter: "Filter", clear: "Filter zurücksetzen", all: "Alle",
     company: "Unternehmen", role: "Rolle", url: "Stellen-URL", date: "Bewerbungsdatum", status: "Status",
     applicationType: "Anstellungsart", industry: "Branche", workModel: "Arbeitsmodell",
@@ -22,15 +54,37 @@ export const de = {
     close: "Schließen",
     send: "Senden",
     any: "Beliebig",
-    optional: "optional"
+    optional: "optional",
+    plans: {
+      free: "Kostenlos",
+      pro: "Pro",
+      business: "Business"
+    }
   },
   tracker: {
     title: "Bewerbungs-Tracker",
     addJob: "Stelle hinzufügen",
+    addToSaved: "Zu Gespeichert hinzufügen",
+    addedToSaved: "{{company}} zu Gespeichert hinzugefügt",
+    deletedToast: "\"{{role}}\" bei {{company}} gelöscht",
     autoAdd: "Per KI hinzufügen",
     jobs_one: "{{count}} Stelle",
     jobs_other: "{{count}} Stellen",
     searchPlaceholder: "Unternehmen oder Rolle suchen...",
+    status: {
+      saved: "Gespeichert",
+      applied: "Beworben",
+      interviewing: "Vorstellungsgespräch",
+      offer: "Angebot",
+      rejected: "Abgelehnt",
+      archived: "Archiviert",
+    },
+    archiveTypes: {
+      closed: "Position geschlossen",
+      rejected: "Abgelehnt",
+      ghosted: "Ghosted (keine Antwort)",
+    },
+    appliedAt: "Beworben am {{date}}",
     ghostingTitle: "Keine Neuigkeiten von {{company}}?",
     ghostingDesc: "{{role}} ist seit {{days}}+ Tagen im Status {{status}}. Als 'Ghosted' archivieren, um dein Board aufzuräumen.",
     archiveAsGhosted: "Als Ghosted archivieren",
@@ -40,6 +94,30 @@ export const de = {
     sortDateDesc: "Datum: Neueste zuerst",
     sortDateAsc: "Datum: Älteste zuerst",
     sortCompanyAsc: "Unternehmen: A–Z"
+  },
+  discovery: {
+    title: "KI-Job-Match",
+    searchPlaceholder: "Rolle, Stichworte...",
+    locationPlaceholder: "Standort",
+    searching: "Suche...",
+    search: "Suchen",
+    filters: "Filter",
+    matches_one: "{{count}} Treffer",
+    matches_other: "{{count}} Treffer",
+    relevance: "Relevanz",
+    date: "Datum",
+    empty: "Geben Sie eine Suche ein und wir zeigen Ihnen KI-bewertete Treffer passend zu Ihrem Lebenslauf.",
+    scoring: "Treffer werden bewertet...",
+    daysAgo: "vor {{count}} Tagen",
+    linkedinTooltip: "Auf LinkedIn suchen",
+    baselineCv: "Basis-Lebenslauf",
+    anyTime: "Beliebige Zeit",
+    last24h: "Letzte 24 Stunden",
+    last7d: "Letzte 7 Tage",
+    last30d: "Letzte 30 Tage",
+    apply: "Anwenden",
+    collapse: "Einklappen",
+    expand: "KI-Job-Match"
   },
   analytics: {
     title: "Analyse",
@@ -54,7 +132,13 @@ export const de = {
     score: "Score",
     roleDistribution: "Rollenverteilung",
     avgMatchScore: "Durchschn. Match-Score",
-    clickToFilter: "Klicken zum Filtern der Analyse"
+    noAppliedRoles: "Noch keine beworbenen Rollen. Verschieben Sie Jobs aus 'Gespeichert', um die Verteilung zu verfolgen.",
+    clickToFilter: "Klicken zum Filtern der Analyse",
+    insightScore: "wo Ihr durchschnittlicher Match-Score bei {{score}}% liegt",
+    insightNoScore: "mit bisher noch keinen bewerteten Bewerbungen",
+    insightVolume: "Ihr höchstes Bewerbungsvolumen liegt im Bereich {{category}}, {{avg}}.",
+    barHint: "Die Balkendeckkraft spiegelt die durchschnittliche Match-Qualität wider. Klicken Sie auf einen Balken, um die Seite zu filtern.",
+    conversion: "Konversion"
   },
   filters: {
     appType: "Anstellungsart", industry: "Branche", workModel: "Arbeitsmodell", dateApplied: "Bewerbungsdatum",
@@ -64,6 +148,28 @@ export const de = {
   },
   settings: {
     title: "Einstellungen", subtitle: "Präferenzen konfigurieren und Daten verwalten.",
+    accountTitle: "Konto & Abonnement",
+    freePlanDesc: "Upgrade für unbegrenztes Job-Tracking und erweiterte KI-Funktionen.",
+    proPlanDesc: "Danke für die Unterstützung von ONboard.",
+    manageSub: "Abonnement verwalten",
+    planLabelFree: "Kostenloser Plan",
+    upgradeToPro: "Auf Pro upgraden",
+    cvTitle: "Lebenslauf-Verwaltung",
+    workflowTitle: "Workflow-Einstellungen",
+    ghostingThreshold: "Ghosting-Schwellenwert",
+    daysCount: "{{count}} Tage",
+    dataTitle: "Daten & Sicherheit",
+    exportImportTitle: "Daten Export & Import",
+    exportBtn: "Daten als CSV exportieren",
+    importBtn: "Daten aus CSV importieren",
+    signedInAs: "Angemeldet als {{email}}",
+    signOut: "Abmelden",
+    deleteAccount: "Konto löschen",
+    deleteAccountDesc: "Löschen Sie Ihr Konto und alle zugehörigen Daten dauerhaft. Dies kann nicht rückgängig gemacht werden.",
+    deleteAccountTitle: "Ihr Konto löschen?",
+    deleteAccountConfirm: "Dies löscht dauerhaft Ihr Konto und alle zugehörigen Daten (Jobs, Lebensläufe, Token). Dies kann nicht rückgängig gemacht werden.",
+    deleting: "Wird gelöscht...",
+    deleteAccountSuccess: "Kontolöschung angefordert. Sie wurden abgemeldet.",
     appearance: "Erscheinungsbild", appearanceHint: "Wähle, wie die Oberfläche aussieht.",
     light: "Hell", dark: "Dunkel", system: "System",
     language: "Sprache", languageHint: "Sprache für Menüs und Beschriftungen.",
@@ -97,7 +203,13 @@ export const de = {
     proFeatures: "Pro-Funktionen",
     thinking: "Denkt nach...",
     uploadFile: "PDF / DOCX hochladen",
+    upgradeBtn: "Auf Pro upgraden für Zugriff",
     tone: {
+      subtitle: "Passen Sie sich der Unternehmenskultur an. Entwurf + Zielunternehmen einfügen; Ton-Score und konkrete Bearbeitungen erhalten.",
+      premium: {
+        presets: { title: "Ton-Voreinstellungen für mehrere Unternehmen", desc: "Speichern Sie Tonprofile für jedes Unternehmen, das Sie anvisieren." },
+        rewrite: { title: "Bulk-Anschreiben-Rewrite", desc: "Schreiben Sie mehrere Anschreiben in einem Durchgang um." }
+      },
       targetCompany: "Zielunternehmen",
       draftLabel: "Anschreiben-Entwurf",
       uploadLabel: "Anschreiben hochladen",
@@ -116,17 +228,29 @@ export const de = {
       scoreWeak: "Schwach"
     },
     translate: {
+      subtitle: "Verwandeln Sie unkonventionelle Erfahrungen in korporationstaugliche Lebenslauf-Punkte, zugeschnitten auf eine Stellenbeschreibung.",
+      premium: {
+        batch: { title: "Stellenbeschreibungs-Batch-Übersetzung", desc: "Übersetzen Sie eine Erfahrung gegen viele Stellenbeschreibungen gleichzeitig." },
+        packs: { title: "Branchenspezifische Pakete", desc: "Ton-Pakete für Finanzen, Tech, Beratung & mehr." }
+      },
       experienceLabel: "Ungewöhnliche Erfahrung",
       experiencePlaceholder: "z.B. Leitete eine 30-köpfige Freiwilligengruppe, koordinierte die Logistik in 5 Distrikten...",
       jdLabel: "Ziel-Stellenbeschreibung",
       jdPlaceholder: "Füge die Stellenbeschreibung hier ein oder lade ein PDF/DOCX hoch...",
+      uploadJd: "Stellenbeschreibung hochladen",
       translateBtn: "Fähigkeiten übersetzen",
       empty: "3–5 unternehmensbereite Aufzählungspunkte, maßgeschneidert auf die Stellenbeschreibung.",
       suggestedBullets: "Vorgeschlagene Lebenslauf-Punkte",
       strategy: "Strategie"
     },
     polish: {
+      subtitle: "Grammatik korrigieren, Formulierungen straffen und Ton anpassen – auf Englisch oder Deutsch (mit optionalem Geschäftsdeutsch-Modus).",
+      premium: {
+        export: { title: "Export mit Nachverfolgung", desc: "Laden Sie polierten Text als DOCX mit Bearbeitungsmarkierungen herunter." },
+        presets: { title: "Ton-Voreinstellungen", desc: "Wechseln Sie zwischen formalen, freundlichen und exekutiven Stimmen." }
+      },
       businessGerman: "Für Geschäftsdeutsch optimieren",
+      languageLabel: "Sprache",
       textLabel: "Text",
       placeholder: "Füge eine E-Mail, einen Lebenslauf-Punkt oder eine Nachricht ein — oder lade ein PDF/DOCX hoch...",
       polishBtn: "Polieren",
@@ -135,6 +259,11 @@ export const de = {
       keyChanges: "Wichtigste Änderungen"
     },
     interview: {
+      subtitle: "Erstellen Sie wahrscheinliche Fragen und STAR-strukturierte Antworten für jede Rolle, für die Sie gerade interviewt werden.",
+      premium: {
+        voice: { title: "Live-Mock-Interview (Stimme)", desc: "Üben Sie laut mit Echtzeit-Feedback." },
+        followups: { title: "Follow-up-Fragen im Recruiter-Stil", desc: "Adaptive vertiefende Fragen basierend auf Ihren Antworten." }
+      },
       pickJob: "Wähle eine Stelle für das Interview",
       noJobs: "Noch keine Stellen im 'Interview' — verschiebe zuerst eine Karte in diese Spalte.",
       generate: "Vorbereitung generieren",
@@ -144,24 +273,43 @@ export const de = {
       situation: "Situation",
       task: "Aufgabe",
       action: "Aktion",
-      result: "Ergebnis"
+      result: "Result"
     },
     cv: {
+      subtitle: "Bewerten Sie Ihren Lebenslauf in Bezug auf Sprache, Formatierung, ATS-Freundlichkeit und Keywords – mit umsetzbaren Tipps.",
+      premium: {
+        ats: { title: "Detaillierte ATS-Simulation", desc: "Bericht pro Abschnitt und Heatmap für Recruiter." },
+        scans: { title: "Unbegrenzte tägliche Scans", desc: "Scannen Sie so oft neu, wie Sie an Ihrem Lebenslauf arbeiten." }
+      },
       paste: "Lebenslauf-Text einfügen",
       upload: "Lebenslauf hochladen",
+      uploadPdf: "PDF hochladen",
       analyze: "Lebenslauf analysieren",
+      analyzing: "Analysieren...",
       empty: "Lade deinen Lebenslauf hoch oder füge ihn ein, um Bewertungen und Tipps zu sehen.",
       language: "Professionelle Sprache",
       formatting: "Länge & Formatierung",
       ats: "ATS-Eignung",
       keywords: "Schlüsselwort-Optimierung",
       tips: "Umsetzbare Tipps",
+      tipsList: {
+        noEmail: "Kritisch: Fügen Sie eine E-Mail-Adresse hinzu, damit Personalvermittler Sie kontaktieren können.",
+        noPhone: "Kritisch: Fügen Sie eine Telefonnummer hinzu, um bei Telefoninterviews nicht übergangen zu werden.",
+        lowMetrics: "Fügen Sie mehr Metriken hinzu. Ihr Lebenslauf enthält nur {{count}} Zahlen/Ergebnisse. Personalvermittler achten auf %, $ und Umfang.",
+        weakVerbs: "Ersetzen Sie schwache Formulierungen wie 'verantwortlich für' durch aktive Verben wie 'Federführend', 'Entwickelt' oder 'Optimiert'.",
+        fewSections: "Standardisieren Sie Ihre Überschriften. Stellen Sie sicher, dass Sie klar gekennzeichnete Abschnitte für 'Erfahrung', 'Ausbildung' und 'Fähigkeiten' haben.",
+        fancyChars: "ATS-Warnung: Entfernen Sie komplexe Grafiken oder unübliche Aufzählungszeichen, die das Parsen stören könnten.",
+        shortCv: "Kürze-Warnung: Ihr Lebenslauf umfasst nur {{count}} Wörter. Gehen Sie näher auf Ihre wirkungsvollen Erfolge ein.",
+        longCv: "Längen-Warnung: {{count}} Wörter sind für die meisten Rollen zu lang. Ziel sind 2 Seiten (ca. 900 Wörter).",
+      },
       strengths: "Starke Schlüsselwörter",
       dragDrop: "Drag & Drop oder Dateien durchsuchen",
       unlimitedScans: "Unbegrenzte Scans",
       scanLimit: "Tägliches Scan-Limit: {{used}}/{{limit}} freie Scans verbraucht",
+      scanLimitLabel: "Tägliches Scan-Limit: {{used}}/{{limit}} freie Scans verwendet",
       limitReached: "Tageslimit erreicht. Upgrade auf Pro für unbegrenzte Scans.",
       atsSimulation: "Detaillierte ATS-Simulation",
+      atsReportTitle: "Detaillierter ATS-Bericht",
       atsProHint: "Der detaillierte ATS-Bericht schaltet tiefergehendes Keyword-Scoring, Recruiter-Readability-Heuristiken und abschnittsbezogenes Feedback frei. Erneut ausführen zum Aktualisieren.",
       unlockPro: "Mit Pro freischalten"
     },

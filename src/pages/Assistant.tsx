@@ -109,6 +109,7 @@ function scoreTone(s: number): { label: string; ring: string; bg: string; fg: st
 }
 
 export function ToneAnalyzer() {
+  const { t } = useTranslation();
   const [company, setCompany] = useState("");
   const [draft, setDraft] = useState("");
   const [result, setResult] = useState<ToneResult | null>(null);
@@ -131,43 +132,43 @@ export function ToneAnalyzer() {
     <div className="grid lg:grid-cols-2 gap-5 min-h-[560px] h-full">
       <div className="flex flex-col gap-3 h-full">
         <div className="grid gap-1.5">
-          <Label htmlFor="company">Target company</Label>
+          <Label htmlFor="company">{t("assistant.tone.targetCompany")}</Label>
           <Input id="company" value={company} onChange={(e) => setCompany(e.target.value)} placeholder="e.g. Deutsche Bank, Stripe, BMW" />
         </div>
         <div className="flex flex-col gap-1.5 flex-1 min-h-[260px]">
           <div className="flex items-center justify-between">
-            <Label htmlFor="draft">Cover letter draft</Label>
-            <FileUploadButton onText={setDraft} disabled={loading} label="Upload cover letter" />
+            <Label htmlFor="draft">{t("assistant.tone.draftLabel")}</Label>
+            <FileUploadButton onText={setDraft} disabled={loading} label={t("assistant.tone.uploadLabel")} />
           </div>
-          <Textarea id="draft" value={draft} onChange={(e) => setDraft(e.target.value)} placeholder="Paste your draft here, or upload a PDF/DOCX…" className="flex-1 min-h-[260px] resize-none" />
+          <Textarea id="draft" value={draft} onChange={(e) => setDraft(e.target.value)} placeholder={t("assistant.tone.placeholder")} className="flex-1 min-h-[260px] resize-none" />
         </div>
         <Button onClick={run} disabled={loading} className="mt-auto w-full h-11 text-sm font-semibold bg-gradient-premium text-white border-0 hover:opacity-95 disabled:opacity-50">
           {loading ? <Loader2 className="h-4 w-4 animate-spin mr-2" /> : <Wand2 className="h-4 w-4 mr-2" />}
-          Analyze tone
+          {t("assistant.tone.analyzeBtn")}
         </Button>
       </div>
 
       <div className="min-h-[260px] h-full">
         {loading ? (
           <div className="surface-card p-5 flex items-center gap-2 text-sm text-muted-foreground h-full">
-            <Loader2 className="h-4 w-4 animate-spin" /> Thinking…
+            <Loader2 className="h-4 w-4 animate-spin" /> {t("assistant.thinking")}
           </div>
         ) : !result ? (
           <div className="surface-card p-5 text-sm text-muted-foreground min-h-[260px] h-full">
-            Output will appear here — culture inference, tone match, issues, and concrete before/after edits.
+            {t("assistant.tone.empty")}
           </div>
         ) : (
           <div className="space-y-4">
             <div className="grid sm:grid-cols-2 gap-3">
               <div className="surface-card p-4">
                 <div className="text-[11px] font-medium uppercase tracking-wider text-muted-foreground flex items-center gap-1.5">
-                  <Sparkles className="h-3.5 w-3.5" /> Inferred Culture
+                  <Sparkles className="h-3.5 w-3.5" /> {t("assistant.tone.inferredCulture")}
                 </div>
                 <p className="mt-2 text-sm text-foreground/90 leading-relaxed">{result.culture}</p>
               </div>
               <div className={cn("surface-card p-4 ring-1", tone!.ring)}>
                 <div className="text-[11px] font-medium uppercase tracking-wider text-muted-foreground flex items-center gap-1.5">
-                  <Gauge className="h-3.5 w-3.5" /> Tone Match
+                  <Gauge className="h-3.5 w-3.5" /> {t("assistant.tone.toneMatch")}
                 </div>
                 <div className="mt-2 flex items-center gap-3">
                   <div className={cn("flex items-center justify-center h-14 w-14 rounded-full font-bold text-lg", tone!.bg, tone!.fg)}>
@@ -184,7 +185,7 @@ export function ToneAnalyzer() {
             {result.issues.length > 0 && (
               <div className="surface-card p-4 border-warning/40 bg-warning/5">
                 <div className="text-[11px] font-medium uppercase tracking-wider text-warning-foreground/80 flex items-center gap-1.5">
-                  <AlertTriangle className="h-3.5 w-3.5" /> Issues ({result.issues.length})
+                  <AlertTriangle className="h-3.5 w-3.5" /> {t("assistant.tone.issues")} ({result.issues.length})
                 </div>
                 <ul className="mt-2 space-y-1.5">
                   {result.issues.map((it, i) => (
@@ -199,22 +200,22 @@ export function ToneAnalyzer() {
             {result.edits.length > 0 && (
               <div className="space-y-3">
                 <div className="text-[11px] font-medium uppercase tracking-wider text-muted-foreground">
-                  Suggested Edits ({result.edits.length})
+                  {t("assistant.tone.suggestedEdits")} ({result.edits.length})
                 </div>
                 {result.edits.map((e, i) => (
                   <div key={i} className="surface-card overflow-hidden">
                     <div className="grid md:grid-cols-2 divide-y md:divide-y-0 md:divide-x divide-border">
                       <div className="p-3 bg-destructive/5">
-                        <div className="text-[10px] font-semibold uppercase tracking-wider text-destructive/80 mb-1">Before</div>
+                        <div className="text-[10px] font-semibold uppercase tracking-wider text-destructive/80 mb-1">{t("assistant.tone.before")}</div>
                         <p className="text-sm text-foreground/90 leading-relaxed">{e.before}</p>
                       </div>
                       <div className="p-3 bg-success/5">
-                        <div className="text-[10px] font-semibold uppercase tracking-wider text-success mb-1">After</div>
+                        <div className="text-[10px] font-semibold uppercase tracking-wider text-success mb-1">{t("assistant.tone.after")}</div>
                         <p className="text-sm text-foreground/90 leading-relaxed">{e.after}</p>
                       </div>
                     </div>
                     <div className="px-3 py-2 border-t border-border bg-muted/40 text-xs text-muted-foreground">
-                      <span className="font-medium text-foreground/80">Why:</span> {e.reason}
+                      <span className="font-medium text-foreground/80">{t("assistant.tone.why")}:</span> {e.reason}
                     </div>
                   </div>
                 ))}
@@ -234,6 +235,7 @@ interface TranslateResult {
 }
 
 export function SkillTranslator() {
+  const { t } = useTranslation();
   const [experience, setExperience] = useState("");
   const [jobDescription, setJobDescription] = useState("");
   const [result, setResult] = useState<TranslateResult | null>(null);
@@ -279,34 +281,34 @@ export function SkillTranslator() {
     <div className="grid lg:grid-cols-2 gap-5 min-h-[560px] h-full">
       <div className="flex flex-col gap-3 h-full">
         <div className="flex flex-col gap-1.5 flex-1 min-h-[200px]">
-          <Label htmlFor="exp">Unconventional experience</Label>
-          <Textarea id="exp" value={experience} onChange={(e) => setExperience(e.target.value)} placeholder="e.g. Led a 30-person volunteer cleanup, coordinated logistics across 5 districts…" className="flex-1 min-h-[200px] resize-none" />
+          <Label htmlFor="exp">{t("assistant.translate.experienceLabel")}</Label>
+          <Textarea id="exp" value={experience} onChange={(e) => setExperience(e.target.value)} placeholder={t("assistant.translate.experiencePlaceholder")} className="flex-1 min-h-[200px] resize-none" />
         </div>
         <div className="flex flex-col gap-1.5 flex-1 min-h-[200px]">
           <div className="flex items-center justify-between">
-            <Label htmlFor="jd">Target job description</Label>
-            <FileUploadButton onText={setJobDescription} disabled={loading} label="Upload JD" />
+            <Label htmlFor="jd">{t("assistant.translate.jdLabel")}</Label>
+            <FileUploadButton onText={setJobDescription} disabled={loading} label={t("assistant.translate.uploadJd")} />
           </div>
-          <Textarea id="jd" value={jobDescription} onChange={(e) => setJobDescription(e.target.value)} placeholder="Paste the JD here, or upload a PDF/DOCX…" className="flex-1 min-h-[200px] resize-none" />
+          <Textarea id="jd" value={jobDescription} onChange={(e) => setJobDescription(e.target.value)} placeholder={t("assistant.translate.jdPlaceholder")} className="flex-1 min-h-[200px] resize-none" />
         </div>
         <Button onClick={run} disabled={loading} className="mt-auto w-full h-11 text-sm font-semibold bg-gradient-premium text-white border-0 hover:opacity-95 disabled:opacity-50">
           {loading ? <Loader2 className="h-4 w-4 animate-spin mr-2" /> : <Briefcase className="h-4 w-4 mr-2" />}
-          Translate skills
+          {t("assistant.translate.translateBtn")}
         </Button>
       </div>
 
       <div className="min-h-[260px] h-full">
         {loading ? (
           <div className="surface-card p-5 flex items-center gap-2 text-sm text-muted-foreground h-full">
-            <Loader2 className="h-4 w-4 animate-spin" /> Thinking…
+            <Loader2 className="h-4 w-4 animate-spin" /> {t("assistant.thinking")}
           </div>
         ) : !result ? (
           <div className="surface-card p-5 text-sm text-muted-foreground min-h-[260px] h-full">
-            3–5 corporate-ready bullets, tailored to the JD.
+            {t("assistant.translate.empty")}
           </div>
         ) : (
           <div className="space-y-4">
-            <div className="text-sm font-semibold text-foreground px-1">Suggested Resume Bullets</div>
+            <div className="text-sm font-semibold text-foreground px-1">{t("assistant.translate.suggestedBullets")}</div>
             {result.bullets.map((b, i) => (
               <div key={i} className="surface-card overflow-hidden border-l-4 border-l-accent shadow-sm">
                 <div className="p-4 bg-card">
@@ -320,7 +322,7 @@ export function SkillTranslator() {
                 <div className="px-4 py-2.5 bg-muted/30 border-t border-border flex items-start gap-2">
                   <Sparkles className="h-3.5 w-3.5 text-accent mt-0.5 shrink-0" />
                   <div className="text-[11.5px] text-muted-foreground leading-snug italic">
-                    <span className="font-semibold text-foreground/70 not-italic">Strategy:</span> {b.reason}
+                    <span className="font-semibold text-foreground/70 not-italic">{t("assistant.translate.strategy")}:</span> {b.reason}
                   </div>
                 </div>
               </div>
@@ -357,11 +359,11 @@ export function PolishTool() {
     <div className="grid lg:grid-cols-2 gap-5 min-h-[560px] h-full">
       <div className="flex flex-col gap-3 h-full">
         <div className="flex items-end justify-between gap-3 flex-wrap">
-          <Label htmlFor="polish-text" className="mb-0">Text</Label>
+          <Label htmlFor="polish-text" className="mb-0">{t("assistant.polish.textLabel")}</Label>
           <div className="flex items-end gap-2 ml-auto">
-            <FileUploadButton onText={setText} disabled={loading} label="Upload file" />
+            <FileUploadButton onText={setText} disabled={loading} label={t("assistant.uploadFile")} />
             <div className="grid gap-1.5 w-36">
-              <Label className="flex items-center gap-1 text-xs"><Languages className="h-3.5 w-3.5" /> Language</Label>
+              <Label className="flex items-center gap-1 text-xs"><Languages className="h-3.5 w-3.5" /> {t("assistant.polish.languageLabel")}</Label>
               <Select value={language} onValueChange={setLanguage}>
                 <SelectTrigger><SelectValue /></SelectTrigger>
                 <SelectContent>
@@ -386,28 +388,28 @@ export function PolishTool() {
             <span className="text-sm text-foreground">{t("assistant.polish.businessGerman")}</span>
           </label>
         )}
-        <Textarea id="polish-text" value={text} onChange={(e) => setText(e.target.value)} placeholder="Paste an email, CV bullet point, or message — or upload a PDF/DOCX…" className="flex-1 min-h-[300px] resize-none" />
+        <Textarea id="polish-text" value={text} onChange={(e) => setText(e.target.value)} placeholder={t("assistant.polish.placeholder")} className="flex-1 min-h-[300px] resize-none" />
         <Button onClick={run} disabled={loading} className="mt-auto w-full h-11 text-sm font-semibold bg-gradient-premium text-white border-0 hover:opacity-95 disabled:opacity-50">
           {loading ? <Loader2 className="h-4 w-4 animate-spin mr-2" /> : <Sparkles className="h-4 w-4 mr-2" />}
-          Polish
+          {t("assistant.polish.polishBtn")}
         </Button>
       </div>
 
       <div className="min-h-[260px] h-full">
         {loading ? (
           <div className="surface-card p-5 flex items-center gap-2 text-sm text-muted-foreground h-full">
-            <Loader2 className="h-4 w-4 animate-spin" /> Thinking…
+            <Loader2 className="h-4 w-4 animate-spin" /> {t("assistant.thinking")}
           </div>
         ) : !result ? (
           <div className="surface-card p-5 text-sm text-muted-foreground min-h-[260px] h-full">
-            Polished version + a short list of key changes will appear here.
+            {t("assistant.polish.empty")}
           </div>
         ) : (
           <div className="space-y-4">
             <div className="surface-card p-5 shadow-md ring-1 ring-accent/30 bg-card">
               <div className="flex items-center gap-2 mb-3">
                 <Badge variant="secondary" className="bg-accent/15 text-accent border-accent/20">
-                  <Sparkles className="h-3 w-3" /> Polished Version
+                  <Sparkles className="h-3 w-3" /> {t("assistant.polish.polishedVersion")}
                 </Badge>
               </div>
               <div className="text-sm text-foreground/90 whitespace-pre-wrap leading-relaxed">{result.polished}</div>
@@ -415,7 +417,7 @@ export function PolishTool() {
             
             <div className="surface-card p-5 bg-muted/40">
               <div className="text-[11px] font-medium uppercase tracking-wider text-muted-foreground mb-2">
-                Key Changes ({result.changes.length})
+                {t("assistant.polish.keyChanges")} ({result.changes.length})
               </div>
               <ul className="grid sm:grid-cols-2 gap-x-6 gap-y-2">
                 {result.changes.map((c, i) => (
@@ -469,7 +471,7 @@ export function InterviewPrep() {
             </div>
           ) : (
             <Select value={selectedId} onValueChange={setSelectedId}>
-              <SelectTrigger><SelectValue placeholder="Select a role…" /></SelectTrigger>
+              <SelectTrigger><SelectValue placeholder={t("common.any")} /></SelectTrigger>
               <SelectContent>
                 {interviewJobs.map((j) => (
                   <SelectItem key={j.id} value={j.id}>{j.role} — {j.company}</SelectItem>
@@ -494,7 +496,7 @@ export function InterviewPrep() {
         )}
         {loading && (
           <div className="surface-card p-6 flex items-center gap-2 text-sm text-muted-foreground h-full">
-            <Loader2 className="h-4 w-4 animate-spin" /> Thinking…
+            <Loader2 className="h-4 w-4 animate-spin" /> {t("assistant.thinking")}
           </div>
         )}
         {result && (
@@ -509,10 +511,10 @@ export function InterviewPrep() {
               <div className="text-[11px] uppercase tracking-wider text-muted-foreground mb-2">{t("assistant.interview.answer")}</div>
               <div className="space-y-1.5 text-sm">
                 {[
-                  { k: "S", label: "Situation", v: q.situation },
-                  { k: "T", label: "Task", v: q.task },
-                  { k: "A", label: "Action", v: q.action },
-                  { k: "R", label: "Result", v: q.result },
+                  { k: "S", label: t("assistant.interview.situation"), v: q.situation },
+                  { k: "T", label: t("assistant.interview.task"), v: q.task },
+                  { k: "A", label: t("assistant.interview.action"), v: q.action },
+                  { k: "R", label: t("assistant.interview.result"), v: q.result },
                 ].map((s) => (
                   <div key={s.k} className="flex gap-2">
                     <span className="inline-flex h-5 w-5 shrink-0 items-center justify-center rounded bg-accent/15 text-accent text-[10px] font-bold">{s.k}</span>
@@ -663,7 +665,7 @@ export function CvAnalyzer() {
 
   const run = async () => {
     if (!text.trim()) return toast.error("Paste or upload your CV first.");
-    if (limitReached) return toast.error("Daily scan limit reached. Upgrade to Pro for unlimited scans.");
+    if (limitReached) return toast.error(t("assistant.cv.limitReached"));
     setLoading(true); setAiResult(null);
     try {
       const r = await runStructured<CvAiResult>("cv", { cv: text });
@@ -693,14 +695,14 @@ export function CvAnalyzer() {
 
   const extraTips: string[] = [];
   if (rules) {
-    if (!rules.hasEmail) extraTips.push("Critical: Add an email address for recruiters to contact you.");
-    if (!rules.hasPhone) extraTips.push("Critical: Add a phone number to avoid being skipped for phone screens.");
-    if (rules.metrics < 5) extraTips.push(`Add more metrics. Your CV only has ${rules.metrics} numbers/results. Recruiters look for %, $, and scale.`);
-    if (rules.verbScore < 70) extraTips.push("Replace weak phrases like 'responsible for' with active verbs like 'Spearheaded', 'Engineered', or 'Optimized'.");
-    if (rules.foundSections < 4) extraTips.push("Standardize your headers. Ensure you have clearly labeled 'Experience', 'Education', and 'Skills' sections.");
-    if (rules.fancyChars > 5) extraTips.push("ATS Alert: Remove complex graphics or non-standard bullet symbols that might break parsing.");
-    if (rules.words < 350) extraTips.push(`Brevity alert: Your CV is only ${rules.words} words. Expand on your high-impact achievements.`);
-    if (rules.words > 1200) extraTips.push(`Length alert: ${rules.words} words is too long for most roles. Aim for 2 pages (approx. 900 words).`);
+    if (!rules.hasEmail) extraTips.push(t("assistant.cv.tipsList.noEmail"));
+    if (!rules.hasPhone) extraTips.push(t("assistant.cv.tipsList.noPhone"));
+    if (rules.metrics < 5) extraTips.push(t("assistant.cv.tipsList.lowMetrics", { count: rules.metrics }));
+    if (rules.verbScore < 70) extraTips.push(t("assistant.cv.tipsList.weakVerbs"));
+    if (rules.foundSections < 4) extraTips.push(t("assistant.cv.tipsList.fewSections"));
+    if (rules.fancyChars > 5) extraTips.push(t("assistant.cv.tipsList.fancyChars"));
+    if (rules.words < 350) extraTips.push(t("assistant.cv.tipsList.shortCv", { count: rules.words }));
+    if (rules.words > 1200) extraTips.push(t("assistant.cv.tipsList.longCv", { count: rules.words }));
   }
 
   const scanPct = Math.min(100, Math.round((scansUsed / SCAN_LIMIT) * 100));
@@ -710,12 +712,12 @@ export function CvAnalyzer() {
       {/* LEFT — Input */}
       <div className="flex flex-col gap-4 h-full">
         <div className="surface-card p-4 flex flex-col flex-1 min-h-[200px]">
-          <Label htmlFor="cv-text" className="text-sm font-semibold mb-2 block">Paste CV Text</Label>
+          <Label htmlFor="cv-text" className="text-sm font-semibold mb-2 block">{t("assistant.cv.paste")}</Label>
           <Textarea
             id="cv-text"
             value={text}
             onChange={(e) => setText(e.target.value)}
-            placeholder="Paste your full CV here…"
+            placeholder={t("assistant.cv.empty")}
             className="resize-none flex-1 min-h-[160px]"
           />
         </div>
@@ -739,8 +741,8 @@ export function CvAnalyzer() {
             onChange={(e) => { const f = e.target.files?.[0]; e.target.value = ""; if (f) handleFile(f); }}
           />
           <Upload className="h-7 w-7 text-accent mb-2" />
-          <div className="text-sm font-semibold">Upload PDF or Docx</div>
-          <div className="text-xs text-muted-foreground mt-0.5">Drag & Drop or Browse Files</div>
+          <div className="text-sm font-semibold">{t("assistant.cv.uploadPdf")}</div>
+          <div className="text-xs text-muted-foreground mt-0.5">{t("assistant.cv.dragDrop")}</div>
         </div>
 
         <div className="surface-card p-4">
@@ -748,17 +750,17 @@ export function CvAnalyzer() {
             <span className="text-muted-foreground">
               {isPro ? (
                 <span className="inline-flex items-center gap-1 text-premium font-medium">
-                  <Sparkles className="h-3 w-3" /> Unlimited scans
+                  <Sparkles className="h-3 w-3" /> {t("assistant.cv.unlimitedScans")}
                 </span>
               ) : (
-                `Daily Scan Limit: ${scansUsed}/${SCAN_LIMIT} free scans used`
+                t("assistant.cv.scanLimitLabel", { used: scansUsed, limit: SCAN_LIMIT })
               )}
             </span>
           </div>
           {!isPro && <Progress value={scanPct} className="h-1.5" />}
           {limitReached && (
             <p className="text-[11px] text-destructive mt-2">
-              Daily limit reached. <a href="/billing" className="underline font-medium">Upgrade to Pro</a> for unlimited scans.
+              {t("assistant.cv.limitReached")} <a href="/billing" className="underline font-medium">{t("assistant.tabs.cv")}</a>
             </p>
           )}
         </div>
@@ -769,7 +771,7 @@ export function CvAnalyzer() {
           className="mt-auto w-full h-11 text-sm font-semibold bg-gradient-premium text-white border-0 hover:opacity-95 disabled:opacity-50"
         >
           {loading ? <Loader2 className="h-4 w-4 animate-spin mr-2" /> : <Target className="h-4 w-4 mr-2" />}
-          Analyze CV
+          {t("assistant.cv.analyze")}
         </Button>
       </div>
 
@@ -777,26 +779,26 @@ export function CvAnalyzer() {
       <div className="space-y-4 h-full flex flex-col">
         {!aiResult && !loading && (
           <div className="surface-card p-8 text-sm text-muted-foreground min-h-[260px] flex-1 flex items-center justify-center text-center">
-            Paste or upload your CV, then run the analyzer to see scores, keywords, and personalized tips.
+            {t("assistant.cv.empty")}
           </div>
         )}
         {loading && (
           <div className="surface-card p-6 flex items-center gap-2 text-sm text-muted-foreground">
-            <Loader2 className="h-4 w-4 animate-spin" /> Analyzing…
+            <Loader2 className="h-4 w-4 animate-spin" /> {t("assistant.cv.analyzing")}
           </div>
         )}
         {aiResult && finalScores && (
           <>
             <div className="grid grid-cols-2 gap-3">
-              <ScoreGauge label="Professional Language" score={finalScores.language} />
-              <ScoreGauge label="Length & Formatting" score={finalScores.formatting} />
-              <ScoreGauge label="ATS Appropriateness" score={finalScores.ats} />
-              <ScoreGauge label="Keyword Optimization" score={finalScores.keywords} />
+              <ScoreGauge label={t("assistant.cv.language")} score={finalScores.language} />
+              <ScoreGauge label={t("assistant.cv.formatting")} score={finalScores.formatting} />
+              <ScoreGauge label={t("assistant.cv.ats")} score={finalScores.ats} />
+              <ScoreGauge label={t("assistant.cv.keywords")} score={finalScores.keywords} />
             </div>
 
             {aiResult.strongKeywords.length > 0 && (
               <div className="surface-card p-4">
-                <div className="text-sm font-semibold mb-2">Strong Keywords</div>
+                <div className="text-sm font-semibold mb-2">{t("assistant.cv.strengths")}</div>
                 <div className="flex flex-wrap gap-1.5">
                   {aiResult.strongKeywords.map((k) => (
                     <Badge key={k} variant="outline" className="bg-success/10 text-success border-success/30">{k}</Badge>
@@ -807,7 +809,7 @@ export function CvAnalyzer() {
 
             <div className="surface-card p-4">
               <div className="text-sm font-semibold mb-2 flex items-center gap-1.5">
-                <ListChecks className="h-4 w-4 text-accent" /> Actionable Tips
+                <ListChecks className="h-4 w-4 text-accent" /> {t("assistant.cv.tips")}
               </div>
               <ul className="space-y-2">
                 {[...extraTips, ...aiResult.tips].map((tip, i) => (
@@ -821,20 +823,19 @@ export function CvAnalyzer() {
             {/* Premium ATS Simulation */}
             <div className="surface-card p-4 relative overflow-hidden">
               <div className="flex items-center justify-between mb-3">
-                <div className="text-sm font-semibold">Detailed ATS Simulation</div>
+                <div className="text-sm font-semibold">{t("assistant.cv.atsSimulation")}</div>
                 <Badge className="bg-gradient-premium text-white border-0 gap-1">
-                  <Sparkles className="h-3 w-3" /> Premium
+                  <Sparkles className="h-3 w-3" /> {t("assistant.premiumTools")}
                 </Badge>
               </div>
               {isPro ? (
                 <div className="text-sm text-muted-foreground">
-                  Detailed ATS report unlocks deeper keyword scoring, recruiter-readability heuristics,
-                  and per-section feedback. Re-run the analyzer to refresh.
+                  {t("assistant.cv.atsProHint")}
                 </div>
               ) : (
                 <div className="relative">
                   <div className="space-y-2 select-none pointer-events-none blur-sm" aria-hidden="true">
-                    <div className="text-xs font-semibold">Detailed ATS Report</div>
+                    <div className="text-xs font-semibold">{t("assistant.cv.atsReportTitle")}</div>
                     <ul className="text-xs space-y-1 text-foreground/80 list-disc pl-5">
                       <li>Agile Methodologies — React Native: Lorem ipsum dolor sit amet…</li>
                       <li>Cross-functional leadership and stakeholder management benchmarks…</li>
@@ -846,7 +847,7 @@ export function CvAnalyzer() {
                   <div className="absolute inset-0 flex items-end justify-center pb-2">
                     <a href="/billing">
                       <Button className="bg-gradient-premium text-white border-0 hover:opacity-95 gap-2 shadow-lg">
-                        <Lock className="h-4 w-4" /> Unlock with Pro
+                        <Lock className="h-4 w-4" /> {t("assistant.cv.unlockPro")}
                       </Button>
                     </a>
                   </div>

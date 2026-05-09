@@ -3,6 +3,7 @@ import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Logo } from "@/components/Logo";
 import { PremiumRail, type PremiumTool } from "@/components/assistant/PremiumRail";
+import { useTranslation } from "react-i18next";
 
 const STORAGE_KEY = "jat.premiumRail.collapsed";
 
@@ -19,6 +20,7 @@ export function AssistantToolShell({
   premiumTools: PremiumTool[];
   children: ReactNode;
 }) {
+  const { t } = useTranslation();
   const [collapsed, setCollapsed] = useState<boolean>(() => {
     try {
       return localStorage.getItem(STORAGE_KEY) === "1";
@@ -76,7 +78,7 @@ export function AssistantToolShell({
         <div className="lg:hidden col-span-full">
           <Link to="/billing">
             <Button className="w-full bg-gradient-premium text-white border-0 hover:opacity-95">
-              Upgrade to Pro for Access
+              {t("assistant.upgradeBtn")}
             </Button>
           </Link>
         </div>

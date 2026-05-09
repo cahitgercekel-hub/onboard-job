@@ -1,15 +1,18 @@
 import { Building2, Wand2 } from "lucide-react";
 import { ToneAnalyzer } from "@/pages/Assistant";
 import { AssistantToolShell } from "@/components/assistant/AssistantToolShell";
+import { useTranslation } from "react-i18next";
 
 export default function ToneAssistant() {
+  const { t } = useTranslation();
+
   return (
     <AssistantToolShell
-      title="Corporate Tone"
-      subtitle="Match a company's culture. Paste a draft + target company; get a tone score and concrete edits."
+      title={t("assistant.tabs.tone")}
+      subtitle={t("assistant.tone.subtitle")}
       premiumTools={[
-        { id: "tone-presets", icon: Building2, title: "Multi-company Tone Presets", desc: "Save tone profiles for every company you target." },
-        { id: "bulk-rewrite", icon: Wand2, title: "Bulk Cover-letter Rewrite", desc: "Rewrite multiple cover letters in one pass." },
+        { id: "tone-presets", icon: Building2, title: t("assistant.tone.premium.presets.title"), desc: t("assistant.tone.premium.presets.desc") },
+        { id: "bulk-rewrite", icon: Wand2, title: t("assistant.tone.premium.rewrite.title"), desc: t("assistant.tone.premium.rewrite.desc") },
       ]}
     >
       <ToneAnalyzer />

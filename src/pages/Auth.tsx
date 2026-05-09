@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
+import { useTranslation } from "react-i18next";
 import { z } from "zod";
 import { supabase } from "@/integrations/supabase/client";
 import { lovable } from "@/integrations/lovable/index";
@@ -12,9 +13,8 @@ import { PasswordStrength, getPasswordScore } from "@/components/PasswordStrengt
 import { Logo } from "@/components/Logo";
 import { toast } from "sonner";
 
-const emailSchema = z.string().trim().email({ message: "Enter a valid email" }).max(255);
-
 export default function AuthPage() {
+  const { t } = useTranslation();
   const { session, loading } = useAuth();
   const navigate = useNavigate();
   const location = useLocation();
@@ -31,9 +31,9 @@ export default function AuthPage() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    const emailParsed = emailSchema.safeParse(email);
+    const emailParsed = z.string().trim().email().safeParse(email);
     if (!emailParsed.success) {
-      toast.error(emailParsed.error.issues[0]?.message ?? "Invalid email");
+      toast.error(t("auth.invalidEmail"));
       return;
     }
 
@@ -44,7 +44,7 @@ export default function AuthPage() {
           redirectTo: `${window.location.origin}/reset-password`,
         });
         if (error) throw error;
-        toast.success("Check your email for a reset link.");
+        toast.success(t("auth.forgotHint"));
         setTab("login");
       } else if (tab === "signup") {
         if (password.length < 8) throw new Error("Password must be at least 8 characters");
@@ -82,7 +82,6 @@ export default function AuthPage() {
         redirect_uri: window.location.origin,
       });
       if (result.error) throw new Error((result.error as any)?.message || "Google sign-in failed");
-      // If redirected, browser handles it; if tokens received, AuthProvider takes over
     } catch (err: any) {
       toast.error(err?.message || "Google sign-in failed");
     } finally {
@@ -96,47 +95,47 @@ export default function AuthPage() {
         <div className="flex items-center gap-3 mb-6">
           <Logo size={64} />
           <div>
-            <h1 className="text-lg font-semibold">ONboard</h1>
-            <p className="text-xs text-muted-foreground">Track Job & CV Assist</p>
+            <h1 className="text-lg font-semibold">{t("app.name")}</h1>
+            <p className="text-xs text-muted-foreground">{t("app.tagline")}</p>
           </div>
         </div>
 
         <Button type="button" variant="outline" className="w-full mb-4" disabled={busy} onClick={signInWithGoogle}>
-          <GoogleIcon /> Continue with Google
+          <GoogleIcon /> {t("auth.googleBtn")}
         </Button>
 
         <div className="relative my-4">
           <div className="absolute inset-0 flex items-center"><span className="w-full border-t border-border" /></div>
-          <div className="relative flex justify-center"><span className="bg-card px-2 text-[11px] uppercase tracking-wide text-muted-foreground">or with email</span></div>
+          <div className="relative flex justify-center"><span className="bg-card px-2 text-[11px] uppercase tracking-wide text-muted-foreground">{t("auth.orWithEmail")}</span></div>
         </div>
 
         <Tabs value={tab === "forgot" ? "login" : tab} onValueChange={(v) => setTab(v as "login" | "signup")}>
           <TabsList className="grid w-full grid-cols-2 mb-4">
-            <TabsTrigger value="login">Log in</TabsTrigger>
-            <TabsTrigger value="signup">Sign up</TabsTrigger>
+            <TabsTrigger value="login">{t("auth.loginTab")}</TabsTrigger>
+            <TabsTrigger value="signup">{t("auth.signupTab")}</TabsTrigger>
           </TabsList>
 
           <TabsContent value="login" className="mt-0">
             {tab === "forgot" ? (
               <form onSubmit={handleSubmit} className="space-y-3">
-                <p className="text-xs text-muted-foreground">Enter your email and we'll send a password reset link.</p>
-                <Field id="forgot-email" label="Email" type="email" value={email} onChange={setEmail} />
+                <p className="text-xs text-muted-foreground">{t("auth.forgotHint")}</p>
+                <Field id="forgot-email" label={t("auth.emailLabel")} type="email" value={email} onChange={setEmail} />
                 <Button type="submit" disabled={busy} className="w-full">
-                  {busy ? "Sending…" : "Send reset link"}
+                  {busy ? t("auth.sending") : t("auth.sendResetLink")}
                 </Button>
                 <button type="button" onClick={() => setTab("login")} className="text-xs text-muted-foreground hover:text-foreground w-full text-center">
-                  Back to log in
+                  {t("auth.backToLogin")}
                 </button>
               </form>
             ) : (
               <form onSubmit={handleSubmit} className="space-y-3">
-                <Field id="login-email" label="Email" type="email" value={email} onChange={setEmail} />
-                <Field id="login-password" label="Password" type="password" value={password} onChange={setPassword} />
+                <Field id="login-email" label={t("auth.emailLabel")} type="email" value={email} onChange={setEmail} />
+                <Field id="login-password" label={t("auth.passwordLabel")} type="password" value={password} onChange={setPassword} />
                 <Button type="submit" disabled={busy} className="w-full">
-                  {busy ? "Signing in…" : "Log in"}
+                  {busy ? t("auth.signingIn") : t("auth.loginTab")}
                 </Button>
                 <button type="button" onClick={() => setTab("forgot")} className="text-xs text-muted-foreground hover:text-foreground w-full text-center">
-                  Forgot password?
+                  {t("auth.forgotTab")}
                 </button>
               </form>
             )}
@@ -144,15 +143,15 @@ export default function AuthPage() {
 
           <TabsContent value="signup" className="mt-0">
             <form onSubmit={handleSubmit} className="space-y-3">
-              <Field id="signup-name" label="Display name (optional)" type="text" value={displayName} onChange={setDisplayName} />
-              <Field id="signup-email" label="Email" type="email" value={email} onChange={setEmail} />
+              <Field id="signup-name" label={t("auth.displayNameLabel")} type="text" value={displayName} onChange={setDisplayName} />
+              <Field id="signup-email" label={t("auth.emailLabel")} type="email" value={email} onChange={setEmail} />
               <div className="grid gap-1.5">
-                <Label htmlFor="signup-password">Password</Label>
+                <Label htmlFor="signup-password">{t("auth.passwordLabel")}</Label>
                 <Input id="signup-password" type="password" value={password} onChange={(e) => setPassword(e.target.value)} required />
                 <PasswordStrength password={password} />
               </div>
               <Button type="submit" disabled={busy} className="w-full">
-                {busy ? "Creating account…" : "Create account"}
+                {busy ? t("auth.creatingAccount") : t("auth.createAccount")}
               </Button>
             </form>
           </TabsContent>

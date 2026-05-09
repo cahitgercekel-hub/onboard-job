@@ -9,6 +9,7 @@ import { usePrefs } from "@/lib/preferences";
 import { FitnessRing } from "@/components/FitnessRing";
 import { useCvVersions } from "@/lib/cvVersionsStore";
 import { CompanyLogo } from "@/components/CompanyLogo";
+import { useTranslation } from "react-i18next";
 
 interface Props {
   job: Job;
@@ -30,6 +31,7 @@ export function JobCard({ job, onClick, onArchive: _onArchive, onDelete, overlay
   const { attributes, listeners, setNodeRef, isDragging } = useDraggable({ id: job.id });
   const { formatDate } = usePrefs();
   const { versions } = useCvVersions();
+  const { t } = useTranslation();
   const cvVersionName = job.cvVersionId ? versions.find((v) => v.id === job.cvVersionId)?.name : null;
   const alarm = alarmFor(job);
   const style = overlay ? undefined : { opacity: isDragging ? 0 : 1 };
@@ -42,11 +44,11 @@ export function JobCard({ job, onClick, onArchive: _onArchive, onDelete, overlay
   };
 
   const statusLabel = (() => {
-    if (job.dateApplied) return `Applied ${formatDate(job.dateApplied)}`;
-    if (job.status === "saved") return "Saved";
-    if (job.status === "interviewing") return "Interviewing";
-    if (job.status === "offer") return "Offer";
-    if (job.status === "rejected") return "Rejected";
+    if (job.dateApplied) return t("tracker.appliedAt", { date: formatDate(job.dateApplied) });
+    if (job.status === "saved") return t("tracker.status.saved");
+    if (job.status === "interviewing") return t("tracker.status.interviewing");
+    if (job.status === "offer") return t("tracker.status.offer");
+    if (job.status === "rejected") return t("tracker.status.rejected");
     return "—";
   })();
 
@@ -73,7 +75,7 @@ export function JobCard({ job, onClick, onArchive: _onArchive, onDelete, overlay
           <div className="text-sm font-semibold text-foreground leading-tight line-clamp-2">{job.role}</div>
           <div className="text-xs font-medium text-foreground/80 truncate mt-1">{job.company}</div>
         </div>
-        <div className="w-10 h-10 shrink-0 flex items-center justify-center" title="Match score">
+        <div className="w-10 h-10 shrink-0 flex items-center justify-center" title={t("analytics.avgMatchScore")}>
           {(job.fitnessScore ?? null) !== null && (
             <FitnessRing score={job.fitnessScore} variant="sm" />
           )}
@@ -126,7 +128,7 @@ export function JobCard({ job, onClick, onArchive: _onArchive, onDelete, overlay
                 "inline-flex items-center gap-1 font-medium",
                 alarm === "warn" ? "text-warning-foreground/90" : "text-destructive"
               )}
-              title={`No update for ${daysSince(job.updatedAt)} days`}
+              title={t("tracker.ghostingTitle", { company: job.company })}
             >
               <AlertTriangle className="h-3 w-3" />
               {daysSince(job.updatedAt)}d
@@ -154,7 +156,7 @@ export function JobCard({ job, onClick, onArchive: _onArchive, onDelete, overlay
               }}
               className="inline-flex items-center gap-1 text-accent hover:text-accent/80 font-medium transition-colors"
             >
-              <ExternalLink className="h-3 w-3" /> Link
+              <ExternalLink className="h-3 w-3" /> {t("common.link")}
             </a>
           )}
           {onDelete && (
@@ -164,10 +166,10 @@ export function JobCard({ job, onClick, onArchive: _onArchive, onDelete, overlay
                 type="button"
                 onClick={(e) => { e.stopPropagation(); onDelete(); }}
                 className="inline-flex items-center gap-1 text-destructive hover:text-destructive/80 font-medium transition-colors"
-                aria-label="Delete job"
-                title="Delete"
+                aria-label={t("common.delete")}
+                title={t("common.delete")}
               >
-                <Trash2 className="h-3 w-3" /> Delete
+                <Trash2 className="h-3 w-3" /> {t("common.delete")}
               </button>
             </>
           )}

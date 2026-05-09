@@ -1,15 +1,47 @@
 export const zh = {
-  app: { name: "ONboard", tagline: "求职追踪与简历助手" },
+  app: { name: "ONboard", tagline: "求职追踪与简历助手", syncedStatus: "已同步到您的账号。" },
+  auth: {
+    googleBtn: "使用 Google 继续",
+    orWithEmail: "或使用电子邮件",
+    loginTab: "登录",
+    signupTab: "注册",
+    forgotTab: "忘记密码？",
+    forgotHint: "输入您的电子邮件，我们将发送重置链接。",
+    sendResetLink: "发送重置链接",
+    backToLogin: "返回登录",
+    displayNameLabel: "显示名称（可选）",
+    emailLabel: "电子邮件",
+    passwordLabel: "密码",
+    createAccount: "创建账户",
+    signingIn: "登录中...",
+    sending: "发送中...",
+    creatingAccount: "正在创建账户...",
+    invalidEmail: "请输入有效的电子邮件"
+  },
+  resetPassword: {
+    title: "重置密码",
+    subtitle: "选择新密码",
+    validating: "正在验证恢复链接...",
+    newPasswordLabel: "新密码",
+    confirmPasswordLabel: "确认密码",
+    updating: "更新中...",
+    updateBtn: "更新密码",
+    matchError: "密码不匹配",
+    strengthError: "请选择强度更高的密码",
+    successToast: "密码已更新"
+  },
   nav: { 
     tracker: "求职追踪", 
     board: "仪表盘", 
     analytics: "分析", 
     assistant: "助手", 
     aiAssistant: "AI 助手", 
-    settings: "设置" 
+    settings: "设置",
+    billing: "方案与账单"
   },
   common: {
     save: "保存", cancel: "取消", delete: "删除", add: "添加", edit: "编辑",
+    link: "链接",
     filter: "筛选", clear: "清除筛选", all: "全部",
     company: "公司", role: "职位", url: "职位链接", date: "申请日期", status: "状态",
     applicationType: "工作类型", industry: "行业", workModel: "工作模式",
@@ -22,15 +54,37 @@ export const zh = {
     close: "关闭",
     send: "发送",
     any: "任何",
-    optional: "可选"
+    optional: "可选",
+    plans: {
+      free: "免费版",
+      pro: "专业版",
+      business: "企业版"
+    }
   },
   tracker: {
     title: "仪表盘",
     addJob: "添加职位",
+    addToSaved: "添加到已保存",
+    addedToSaved: "已将 {{company}} 添加到已保存",
+    deletedToast: "已删除 {{company}} 的“{{role}}”职位",
     autoAdd: "AI 自动添加",
     jobs_one: "{{count}} 个职位",
     jobs_other: "{{count}} 个职位",
-    searchPlaceholder: "搜索公司或职位...",
+    searchPlaceholder: "搜索公司 or 职位...",
+    status: {
+      saved: "已保存",
+      applied: "已申请",
+      interviewing: "面试中",
+      offer: "录用意向",
+      rejected: "已拒绝",
+      archived: "已归档",
+    },
+    archiveTypes: {
+      closed: "职位已关闭",
+      rejected: "已拒绝",
+      ghosted: "无回复 (Ghosted)",
+    },
+    appliedAt: "已于 {{date}} 申请",
     ghostingTitle: "没有 {{company}} 的消息吗？",
     ghostingDesc: "{{role}} 已在 {{status}} 阶段停留超过 {{days}} 天。将其归档为“无响应”以清理看板。",
     archiveAsGhosted: "归档为无响应",
@@ -40,6 +94,30 @@ export const zh = {
     sortDateDesc: "日期：从新到旧",
     sortDateAsc: "日期：从旧到新",
     sortCompanyAsc: "公司：A–Z"
+  },
+  discovery: {
+    title: "AI 职位匹配",
+    searchPlaceholder: "职位、关键词...",
+    locationPlaceholder: "地点",
+    searching: "搜索中...",
+    search: "搜索",
+    filters: "筛选",
+    matches_one: "{{count}} 个匹配",
+    matches_other: "{{count}} 个匹配",
+    relevance: "相关性",
+    date: "日期",
+    empty: "输入搜索内容，我们将为您呈现与您的简历相匹配的 AI 评分结果。",
+    scoring: "匹配评分中...",
+    daysAgo: "{{count}} 天前",
+    linkedinTooltip: "在 LinkedIn 上搜索",
+    baselineCv: "基础简历",
+    anyTime: "任何时间",
+    last24h: "过去 24 小时",
+    last7d: "过去 7 天",
+    last30d: "过去 30 天",
+    apply: "应用",
+    collapse: "折叠",
+    expand: "AI 职位匹配"
   },
   analytics: {
     title: "分析",
@@ -54,7 +132,13 @@ export const zh = {
     score: "分数",
     roleDistribution: "职位分布",
     avgMatchScore: "平均匹配分数",
-    clickToFilter: "点击以筛选分析"
+    noAppliedRoles: "尚无已申请的职位。将工作从“已保存”移出以开始跟踪分布。",
+    clickToFilter: "点击以筛选分析",
+    insightScore: "平均匹配分数为 {{score}}%",
+    insightNoScore: "尚无评分的申请",
+    insightVolume: "您的申请量最高的是 {{category}}，{{avg}}。",
+    barHint: "柱状图透明度反映了平均匹配质量。点击任何柱条以过滤页面。",
+    conversion: "转化率"
   },
   filters: {
     appType: "工作类型", industry: "行业", workModel: "工作模式", dateApplied: "申请日期",
@@ -64,6 +148,28 @@ export const zh = {
   },
   settings: {
     title: "设置", subtitle: "配置偏好并管理您的数据。",
+    accountTitle: "账户与订阅",
+    freePlanDesc: "升级以获取无限职位追踪和高级 AI 功能。",
+    proPlanDesc: "感谢您支持 ONboard。",
+    manageSub: "管理订阅",
+    planLabelFree: "免费方案",
+    upgradeToPro: "升级到专业版",
+    cvTitle: "简历管理",
+    workflowTitle: "工作流偏好",
+    ghostingThreshold: "无响应 (Ghosting) 阈值",
+    daysCount: "{{count}} 天",
+    dataTitle: "数据与安全",
+    exportImportTitle: "数据导出与导入",
+    exportBtn: "导出数据为 CSV",
+    importBtn: "从 CSV 导入数据",
+    signedInAs: "已登录为 {{email}}",
+    signOut: "退出登录",
+    deleteAccount: "删除账户",
+    deleteAccountDesc: "永久删除您的账户及所有相关数据。此操作无法撤销。",
+    deleteAccountTitle: "删除您的账户？",
+    deleteAccountConfirm: "这将永久删除您的账户及所有相关数据（职位、简历、令牌）。此操作无法撤销。",
+    deleting: "正在删除...",
+    deleteAccountSuccess: "已请求删除账户。您已退出登录。",
     appearance: "外观", appearanceHint: "选择界面外观。",
     light: "浅色", dark: "深色", system: "系统",
     language: "语言", languageHint: "菜单和标签的界面语言。",
@@ -97,7 +203,13 @@ export const zh = {
     proFeatures: "专业版功能",
     thinking: "正在思考...",
     uploadFile: "上传 PDF / DOCX",
+    upgradeBtn: "升级到专业版以获取权限",
     tone: {
+      subtitle: "匹配公司文化。粘贴草稿 + 目标公司；获得语气评分和具体的修改建议。",
+      premium: {
+        presets: { title: "多公司语气预设", desc: "为您针对的每家公司保存语气概况。" },
+        rewrite: { title: "批量求职信改写", desc: "一次性重写多封求职信。" }
+      },
       targetCompany: "目标公司",
       draftLabel: "求职信草稿",
       uploadLabel: "上传求职信",
@@ -116,17 +228,29 @@ export const zh = {
       scoreWeak: "弱"
     },
     translate: {
+      subtitle: "将非传统的经历转化为适合企业的简历要点，针对职位描述量身定制。",
+      premium: {
+        batch: { title: "职位描述批量翻译", desc: "一次性针对多个职位描述翻译一段经历。" },
+        packs: { title: "行业专属包", desc: "针对金融、科技、咨询等行业的语气包。" }
+      },
       experienceLabel: "非常规经历",
       experiencePlaceholder: "例如：领导了 30 人的志愿者清理活动，协调了 5 个地区的物流...",
       jdLabel: "目标职位描述",
       jdPlaceholder: "在此粘贴职位描述，或上传 PDF/DOCX...",
+      uploadJd: "上传职位描述",
       translateBtn: "翻译技能",
       empty: "3–5 个针对职位描述定制的企业级描述点。",
       suggestedBullets: "建议的简历描述点",
       strategy: "策略"
     },
     polish: {
+      subtitle: "修正语法、精简用词并调整语气 —— 支持英语或德语。",
+      premium: {
+        export: { title: "修订模式导出", desc: "下载带有编辑标记的 DOCX 格式精修文本。" },
+        presets: { title: "语气预设", desc: "在正式、友好和高管语气之间切换。" }
+      },
       businessGerman: "针对商务德语进行优化",
+      languageLabel: "语言",
       textLabel: "文本",
       placeholder: "粘贴电子邮件、简历描述点或消息 —— 或上传 PDF/DOCX...",
       polishBtn: "润色",
@@ -135,6 +259,11 @@ export const zh = {
       keyChanges: "关键修改"
     },
     interview: {
+      subtitle: "为您当前正在面试的任何职位生成可能的面试问题和 STAR 结构的回答。",
+      premium: {
+        voice: { title: "实时模拟面试 (语音)", desc: "大声练习并获得实时反馈。" },
+        followups: { title: "招聘人员风格的后续提问", desc: "根据您的回答进行自适应的深入提问。" }
+      },
       pickJob: "选择一个面试职位",
       noJobs: "“面试”列中暂无职位 —— 请先将卡片移动到该列。",
       generate: "生成面试准备",
@@ -147,21 +276,40 @@ export const zh = {
       result: "结果 (Result)"
     },
     cv: {
+      subtitle: "针对语言、格式、ATS 友好度和关键词对您的简历进行评分，并提供切实可行的建议。",
+      premium: {
+        ats: { title: "详细的 ATS 模拟", desc: "分章节的解析报告和招聘人员热力图。" },
+        scans: { title: "无限次每日扫描", desc: "随简历修改进度随时重新扫描。" }
+      },
       paste: "粘贴简历文本",
       upload: "上传简历",
+      uploadPdf: "上传 PDF",
       analyze: "分析简历",
+      analyzing: "正在分析...",
       empty: "上传或粘贴您的简历以查看评分和改进建议。",
       language: "专业语言",
       formatting: "长度与格式",
       ats: "ATS 适配性",
       keywords: "关键词优化",
       tips: "改进建议",
+      tipsList: {
+        noEmail: "关键：添加电子邮件地址，以便招聘人员联系您。",
+        noPhone: "关键：添加电话号码，以免错过电话面试。",
+        lowMetrics: "增加更多量化指标。您的简历只有 {{count}} 个数字/结果。招聘人员看重 %、$ 和规模。",
+        weakVerbs: "将“负责”等平淡的措辞替换为“带头”、“设计”或“优化”等主动动词。",
+        fewSections: "标准化您的标题。确保您有清晰标记的“工作经验”、“教育背景”和“技能”板块。",
+        fancyChars: "ATS 警报：移除可能导致解析失败的复杂图形或非标准符号。",
+        shortCv: "篇幅过短警报：您的简历只有 {{count}} 个单词。请详细阐述您的高影响力成就。",
+        longCv: "篇幅过长警报：对于大多数职位来说，{{count}} 个单词太长了。目标是 2 页（约 900 字）。",
+      },
       strengths: "强力关键词",
       dragDrop: "拖放或浏览文件",
       unlimitedScans: "无限次扫描",
       scanLimit: "每日扫描限制：已使用 {{used}}/{{limit}} 次免费扫描",
+      scanLimitLabel: "每日扫描限制：已使用 {{used}}/{{limit}} 次免费扫描",
       limitReached: "已达到每日限制。升级到专业版以享受无限次扫描。",
       atsSimulation: "详细 ATS 模拟",
+      atsReportTitle: "详细 ATS 报告",
       atsProHint: "详细的 ATS 报告将解锁更深入的关键词评分、招聘人员阅读启发式评估和分段反馈。重新运行分析器以更新。",
       unlockPro: "使用专业版解锁"
     },

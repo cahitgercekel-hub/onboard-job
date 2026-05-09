@@ -1,15 +1,47 @@
 export const tr = {
-  app: { name: "ONboard", tagline: "İş Takibi ve CV Asistanı" },
+  app: { name: "ONboard", tagline: "İş Takibi ve CV Asistanı", syncedStatus: "Hesabınızla senkronize edildi." },
+  auth: {
+    googleBtn: "Google ile devam et",
+    orWithEmail: "veya e-posta ile",
+    loginTab: "Giriş yap",
+    signupTab: "Kayıt ol",
+    forgotTab: "Şifremi unuttum",
+    forgotHint: "E-postanızı girin, size bir şifre sıfırlama bağlantısı gönderelim.",
+    sendResetLink: "Sıfırlama bağlantısı gönder",
+    backToLogin: "Giriş yapmaya dön",
+    displayNameLabel: "Görünen ad (isteğe bağlı)",
+    emailLabel: "E-posta",
+    passwordLabel: "Şifre",
+    createAccount: "Hesap oluştur",
+    signingIn: "Giriş yapılıyor...",
+    sending: "Gönderiliyor...",
+    creatingAccount: "Hesap oluşturuluyor...",
+    invalidEmail: "Geçerli bir e-posta girin"
+  },
+  resetPassword: {
+    title: "Şifrenizi sıfırlayın",
+    subtitle: "Yeni bir şifre seçin",
+    validating: "Kurtarma bağlantısı doğrulanıyor...",
+    newPasswordLabel: "Yeni şifre",
+    confirmPasswordLabel: "Şifreyi onayla",
+    updating: "Güncelleniyor...",
+    updateBtn: "Şifreyi güncelle",
+    matchError: "Şifreler eşleşmiyor",
+    strengthError: "Lütfen daha güçlü bir şifre seçin",
+    successToast: "Şifre güncellendi"
+  },
   nav: { 
     tracker: "İş Takibi", 
     board: "Pano", 
     analytics: "Analiz", 
     assistant: "Asistan", 
     aiAssistant: "Yapay Zeka Asistanı", 
-    settings: "Ayarlar" 
+    settings: "Ayarlar",
+    billing: "Planlar ve Ödemeler"
   },
   common: {
     save: "Kaydet", cancel: "İptal", delete: "Sil", add: "Ekle", edit: "Düzenle",
+    link: "Bağlantı",
     filter: "Filtrele", clear: "Filtreleri temizle", all: "Tümü",
     company: "Şirket", role: "Pozisyon", url: "İlan URL", date: "Başvuru tarihi", status: "Durum",
     applicationType: "Başvuru türü", industry: "Sektör", workModel: "Çalışma modeli",
@@ -22,15 +54,37 @@ export const tr = {
     close: "Kapat",
     send: "Gönder",
     any: "Herhangi",
-    optional: "isteğe bağlı"
+    optional: "isteğe bağlı",
+    plans: {
+      free: "Ücretsiz",
+      pro: "Pro",
+      business: "İşletme"
+    }
   },
   tracker: {
     title: "Pano",
     addJob: "İş ekle",
+    addToSaved: "Kaydedilenlere Ekle",
+    addedToSaved: "{{company}} Kaydedilenlere eklendi",
+    deletedToast: "{{company}} şirketindeki \"{{role}}\" pozisyonu silindi",
     autoAdd: "Yapay Zeka ile otomatik ekle",
     jobs_one: "{{count}} iş",
     jobs_other: "{{count}} iş",
     searchPlaceholder: "Şirket veya pozisyon ara...",
+    status: {
+      saved: "Kaydedildi",
+      applied: "Başvuruldu",
+      interviewing: "Mülakat",
+      offer: "Teklif",
+      rejected: "Reddedildi",
+      archived: "Arşivlendi",
+    },
+    archiveTypes: {
+      closed: "Pozisyon kapatıldı",
+      rejected: "Reddedildi",
+      ghosted: "Hayalet (cevap yok)",
+    },
+    appliedAt: "{{date}} tarihinde başvuruldu",
     ghostingTitle: "{{company}} şirketinden haber yok mu?",
     ghostingDesc: "{{role}} pozisyonu {{days}} gündür {{status}} aşamasında. Panonuzu temizlemek için hayalet ilan olarak arşivleyin.",
     archiveAsGhosted: "Hayalet İlan Olarak Arşivle",
@@ -40,6 +94,30 @@ export const tr = {
     sortDateDesc: "Tarih: En Yeni Önce",
     sortDateAsc: "Tarih: En Eski Önce",
     sortCompanyAsc: "Şirket: A–Z"
+  },
+  discovery: {
+    title: "Yapay Zeka İş Eşleşmesi",
+    searchPlaceholder: "Pozisyon, anahtar kelimeler...",
+    locationPlaceholder: "Konum",
+    searching: "Aranıyor...",
+    search: "Ara",
+    filters: "Filtreler",
+    matches_one: "{{count}} eşleşme",
+    matches_other: "{{count}} eşleşme",
+    relevance: "Alaka Düzeyi",
+    date: "Tarih",
+    empty: "Bir arama yapın, CV'nize göre yapay zeka tarafından puanlanmış eşleşmeleri listeleyelim.",
+    scoring: "Eşleşmeler puanlanıyor...",
+    daysAgo: "{{count}} gün önce",
+    linkedinTooltip: "LinkedIn'de Ara",
+    baselineCv: "Temel CV",
+    anyTime: "Herhangi bir zaman",
+    last24h: "Son 24 saat",
+    last7d: "Son 7 gün",
+    last30d: "Son 30 gün",
+    apply: "Uygula",
+    collapse: "Daralt",
+    expand: "Yapay Zeka İş Eşleşmesi"
   },
   analytics: {
     title: "Analiz",
@@ -54,7 +132,13 @@ export const tr = {
     score: "Puan",
     roleDistribution: "Pozisyon Dağılımı",
     avgMatchScore: "Ort. eşleşme puanı",
-    clickToFilter: "Analizi filtrelemek için tıklayın"
+    noAppliedRoles: "Henüz başvurulmuş pozisyon yok. Dağılımı takip etmek için işleri 'Kaydedildi' sütunundan taşıyın.",
+    clickToFilter: "Analizi filtrelemek için tıklayın",
+    insightScore: "ortalama eşleşme puanınızın %{{score}} olduğu",
+    insightNoScore: "henüz puanlanmış başvurunuzun olmadığı",
+    insightVolume: "En yüksek başvuru hacminiz {{category}} alanında, {{avg}}.",
+    barHint: "Çubuk opaklığı ortalama eşleşme kalitesini yansıtır. Sayfayı filtrelemek için herhangi bir çubuğa tıklayın.",
+    conversion: "dönüşüm"
   },
   filters: {
     appType: "Başvuru türü", industry: "Sektör", workModel: "Çalışma modeli", dateApplied: "Başvuru tarihi",
@@ -64,6 +148,28 @@ export const tr = {
   },
   settings: {
     title: "Ayarlar", subtitle: "Tercihleri yapılandır ve verilerinizi yönetin.",
+    accountTitle: "Hesap ve Abonelik",
+    freePlanDesc: "Sınırsız iş takibi ve gelişmiş yapay zeka özellikleri için yükseltin.",
+    proPlanDesc: "ONboard'u desteklediğiniz için teşekkürler.",
+    manageSub: "Aboneliği Yönet",
+    planLabelFree: "Ücretsiz Plan",
+    upgradeToPro: "Pro'ya Yükselt",
+    cvTitle: "CV Yönetimi",
+    workflowTitle: "İş Akışı Tercihleri",
+    ghostingThreshold: "Hayalet olma eşiği",
+    daysCount: "{{count}} gün",
+    dataTitle: "Veri ve Güvenlik",
+    exportImportTitle: "Veri Dışa/İçe Aktarma",
+    exportBtn: "Verileri CSV olarak dışa aktar",
+    importBtn: "Verileri CSV'den içe aktar",
+    signedInAs: "{{email}} olarak giriş yapıldı",
+    signOut: "Oturumu kapat",
+    deleteAccount: "Hesabı sil",
+    deleteAccountDesc: "Hesabınızı ve tüm verilerinizi kalıcı olarak kaldırın. Bu işlem geri alınamaz.",
+    deleteAccountTitle: "Hesabınızı silmek istiyor musunuz?",
+    deleteAccountConfirm: "Bu işlem hesabınızı ve tüm ilişkili verileri (işler, CV'ler, tokenlar) kalıcı olarak siler. Bu işlem geri alınamaz.",
+    deleting: "Siliniyor...",
+    deleteAccountSuccess: "Hesap silme talebi alındı. Oturumunuz kapatıldı.",
     appearance: "Görünüm", appearanceHint: "Arayüzün nasıl görüneceğini seçin.",
     light: "Açık", dark: "Koyu", system: "Sistem",
     language: "Dil", languageHint: "Menüler ve etiketler için arayüz dili.",
@@ -97,7 +203,13 @@ export const tr = {
     proFeatures: "Pro özellikler",
     thinking: "Düşünüyor...",
     uploadFile: "PDF / DOCX Yükle",
+    upgradeBtn: "Erişim için Pro'ya Yükselt",
     tone: {
+      subtitle: "Bir şirketin kültürüne uyum sağlayın. Taslağınızı + hedef şirketi yapıştırın; ton puanı ve somut düzenlemeler alın.",
+      premium: {
+        presets: { title: "Çoklu Şirket Ton Hazır Ayarları", desc: "Hedeflediğiniz her şirket için ton profilleri kaydedin." },
+        rewrite: { title: "Toplu Ön Yazı Yeniden Yazma", desc: "Tek seferde birden fazla ön yazıyı yeniden yazın." }
+      },
       targetCompany: "Hedef şirket",
       draftLabel: "Ön yazı taslağı",
       uploadLabel: "Ön yazı yükle",
@@ -116,6 +228,11 @@ export const tr = {
       scoreWeak: "Zayıf"
     },
     translate: {
+      subtitle: "Sıra dışı deneyimleri, iş tanımına uygun, kurumsal kullanıma hazır özgeçmiş maddelerine dönüştürün.",
+      premium: {
+        batch: { title: "İş Tanımı Toplu Çeviri", desc: "Bir deneyimi aynı anda birçok iş tanımına göre çevirin." },
+        packs: { title: "Sektöre Özel Paketler", desc: "Finans, teknoloji, danışmanlık ve daha fazlası için ton paketleri." }
+      },
       experienceLabel: "Alışılmadık deneyim",
       experiencePlaceholder: "Örn. 30 kişilik bir gönüllü temizlik ekibine liderlik ettim, 5 bölgede lojistiği koordine ettim...",
       jdLabel: "Hedef iş tanımı",
@@ -123,9 +240,14 @@ export const tr = {
       translateBtn: "Yetenekleri çevir",
       empty: "İş tanımına göre uyarlanmış 3–5 kurumsal hazır madde.",
       suggestedBullets: "Önerilen Özgeçmiş Maddeleri",
-      strategy: "Strateji"
+      strategy: "Strategy"
     },
     polish: {
+      subtitle: "Gramer hatalarını düzeltin, ifadeleri netleştirin ve tonu uyarlayın — İngilizce veya Almanca.",
+      premium: {
+        export: { title: "Değişiklikleri İzle Dışa Aktarma", desc: "Düzenlenmiş metni düzenleme işaretleriyle birlikte DOCX olarak indirin." },
+        presets: { title: "Ton Hazır Ayarları", desc: "Resmi, samimi ve yönetici sesleri arasında geçiş yapın." }
+      },
       businessGerman: "İş Almancası (Geschäftsdeutsch) için optimize et",
       textLabel: "Metin",
       placeholder: "Bir e-posta, özgeçmiş maddesi veya mesaj yapıştırın — veya bir PDF/DOCX yükleyin...",
@@ -135,6 +257,11 @@ export const tr = {
       keyChanges: "Temel Değişiklikler"
     },
     interview: {
+      subtitle: "Mülakat yaptığınız herhangi bir rol için muhtemel sorular ve STAR yapılı cevaplar oluşturun.",
+      premium: {
+        voice: { title: "Canlı Deneme Mülakatı (Sesli)", desc: "Gerçek zamanlı geri bildirimle sesli pratik yapın." },
+        followups: { title: "İşe Alım Uzmanı Tarzı Takip Soruları", desc: "Cevaplarınıza dayalı uyarlanabilir derinlemesine sorular." }
+      },
       pickJob: "Mülakat yapılacak bir rol seçin",
       noJobs: "'Mülakat' aşamasında henüz iş yok — önce bir kartı o sütuna taşıyın.",
       generate: "Hazırlık oluştur",
@@ -147,21 +274,40 @@ export const tr = {
       result: "Sonuç"
     },
     cv: {
+      subtitle: "CV'nizi dil, biçimlendirme, ATS uyumluluğu ve anahtar kelimeler açısından puanlayın — uygulanabilir ipuçlarıyla.",
+      premium: {
+        ats: { title: "Detaylı ATS Simülasyonu", desc: "Bölüm bazlı ayrıştırıcı raporu ve işe alım uzmanı ısı haritası." },
+        scans: { title: "Sınırsız Günlük Tarama", desc: "CV'niz üzerinde çalıştıkça istediğiniz sıklıkta yeniden tarayın." }
+      },
       paste: "CV metnini yapıştırın",
       upload: "CV Yükle",
+      uploadPdf: "PDF Yükle",
       analyze: "CV Analiz Et",
+      analyzing: "Analiz ediliyor...",
       empty: "Puan kartlarını ve uygulanabilir ipuçlarını görmek için CV'nizi yükleyin veya yapıştırın.",
       language: "Profesyonel Dil",
       formatting: "Uzunluk & Format",
       ats: "ATS Uygunluğu",
       keywords: "Anahtar Kelime Optimizasyonu",
       tips: "Uygulanabilir ipuçları",
+      tipsList: {
+        noEmail: "Kritik: İşe alım uzmanlarının size ulaşabilmesi için bir e-posta adresi ekleyin.",
+        noPhone: "Kritik: Telefon mülakatları için atlanmamak adına bir telefon numarası ekleyin.",
+        lowMetrics: "Daha fazla metrik ekleyin. CV'nizde sadece {{count}} sayı/sonuç var. İşe alım uzmanları %, $ ve ölçek ararlar.",
+        weakVerbs: "'Sorumlu', 'yardımcı oldu' gibi zayıf ifadeleri 'Öncülük etti', 'Tasarladı' veya 'Optimize etti' gibi aktif fiillerle değiştirin.",
+        fewSections: "Başlıklarınızı standartlaştırın. 'Deneyim', 'Eğitim' ve 'Yetenekler' bölümlerinin net bir şekilde etiketlendiğinden emin olun.",
+        fancyChars: "ATS Uyarısı: Ayrıştırmayı bozabilecek karmaşık grafikleri veya standart dışı madde imlerini kaldırın.",
+        shortCv: "Kısalık uyarısı: CV'niz sadece {{count}} kelime. Yüksek etkili başarılarınızı detaylandırın.",
+        longCv: "Uzunluk uyarısı: {{count}} kelime çoğu rol için çok uzun. 2 sayfa (yaklaşık 900 kelime) hedefleyin.",
+      },
       strengths: "Güçlü anahtar kelimeler",
       dragDrop: "Sürükle & Bırak veya Dosyalara Göz At",
       unlimitedScans: "Sınırsız tarama",
       scanLimit: "Günlük Tarama Limiti: {{used}}/{{limit}} ücretsiz tarama kullanıldı",
+      scanLimitLabel: "Günlük Tarama Limiti: {{used}}/{{limit}} ücretsiz tarama kullanıldı",
       limitReached: "Günlük limite ulaşıldı. Sınırsız tarama için Pro'ya yükseltin.",
       atsSimulation: "Detaylı ATS Simülasyonu",
+      atsReportTitle: "Detaylı ATS Raporu",
       atsProHint: "Detaylı ATS raporu, daha derin anahtar kelime puanlaması, işe alım uzmanı okunabilirlik sezgileri ve bölüm bazlı geri bildirimlerin kilidini açar. Yenilemek için analizörü tekrar çalıştırın.",
       unlockPro: "Pro ile Kilidi Aç"
     },

@@ -140,7 +140,7 @@ export function JobDialog({ open, onOpenChange, initialStatus = "saved", job, on
                 <SelectTrigger><SelectValue /></SelectTrigger>
                 <SelectContent>
                   {STATUS_ORDER.map((s) => (
-                    <SelectItem key={s} value={s}>{STATUS_LABEL[s]}</SelectItem>
+                    <SelectItem key={s} value={s}>{t(`tracker.status.${s}`)}</SelectItem>
                   ))}
                 </SelectContent>
               </Select>
@@ -182,16 +182,16 @@ export function JobDialog({ open, onOpenChange, initialStatus = "saved", job, on
             </div>
           </div>
           <div className="grid gap-1.5">
-            <Label>CV version used</Label>
+            <Label>{t("assistant.tabs.cv")}</Label>
             <Select
               value={cvVersionId || "__none__"}
               onValueChange={(v) => setCvVersionId(v === "__none__" ? "" : v)}
             >
               <SelectTrigger>
-                <SelectValue placeholder={versions.length === 0 ? "No CV versions yet — add one in Settings" : "Select a CV version…"} />
+                <SelectValue placeholder={versions.length === 0 ? t("tracker.noJobs") : t("common.any")} />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="__none__">None</SelectItem>
+                <SelectItem value="__none__">{t("common.any")}</SelectItem>
                 {versions.map((v) => (
                   <SelectItem key={v.id} value={v.id}>{v.name}</SelectItem>
                 ))}
@@ -204,7 +204,7 @@ export function JobDialog({ open, onOpenChange, initialStatus = "saved", job, on
               {job && (
                 <Button type="button" variant="outline" size="sm" disabled={scoring || !jobDescription.trim()} onClick={calculateFitness}>
                   {scoring ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <Sparkles className="h-3.5 w-3.5" />}
-                  {job.fitnessScore != null ? "Re-score fitness" : "Calculate fitness"}
+                  {job.fitnessScore != null ? t("assistant.cv.analyze") : t("assistant.cv.analyze")}
                 </Button>
               )}
             </div>
@@ -213,7 +213,7 @@ export function JobDialog({ open, onOpenChange, initialStatus = "saved", job, on
               <div className="mt-2 flex gap-3 rounded-md border border-border bg-muted/30 p-3">
                 <FitnessRing score={job.fitnessScore} size={44} stroke={5} />
                 <div className="min-w-0 flex-1">
-                  <div className="text-[11px] font-medium text-muted-foreground uppercase tracking-wide mb-0.5">AI Fitness reasoning</div>
+                  <div className="text-[11px] font-medium text-muted-foreground uppercase tracking-wide mb-0.5">{t("analytics.fitnessTitle")}</div>
                   <p className="text-xs text-foreground leading-relaxed">{job.fitnessReasoning}</p>
                 </div>
               </div>
@@ -233,12 +233,12 @@ export function JobDialog({ open, onOpenChange, initialStatus = "saved", job, on
             )}
             {job && onArchive && (
               <Button variant="ghost" onClick={onArchive}>
-                Archive
+                {t("common.archive")}
               </Button>
             )}
             {job && (
               <Button variant="ghost" onClick={() => setCoverOpen(true)}>
-                <Mail className="h-3.5 w-3.5" /> Cover letter
+                <Mail className="h-3.5 w-3.5" /> {t("assistant.tabs.tone")}
               </Button>
             )}
           </div>

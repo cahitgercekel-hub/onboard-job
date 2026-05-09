@@ -1,15 +1,18 @@
 import { Layers, Briefcase } from "lucide-react";
 import { SkillTranslator } from "@/pages/Assistant";
 import { AssistantToolShell } from "@/components/assistant/AssistantToolShell";
+import { useTranslation } from "react-i18next";
 
 export default function TranslatorAssistant() {
+  const { t } = useTranslation();
+
   return (
     <AssistantToolShell
-      title="Skill Translator"
-      subtitle="Turn unconventional experience into corporate-ready resume bullets, tailored to a job description."
+      title={t("assistant.tabs.translate")}
+      subtitle={t("assistant.translate.subtitle")}
       premiumTools={[
-        { id: "jd-batch", icon: Layers, title: "JD Batch Translation", desc: "Translate one experience against many JDs at once." },
-        { id: "industry-packs", icon: Briefcase, title: "Industry-specific Packs", desc: "Tone packs for finance, tech, consulting & more." },
+        { id: "jd-batch", icon: Layers, title: t("assistant.translate.premium.batch.title"), desc: t("assistant.translate.premium.batch.desc") },
+        { id: "industry-packs", icon: Briefcase, title: t("assistant.translate.premium.packs.title"), desc: t("assistant.translate.premium.packs.desc") },
       ]}
     >
       <SkillTranslator />

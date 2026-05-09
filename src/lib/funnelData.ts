@@ -9,13 +9,13 @@ const RANK: Record<string, number> = {
 };
 
 const STAGE_LABEL: Record<string, string> = {
-  saved: "Saved",
-  applied: "Applied",
-  interviewing: "Interviewing",
-  offer: "Offer",
-  rejected: "Rejected",
-  ghosted: "Ghosted",
-  closed: "Closed",
+  saved: "saved",
+  applied: "applied",
+  interviewing: "interviewing",
+  offer: "offer",
+  rejected: "rejected",
+  ghosted: "ghosted",
+  closed: "closed",
 };
 
 export interface SankeyNode {
@@ -34,13 +34,13 @@ export interface SankeyData {
 
 // Brand colors for active progressions (HSL strings — read from CSS vars at render time)
 const COLORS: Record<string, string> = {
-  Saved: "hsl(var(--col-saved))",
-  Applied: "hsl(var(--col-applied))",
-  Interviewing: "hsl(var(--col-interviewing))",
-  Offer: "hsl(var(--col-offer))",
-  Rejected: "hsl(var(--col-rejected))",
-  Ghosted: "hsl(var(--muted-foreground))",
-  Closed: "hsl(var(--muted-foreground))",
+  saved: "hsl(var(--col-saved))",
+  applied: "hsl(var(--col-applied))",
+  interviewing: "hsl(var(--col-interviewing))",
+  offer: "hsl(var(--col-offer))",
+  rejected: "hsl(var(--col-rejected))",
+  ghosted: "hsl(var(--muted-foreground))",
+  closed: "hsl(var(--muted-foreground))",
 };
 
 // Determine the highest positive stage a job actually reached.
@@ -61,11 +61,11 @@ function highestStage(job: Job): "saved" | "applied" | "interviewing" | "offer" 
 
 function terminalLabel(job: Job): string | null {
   if (job.status === "archived") {
-    if (job.archiveType === "ghosted") return "Ghosted";
+    if (job.archiveType === "ghosted") return "ghosted";
     if (job.archiveType === "closed") return null; // Closed jobs are excluded from the funnel
-    return "Rejected";
+    return "rejected";
   }
-  if (job.status === "rejected") return "Rejected";
+  if (job.status === "rejected") return "rejected";
   return null; // still active in pipeline
 }
 
@@ -108,7 +108,7 @@ export function buildFunnelData(jobs: Job[]): SankeyData {
   }
 
   // Order: positive funnel first (top), terminal drop-offs last (bottom).
-  const orderedNodes = ["Saved", "Applied", "Interviewing", "Offer", "Rejected", "Ghosted"]
+  const orderedNodes = ["saved", "applied", "interviewing", "offer", "rejected", "ghosted"]
     .filter((n) => usedNodes.has(n));
 
   const nodes: SankeyNode[] = orderedNodes.map((id) => ({

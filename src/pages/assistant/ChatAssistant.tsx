@@ -2,6 +2,7 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import { Link } from "react-router-dom";
 import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
+import { useTranslation } from "react-i18next";
 import {
   Loader2, Send, Square, Sparkles, X, Briefcase, Bot, FileText,
   CalendarCheck, Plus, Smile, MessagesSquare, Search, ChevronUp, ChevronDown,
@@ -25,24 +26,6 @@ import { loadChatThread, saveChatThread, clearChatThread, type ChatMsg } from "@
 
 type Msg = ChatMsg;
 
-const PRIMARY_QUICK = [
-  { label: "View Tailored CV", icon: FileText, prompt: "Tailor my baseline CV to the attached job. Show the rewritten summary and 3 most-improved bullet points." },
-  { label: "Generate Interview Questions", icon: Sparkles, prompt: "Generate 8 likely interview questions for this role, mixing behavioral and technical. For each, give a 1-line ideal-answer hint." },
-  { label: "Schedule Mock Interview", icon: CalendarCheck, prompt: "Run a mock interview. Ask me ONE question at a time, wait for my answer, then critique it using STAR before the next question." },
-];
-
-const MORE_QUICK = [
-  { label: "Find my skill gaps", prompt: "Compare my CV against the kinds of roles I've been applying to. What are my biggest skill gaps and how should I close them in the next 90 days?" },
-  { label: "Draft a follow-up email", prompt: "Draft a polite, concise follow-up email to send a week after applying. Keep it under 120 words." },
-  { label: "Negotiate this offer", prompt: "I just received an offer. Walk me through how to negotiate base salary, sign-on, and equity for this role." },
-  { label: "Suggest a career pivot", prompt: "Based on my CV, what 2-3 adjacent roles could I realistically pivot into? List required skills I'd need to add for each." },
-];
-
-const PREMIUM_TOOLS = [
-  { id: "auto-apply", icon: Bot, title: "Auto-apply Bot", desc: "Automatically apply to relevant jobs daily" },
-  { id: "cv-versions", icon: FileText, title: "Unlimited CV Versions", desc: "Create and store unlimited tailored CVs" },
-];
-
 const CHAT_URL = `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/career-chat`;
 
 const RAIL_STORAGE_KEY = "jat.premiumRail.collapsed";
@@ -53,6 +36,24 @@ export default function ChatAssistant() {
   const { user } = useAuth();
   const { plan } = usePlan();
   const isPro = plan !== "free";
+
+  const PRIMARY_QUICK = useMemo(() => [
+    { label: t("assistant.chat.quick.tailorCv"), icon: FileText, prompt: "Tailor my baseline CV to the attached job. Show the rewritten summary and 3 most-improved bullet points." },
+    { label: t("assistant.chat.quick.interviewQuestions"), icon: Sparkles, prompt: "Generate 8 likely interview questions for this role, mixing behavioral and technical. For each, give a 1-line ideal-answer hint." },
+    { label: t("assistant.chat.quick.mockInterview"), icon: CalendarCheck, prompt: "Run a mock interview. Ask me ONE question at a time, wait for my answer, then critique it using STAR before the next question." },
+  ], [t]);
+
+  const MORE_QUICK = useMemo(() => [
+    { label: t("assistant.chat.quick.skillGaps"), prompt: "Compare my CV against the kinds of roles I've been applying to. What are my biggest skill gaps and how should I close them in the next 90 days?" },
+    { label: t("assistant.chat.quick.followUp"), prompt: "Draft a polite, concise follow-up email to send a week after applying. Keep it under 120 words." },
+    { label: t("assistant.chat.quick.negotiate"), prompt: "I just received an offer. Walk me through how to negotiate base salary, sign-on, and equity for this role." },
+    { label: t("assistant.chat.quick.careerPivot"), prompt: "Based on my CV, what 2-3 adjacent roles could I realistically pivot into? List required skills I'd need to add for each." },
+  ], [t]);
+
+  const PREMIUM_TOOLS = useMemo(() => [
+    { id: "auto-apply", icon: Bot, title: "Auto-apply Bot", desc: "Automatically apply to relevant jobs daily" },
+    { id: "cv-versions", icon: FileText, title: "Unlimited CV Versions", desc: "Create and store unlimited tailored CVs" },
+  ], []);
 
   const ATTACHED_JOB_KEY = useMemo(
     () => `jat.chat.attachedJob.${user?.id || "anon"}`,

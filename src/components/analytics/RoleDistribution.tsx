@@ -4,6 +4,7 @@ import { Briefcase, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { buildRoleStats, type RoleCategory } from "@/lib/roleCategory";
 import type { Job } from "@/lib/types";
+import { useTranslation } from "react-i18next";
 
 interface Props {
   jobs: Job[];
@@ -12,14 +13,17 @@ interface Props {
 }
 
 export function RoleDistribution({ jobs, selected, onSelect }: Props) {
+  const { t } = useTranslation();
   const stats = useMemo(() => buildRoleStats(jobs), [jobs]);
 
   const insight = useMemo(() => {
     if (stats.length === 0) return null;
     const top = stats[0];
-    const avg = top.avgScore != null ? `where your average match score is ${top.avgScore}%` : "with no scored applications yet";
-    return `Your highest volume of applications is in ${top.category}, ${avg}.`;
-  }, [stats]);
+    const avg = top.avgScore != null 
+      ? t("analytics.insightScore", { score: top.avgScore })
+      : t("analytics.insightNoScore");
+    return t("analytics.insightVolume", { category: top.category, avg });
+  }, [stats, t]);
 
   const data = stats.map((s) => ({
     name: s.category,
@@ -32,18 +36,18 @@ export function RoleDistribution({ jobs, selected, onSelect }: Props) {
     <div className="surface-card p-3 md:p-5 overflow-hidden">
       <div className="flex items-center justify-between mb-4 flex-wrap gap-2">
         <h2 className="text-sm font-medium text-foreground flex items-center gap-2">
-          <Briefcase className="h-4 w-4 text-accent" /> Role Concentration
+          <Briefcase className="h-4 w-4 text-accent" /> {t("analytics.roleDistribution")}
         </h2>
         {selected && (
           <Button size="sm" variant="ghost" onClick={() => onSelect(null)} className="h-7 text-xs">
-            <X className="h-3 w-3" /> Clear filter: {selected}
+            <X className="h-3 w-3" /> {t("common.clear")}: {selected}
           </Button>
         )}
       </div>
 
       {data.length === 0 ? (
         <p className="text-xs text-muted-foreground py-8 text-center">
-          No applied roles yet. Move jobs out of "Saved" to start tracking distribution.
+          {t("analytics.noAppliedRoles")}
         </p>
       ) : (
         <>
@@ -61,9 +65,9 @@ export function RoleDistribution({ jobs, selected, onSelect }: Props) {
                     return (
                       <div className="rounded-md border border-border bg-popover px-3 py-2 text-xs text-popover-foreground shadow-md">
                         <div className="font-semibold">{p.name}</div>
-                        <div>Applications: <span className="font-medium">{p.count}</span></div>
-                        <div>Avg match score: <span className="font-medium">{p.hasScore ? `${p.avgScore}%` : "—"}</span></div>
-                        <div className="text-muted-foreground mt-1">Click to filter analytics</div>
+                        <div>{t("common.status")}: <span className="font-medium">{p.count}</span></div>
+                        <div>{t("analytics.avgMatchScore")}: <span className="font-medium">{p.hasScore ? `${p.avgScore}%` : "—"}</span></div>
+                        <div className="text-muted-foreground mt-1">{t("analytics.clickToFilter")}</div>
                       </div>
                     );
                   }}
@@ -107,7 +111,7 @@ export function RoleDistribution({ jobs, selected, onSelect }: Props) {
             <p className="text-[11px] text-muted-foreground mt-3 italic">{insight}</p>
           )}
           <p className="text-[10px] text-muted-foreground mt-1">
-            Bar opacity reflects average match quality. Click any bar to filter the page.
+            {t("analytics.barHint")}
           </p>
         </>
       )}

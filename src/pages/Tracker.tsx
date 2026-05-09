@@ -333,7 +333,7 @@ export default function Tracker() {
                   onDeleteCard={(j) => {
                     const snapshot = j;
                     removeJob(j.id);
-                    toast(t("tracker.deletedToast", { role: j.role, company: j.company, defaultValue: `"${j.role}" at ${j.company} deleted` }), {
+                    toast(t("tracker.deletedToast", { role: j.role, company: j.company }), {
                       action: {
                         label: t("common.undo"),
                         onClick: () => {
@@ -374,9 +374,9 @@ export default function Tracker() {
           onDelete={dialog.job ? () => {
             const snapshot = dialog.job!;
             removeJob(snapshot.id);
-            toast(`"${snapshot.role}" at ${snapshot.company} deleted`, {
+            toast(t("tracker.deletedToast", { role: snapshot.role, company: snapshot.company }), {
               action: {
-                label: "Undo",
+                label: t("common.undo"),
                 onClick: () => {
                   const { id, createdAt, updatedAt, ...rest } = snapshot;
                   addJob(rest);

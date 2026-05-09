@@ -1,15 +1,47 @@
 export const en = {
-  app: { name: "ONboard", tagline: "Track Job & CV Assist" },
+  app: { name: "ONboard", tagline: "Track Job & CV Assist", syncedStatus: "Synced to your account." },
+  auth: {
+    googleBtn: "Continue with Google",
+    orWithEmail: "or with email",
+    loginTab: "Log in",
+    signupTab: "Sign up",
+    forgotTab: "Forgot password?",
+    forgotHint: "Enter your email and we'll send a password reset link.",
+    sendResetLink: "Send reset link",
+    backToLogin: "Back to log in",
+    displayNameLabel: "Display name (optional)",
+    emailLabel: "Email",
+    passwordLabel: "Password",
+    createAccount: "Create account",
+    signingIn: "Signing in...",
+    sending: "Sending...",
+    creatingAccount: "Creating account...",
+    invalidEmail: "Enter a valid email"
+  },
+  resetPassword: {
+    title: "Reset your password",
+    subtitle: "Choose a new password",
+    validating: "Validating recovery link...",
+    newPasswordLabel: "New password",
+    confirmPasswordLabel: "Confirm password",
+    updating: "Updating...",
+    updateBtn: "Update password",
+    matchError: "Passwords don't match",
+    strengthError: "Please choose a stronger password",
+    successToast: "Password updated"
+  },
   nav: { 
     tracker: "Job Tracker", 
     board: "Dashboard", 
     analytics: "Analytics", 
     assistant: "Assistant", 
     aiAssistant: "AI Assistant", 
-    settings: "Settings" 
+    settings: "Settings",
+    billing: "Plans & Billing"
   },
   common: {
     save: "Save", cancel: "Cancel", delete: "Delete", add: "Add", edit: "Edit",
+    link: "Link",
     filter: "Filter", clear: "Clear filters", all: "All",
     company: "Company", role: "Role", url: "Job URL", date: "Date applied", status: "Status",
     applicationType: "Application type", industry: "Industry", workModel: "Work model",
@@ -22,15 +54,37 @@ export const en = {
     close: "Close",
     send: "Send",
     any: "Any",
-    optional: "optional"
+    optional: "optional",
+    plans: {
+      free: "Free",
+      pro: "Pro",
+      business: "Business"
+    }
   },
   tracker: {
     title: "Dashboard",
     addJob: "Add job",
+    addToSaved: "Add to Saved",
+    addedToSaved: "Added {{company}} to Saved",
+    deletedToast: "\"{{role}}\" at {{company}} deleted",
     autoAdd: "Auto-add with AI",
     jobs_one: "{{count}} job",
     jobs_other: "{{count}} jobs",
     searchPlaceholder: "Search company or role...",
+    status: {
+      saved: "Saved",
+      applied: "Applied",
+      interviewing: "Interviewing",
+      offer: "Offer",
+      rejected: "Rejected",
+      archived: "Archived",
+    },
+    archiveTypes: {
+      closed: "Position closed",
+      rejected: "Rejected",
+      ghosted: "Ghosted (no reply)",
+    },
+    appliedAt: "Applied {{date}}",
     ghostingTitle: "No news from {{company}}?",
     ghostingDesc: "{{role}} has been in {{status}} for {{days}}+ days. Mark as ghosted to clean up your board.",
     archiveAsGhosted: "Archive as Ghosted",
@@ -40,6 +94,30 @@ export const en = {
     sortDateDesc: "Date: Newest First",
     sortDateAsc: "Date: Oldest First",
     sortCompanyAsc: "Company: A–Z"
+  },
+  discovery: {
+    title: "AI Job Match",
+    searchPlaceholder: "Role, keywords...",
+    locationPlaceholder: "Location",
+    searching: "Searching...",
+    search: "Search",
+    filters: "Filters",
+    matches_one: "{{count}} match",
+    matches_other: "{{count}} matches",
+    relevance: "Relevance",
+    date: "Date",
+    empty: "Enter a search and we'll surface AI-scored matches against your CV.",
+    scoring: "Scoring matches...",
+    daysAgo: "{{count}}d ago",
+    linkedinTooltip: "Search on LinkedIn",
+    baselineCv: "Baseline CV",
+    anyTime: "Any time",
+    last24h: "Last 24 hours",
+    last7d: "Last 7 days",
+    last30d: "Last 30 days",
+    apply: "Apply",
+    collapse: "Collapse",
+    expand: "AI Job Match"
   },
   analytics: {
     title: "Analytics",
@@ -54,7 +132,13 @@ export const en = {
     score: "Score",
     roleDistribution: "Role Distribution",
     avgMatchScore: "Avg match score",
-    clickToFilter: "Click to filter analytics"
+    noAppliedRoles: "No applied roles yet. Move jobs out of 'Saved' to start tracking distribution.",
+    clickToFilter: "Click to filter analytics",
+    insightScore: "where your average match score is {{score}}%",
+    insightNoScore: "with no scored applications yet",
+    insightVolume: "Your highest volume of applications is in {{category}}, {{avg}}.",
+    barHint: "Bar opacity reflects average match quality. Click any bar to filter the page.",
+    conversion: "conversion"
   },
   filters: {
     appType: "Application type", industry: "Industry", workModel: "Work model", dateApplied: "Date applied",
@@ -64,6 +148,28 @@ export const en = {
   },
   settings: {
     title: "Settings", subtitle: "Configure preferences and manage your data.",
+    accountTitle: "Account & Subscription",
+    freePlanDesc: "Upgrade for unlimited job tracking and advanced AI features.",
+    proPlanDesc: "Thanks for supporting ONboard.",
+    manageSub: "Manage Subscription",
+    planLabelFree: "Free Plan",
+    upgradeToPro: "Upgrade to Pro",
+    cvTitle: "CV Management",
+    workflowTitle: "Workflow Preferences",
+    ghostingThreshold: "Ghosting threshold",
+    daysCount: "{{count}} days",
+    dataTitle: "Data & Security",
+    exportImportTitle: "Data Export & Import",
+    exportBtn: "Export data as CSV",
+    importBtn: "Import data from CSV",
+    signedInAs: "Signed in as {{email}}",
+    signOut: "Sign out",
+    deleteAccount: "Delete account",
+    deleteAccountDesc: "Permanently remove your account and all associated data. This cannot be undone.",
+    deleteAccountTitle: "Delete your account?",
+    deleteAccountConfirm: "This permanently removes your account and all associated data (jobs, CVs, tokens). This cannot be undone.",
+    deleting: "Deleting...",
+    deleteAccountSuccess: "Account deletion requested. You've been signed out.",
     appearance: "Appearance", appearanceHint: "Choose how the interface looks.",
     light: "Light", dark: "Dark", system: "System",
     language: "Language", languageHint: "Interface language for menus and labels.",
@@ -97,7 +203,13 @@ export const en = {
     proFeatures: "Pro features",
     thinking: "Thinking...",
     uploadFile: "Upload PDF / DOCX",
+    upgradeBtn: "Upgrade to Pro for Access",
     tone: {
+      subtitle: "Match a company's culture. Paste a draft + target company; get a tone score and concrete edits.",
+      premium: {
+        presets: { title: "Multi-company Tone Presets", desc: "Save tone profiles for every company you target." },
+        rewrite: { title: "Bulk Cover-letter Rewrite", desc: "Rewrite multiple cover letters in one pass." }
+      },
       targetCompany: "Target company",
       draftLabel: "Cover letter draft",
       uploadLabel: "Upload cover letter",
@@ -116,17 +228,29 @@ export const en = {
       scoreWeak: "Weak"
     },
     translate: {
+      subtitle: "Turn unconventional experience into corporate-ready resume bullets, tailored to a job description.",
+      premium: {
+        batch: { title: "JD Batch Translation", desc: "Translate one experience against many JDs at once." },
+        packs: { title: "Industry-specific Packs", desc: "Tone packs for finance, tech, consulting & more." }
+      },
       experienceLabel: "Unconventional experience",
       experiencePlaceholder: "e.g. Led a 30-person volunteer cleanup, coordinated logistics across 5 districts...",
       jdLabel: "Target job description",
       jdPlaceholder: "Paste the JD here, or upload a PDF/DOCX...",
+      uploadJd: "Upload Job Description",
       translateBtn: "Translate skills",
       empty: "3–5 corporate-ready bullets, tailored to the JD.",
       suggestedBullets: "Suggested Resume Bullets",
       strategy: "Strategy"
     },
     polish: {
+      subtitle: "Fix grammar, tighten wording, and adapt tone — in English or German (with optional Geschäftsdeutsch mode).",
+      premium: {
+        export: { title: "Track-changes Export", desc: "Download polished text as DOCX with edit marks." },
+        presets: { title: "Tone Presets", desc: "Switch between formal, friendly, and executive voices." }
+      },
       businessGerman: "Optimize for Business German (Geschäftsdeutsch)",
+      languageLabel: "Language",
       textLabel: "Text",
       placeholder: "Paste an email, CV bullet point, or message — or upload a PDF/DOCX...",
       polishBtn: "Polish",
@@ -135,6 +259,11 @@ export const en = {
       keyChanges: "Key Changes"
     },
     interview: {
+      subtitle: "Generate likely questions and STAR-structured answers for any role you're currently interviewing for.",
+      premium: {
+        voice: { title: "Live Mock Interview (Voice)", desc: "Practice out loud with real-time feedback." },
+        followups: { title: "Recruiter-style Follow-ups", desc: "Adaptive deep-dive questions based on your answers." }
+      },
       pickJob: "Pick an interviewing role",
       noJobs: "No jobs in 'Interviewing' yet — move a card to that column first.",
       generate: "Generate prep",
@@ -147,6 +276,11 @@ export const en = {
       result: "Result"
     },
     cv: {
+      subtitle: "Score your CV across language, formatting, ATS friendliness, and keywords — with actionable tips.",
+      premium: {
+        ats: { title: "Detailed ATS Simulation", desc: "Per-section parser report and recruiter heatmap." },
+        scans: { title: "Unlimited Daily Scans", desc: "Re-scan as often as you iterate on your CV." }
+      },
       paste: "Paste CV text",
       upload: "Upload CV",
       analyze: "Analyze CV",

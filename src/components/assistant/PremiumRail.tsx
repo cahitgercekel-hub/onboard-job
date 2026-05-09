@@ -2,6 +2,7 @@ import { Link } from "react-router-dom";
 import { Lock, Crown, ChevronRight, ChevronLeft, type LucideIcon } from "lucide-react";
 import { Switch } from "@/components/ui/switch";
 import { Button } from "@/components/ui/button";
+import { useTranslation } from "react-i18next";
 
 export interface PremiumTool {
   id: string;
@@ -19,6 +20,8 @@ export function PremiumRail({
   collapsed?: boolean;
   onToggle?: () => void;
 }) {
+  const { t } = useTranslation();
+
   if (collapsed) {
     return (
       <aside className="hidden lg:flex flex-col surface-card overflow-hidden h-full w-11">
@@ -26,15 +29,15 @@ export function PremiumRail({
           type="button"
           onClick={onToggle}
           className="h-full w-full bg-gradient-premium text-white flex flex-col items-center justify-between py-3 hover:opacity-95 transition rounded-md"
-          aria-label="Expand premium tools"
-          title="Expand premium tools"
+          aria-label={t("discovery.expand")}
+          title={t("discovery.expand")}
         >
           <ChevronLeft className="h-4 w-4 shrink-0" />
           <span
             className="text-[10px] font-bold tracking-[0.2em] uppercase select-none"
             style={{ writingMode: "vertical-rl" }}
           >
-            Premium Tools
+            {t("assistant.premiumTools")}
           </span>
           <Crown className="h-4 w-4 shrink-0" />
         </button>
@@ -49,13 +52,13 @@ export function PremiumRail({
           type="button"
           onClick={onToggle}
           className="flex items-center gap-1.5 text-left hover:opacity-90 transition min-w-0"
-          aria-label="Collapse premium tools"
-          title="Collapse"
+          aria-label={t("discovery.collapse")}
+          title={t("common.close")}
         >
           <ChevronRight className="h-4 w-4" />
           <div className="min-w-0">
-            <div className="text-sm font-semibold leading-tight">Premium Tools</div>
-            <div className="text-[11px] opacity-90 leading-tight">Pro features</div>
+            <div className="text-sm font-semibold leading-tight">{t("assistant.premiumTools")}</div>
+            <div className="text-[11px] opacity-90 leading-tight">{t("assistant.proFeatures")}</div>
           </div>
         </button>
         <span className="inline-flex items-center gap-1 rounded-full bg-amber-300 text-amber-900 px-2 py-0.5 text-[10px] font-bold shrink-0">
@@ -89,7 +92,7 @@ export function PremiumRail({
       <div className="p-3 border-t border-border bg-card">
         <Link to="/billing">
           <Button className="w-full bg-gradient-premium text-white border-0 hover:opacity-95">
-            Upgrade to Pro for Access
+            {t("assistant.upgradeBtn")}
           </Button>
         </Link>
       </div>

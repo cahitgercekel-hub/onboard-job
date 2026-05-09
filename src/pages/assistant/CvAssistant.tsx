@@ -1,15 +1,18 @@
 import { Target, Infinity as InfinityIcon } from "lucide-react";
 import { CvAnalyzer } from "@/pages/Assistant";
 import { AssistantToolShell } from "@/components/assistant/AssistantToolShell";
+import { useTranslation } from "react-i18next";
 
 export default function CvAssistant() {
+  const { t } = useTranslation();
+
   return (
     <AssistantToolShell
-      title="CV Analyzer"
-      subtitle="Score your CV across language, formatting, ATS friendliness, and keywords — with actionable tips."
+      title={t("assistant.tabs.cv")}
+      subtitle={t("assistant.cv.subtitle")}
       premiumTools={[
-        { id: "ats-sim", icon: Target, title: "Detailed ATS Simulation", desc: "Per-section parser report and recruiter heatmap." },
-        { id: "unlimited-scans", icon: InfinityIcon, title: "Unlimited Daily Scans", desc: "Re-scan as often as you iterate on your CV." },
+        { id: "ats-sim", icon: Target, title: t("assistant.cv.premium.ats.title"), desc: t("assistant.cv.premium.ats.desc") },
+        { id: "unlimited-scans", icon: InfinityIcon, title: t("assistant.cv.premium.scans.title"), desc: t("assistant.cv.premium.scans.desc") },
       ]}
     >
       <CvAnalyzer />
