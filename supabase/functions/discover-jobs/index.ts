@@ -1,4 +1,6 @@
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.45.0";
+import { redactContactDetails } from "../_shared/redact.ts";
+import { AI_DISABLED_BODY, isAiEnabled } from "../_shared/aiAccess.ts";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -17,6 +19,10 @@ function json(body: unknown, status = 200) {
 Deno.serve(async (req) => {
   if (req.method === "OPTIONS") return new Response(null, { headers: corsHeaders });
   if (req.method !== "POST") return json({ error: "Method not allowed" }, 405);
+  // The suggestions are AI-invented, not real listings; switched off for the external beta.
+  if (Deno.env.get("DISCOVER_JOBS_ENABLED") !== "true") {
+    return json({ error: "Job discovery is not available in this beta." }, 410);
+  }
 
   const authHeader = req.headers.get("authorization");
   if (!authHeader) return json({ error: "Missing auth" }, 401);
@@ -45,6 +51,7 @@ Deno.serve(async (req) => {
   const sortBy = String(body.sortBy ?? "relevance"); // relevance | date
 
   const admin = createClient(SUPABASE_URL, SERVICE_KEY);
+  if (!(await isAiEnabled(admin, userId))) return json(AI_DISABLED_BODY, 403);
 
   // Pull CV (baseline always; named version notes are extra context)
   const { data: cv } = await admin
@@ -52,7 +59,7 @@ Deno.serve(async (req) => {
     .select("cv_text")
     .eq("user_id", userId)
     .maybeSingle();
-  const cvText = (cv?.cv_text ?? "").trim();
+  const cvText = redactContactDetails((cv?.cv_text ?? "").trim());
   if (!cvText) return json({ error: "Upload a baseline CV in Settings first." }, 400);
 
   let versionNotes = "";
@@ -132,8 +139,7 @@ Deno.serve(async (req) => {
   if (!aiRes.ok) {
     if (aiRes.status === 429) return json({ error: "AI rate limit — try again in a moment." }, 429);
     if (aiRes.status === 402) return json({ error: "AI credits exhausted — add credits in workspace settings." }, 402);
-    const t = await aiRes.text();
-    console.error("AI error", aiRes.status, t);
+    console.error("AI error", aiRes.status);
     return json({ error: "AI request failed" }, 500);
   }
 
@@ -143,8 +149,8 @@ Deno.serve(async (req) => {
   try {
     const args = JSON.parse(call?.function?.arguments ?? "{}");
     jobs = Array.isArray(args.jobs) ? args.jobs : [];
-  } catch (e) {
-    console.error("parse error", e);
+  } catch {
+    console.error("parse error");
     return json({ error: "AI returned malformed output" }, 500);
   }
 

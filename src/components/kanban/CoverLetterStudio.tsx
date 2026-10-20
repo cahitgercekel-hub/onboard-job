@@ -5,6 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { supabase } from "@/integrations/supabase/client";
+import { useAiAccess } from "@/lib/aiAccess";
 import { SKILL_DICTIONARY } from "@/lib/skills";
 import type { Job } from "@/lib/types";
 import { toast } from "sonner";
@@ -59,6 +60,7 @@ Best regards,
 }
 
 export function CoverLetterStudio({ open, onOpenChange, job }: Props) {
+  const { requestAi } = useAiAccess();
   const [draft, setDraft] = useState("");
   const [busy, setBusy] = useState(false);
   const initialized = useRef(false);
@@ -75,6 +77,7 @@ export function CoverLetterStudio({ open, onOpenChange, job }: Props) {
 
   const runQuickAction = async (instruction: string) => {
     if (!draft.trim()) return toast.error("No draft to refine yet.");
+    if (!(await requestAi("cover_letter"))) return;
     setBusy(true);
     try {
       const { data, error } = await supabase.functions.invoke("career-assistant", {

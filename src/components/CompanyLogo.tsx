@@ -1,6 +1,7 @@
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { Briefcase } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { usePrefs } from "@/lib/preferences";
 
 const LOGO_CACHE = new Map<string, string>();
 
@@ -50,9 +51,11 @@ interface CompanyLogoProps {
 }
 
 export function CompanyLogo({ company, url, size = 28, className }: CompanyLogoProps) {
+  // Third-party logo services only see the company domain (and the user's IP) after an explicit opt-in.
+  const { thirdPartyLogos } = usePrefs();
   const domain = useMemo(() => domainFromUrl(url) || slugifyToDomain(company), [url, company]);
   const sources = useMemo(() => {
-    if (!domain) return [] as string[];
+    if (!domain || !thirdPartyLogos) return [] as string[];
     if (LOGO_CACHE.has(domain)) return [LOGO_CACHE.get(domain)!];
     return [
       `https://cdn.brandfetch.io/${domain}/w/80/h/80?c=1idV74_default`,
@@ -60,10 +63,12 @@ export function CompanyLogo({ company, url, size = 28, className }: CompanyLogoP
       `https://logo.clearbit.com/${domain}`,
       `https://www.google.com/s2/favicons?domain=${domain}&sz=64`,
     ];
-  }, [domain]);
+  }, [domain, thirdPartyLogos]);
 
   const [idx, setIdx] = useState(0);
-  const [failed, setFailed] = useState(sources.length === 0);
+  const [failedSources, setFailedSources] = useState<string[] | null>(null);
+  const failed = sources.length === 0 || failedSources === sources;
+  useEffect(() => setIdx(0), [sources]);
 
   const initial = (company || "?").trim().charAt(0).toUpperCase() || "?";
   const hue = hashHue(company || "x");
@@ -100,7 +105,7 @@ export function CompanyLogo({ company, url, size = 28, className }: CompanyLogoP
       }}
       onError={() => {
         if (idx + 1 < sources.length) setIdx(idx + 1);
-        else setFailed(true);
+        else setFailedSources(sources);
       }}
     />
   );

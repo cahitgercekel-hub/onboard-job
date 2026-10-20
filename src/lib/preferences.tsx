@@ -10,6 +10,8 @@ interface Prefs {
   language: string;
   dateFormat: DateFormat;
   ghostingDays: number;
+  /** Load company logos from third-party logo services (sends company domains + IP to them). Off by default. */
+  thirdPartyLogos: boolean;
 }
 
 interface Ctx extends Prefs {
@@ -17,6 +19,7 @@ interface Ctx extends Prefs {
   setLanguage: (l: string) => void;
   setDateFormat: (d: DateFormat) => void;
   setGhostingDays: (d: number) => void;
+  setThirdPartyLogos: (v: boolean) => void;
   formatDate: (iso: string) => string;
 }
 
@@ -26,9 +29,9 @@ const PreferencesContext = createContext<Ctx | null>(null);
 function readPrefs(): Prefs {
   try {
     const raw = localStorage.getItem(STORAGE);
-    if (raw) return { theme: "system", language: "en", dateFormat: "DD.MM.YYYY", ghostingDays: 30, ...JSON.parse(raw) };
+    if (raw) return { theme: "system", language: "en", dateFormat: "DD.MM.YYYY", ghostingDays: 30, thirdPartyLogos: false, ...JSON.parse(raw) };
   } catch {/* ignore */}
-  return { theme: "system", language: localStorage.getItem("jat.lang") || "en", dateFormat: "DD.MM.YYYY", ghostingDays: 30 };
+  return { theme: "system", language: localStorage.getItem("jat.lang") || "en", dateFormat: "DD.MM.YYYY", ghostingDays: 30, thirdPartyLogos: false };
 }
 
 function applyTheme(theme: Theme) {
@@ -64,6 +67,7 @@ export function PreferencesProvider({ children }: { children: ReactNode }) {
   const setLanguage = useCallback((language: string) => persist({ ...readPrefs(), language }), []);
   const setDateFormat = useCallback((dateFormat: DateFormat) => persist({ ...readPrefs(), dateFormat }), []);
   const setGhostingDays = useCallback((ghostingDays: number) => persist({ ...readPrefs(), ghostingDays }), []);
+  const setThirdPartyLogos = useCallback((thirdPartyLogos: boolean) => persist({ ...readPrefs(), thirdPartyLogos }), []);
 
   const formatDate = useCallback(
     (iso: string) => {
@@ -78,8 +82,8 @@ export function PreferencesProvider({ children }: { children: ReactNode }) {
   );
 
   const value = useMemo<Ctx>(
-    () => ({ ...prefs, setTheme, setLanguage, setDateFormat, setGhostingDays, formatDate }),
-    [prefs, setTheme, setLanguage, setDateFormat, setGhostingDays, formatDate]
+    () => ({ ...prefs, setTheme, setLanguage, setDateFormat, setGhostingDays, setThirdPartyLogos, formatDate }),
+    [prefs, setTheme, setLanguage, setDateFormat, setGhostingDays, setThirdPartyLogos, formatDate]
   );
 
   return <PreferencesContext.Provider value={value}>{children}</PreferencesContext.Provider>;

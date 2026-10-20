@@ -10,7 +10,8 @@
     "lint": "eslint .",
     "preview": "vite preview",
     "test": "vitest run",
-    "test:watch": "vitest"
+    "test:watch": "vitest",
+    "test:db": "node --test supabase/tests/"
   },
   "dependencies": {
     "@dnd-kit/core": "^6.3.1",

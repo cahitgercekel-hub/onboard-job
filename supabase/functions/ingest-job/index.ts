@@ -58,12 +58,15 @@ Deno.serve(async (req) => {
     return json({ error: "Invalid JSON body" }, 400);
   }
 
-  const company = String(payload.companyName ?? payload.company ?? "").trim();
-  const role = String(payload.roleTitle ?? payload.role ?? "").trim();
-  const jobUrl = payload.jobUrl ?? payload.url ?? null;
-  const jobDescription = payload.jobDescription ?? payload.description ?? null;
-  const location = payload.location ?? null;
-  const workModel = payload.workModel ?? null;
+  const text = (v: unknown, max: number): string | null =>
+    typeof v === "string" && v.trim() ? v.trim().slice(0, max) : null;
+  const company = text(payload.companyName ?? payload.company, 200) ?? "";
+  const role = text(payload.roleTitle ?? payload.role, 200) ?? "";
+  const rawUrl = text(payload.jobUrl ?? payload.url, 2000);
+  const jobUrl = rawUrl && /^https?:\/\//i.test(rawUrl) ? rawUrl : null;
+  const jobDescription = text(payload.jobDescription ?? payload.description, 20000);
+  const location = text(payload.location, 200);
+  const workModel = text(payload.workModel, 50);
 
   if (!company || !role) {
     return json({ error: "companyName and roleTitle are required" }, 400);
@@ -86,8 +89,8 @@ Deno.serve(async (req) => {
     .single();
 
   if (insertErr) {
-    console.error("ingest-job insert failed", insertErr);
-    return json({ error: insertErr.message }, 500);
+    console.error("ingest-job insert failed", insertErr.code);
+    return json({ error: "Could not save the job" }, 500);
   }
 
   // Fire-and-forget: update last_used_at
@@ -95,7 +98,7 @@ Deno.serve(async (req) => {
     .from("api_tokens")
     .update({ last_used_at: new Date().toISOString() })
     .eq("id", tokenRow.id)
-    .then(({ error }) => error && console.error("last_used_at update failed", error));
+    .then(({ error }) => error && console.error("last_used_at update failed", error.code));
 
   return json({ ok: true, jobId: inserted.id }, 201);
 });

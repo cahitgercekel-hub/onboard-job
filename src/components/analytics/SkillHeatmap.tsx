@@ -4,6 +4,7 @@ import {
 } from "recharts";
 import { Sparkles, Target, Loader2, AlertCircle } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
+import { useAiAccess } from "@/lib/aiAccess";
 import { useAuth } from "@/lib/auth";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -26,6 +27,7 @@ interface OptimizedBullet {
 
 export function SkillHeatmap({ jobs }: Props) {
   const { user } = useAuth();
+  const { requestAi } = useAiAccess();
   const [cvText, setCvText] = useState<string | null>(null);
   const [loadingCv, setLoadingCv] = useState(true);
 
@@ -65,6 +67,7 @@ export function SkillHeatmap({ jobs }: Props) {
       toast.info("Your CV already covers the top demanded skills 🎉");
       return;
     }
+    if (!(await requestAi("cv_optimize"))) return;
     setOpen(true);
     setBusy(true);
     setBullets(null);

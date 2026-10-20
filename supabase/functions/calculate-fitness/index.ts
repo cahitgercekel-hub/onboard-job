@@ -1,4 +1,6 @@
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.45.0";
+import { redactContactDetails } from "../_shared/redact.ts";
+import { AI_DISABLED_BODY, isAiEnabled } from "../_shared/aiAccess.ts";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -47,13 +49,14 @@ Deno.serve(async (req) => {
     .maybeSingle();
   if (jobErr || !job) return json({ error: "Job not found" }, 404);
   if (job.user_id !== userId) return json({ error: "Forbidden" }, 403);
+  if (!(await isAiEnabled(admin, userId))) return json(AI_DISABLED_BODY, 403);
 
   const { data: cv } = await admin
     .from("cv_baseline")
     .select("cv_text")
     .eq("user_id", userId)
     .maybeSingle();
-  const cvText = (cv?.cv_text ?? "").trim();
+  const cvText = redactContactDetails((cv?.cv_text ?? "").trim());
   if (!cvText) return json({ error: "Upload a baseline CV in Settings first." }, 400);
   if (!job.job_description?.trim()) {
     return json({ error: "Add a job description to score this role." }, 400);
@@ -107,8 +110,7 @@ ${cvText.slice(0, 12000)}`;
   if (!aiRes.ok) {
     if (aiRes.status === 429) return json({ error: "AI rate limit — try again in a moment." }, 429);
     if (aiRes.status === 402) return json({ error: "AI credits exhausted — add credits in workspace settings." }, 402);
-    const t = await aiRes.text();
-    console.error("AI error", aiRes.status, t);
+    console.error("AI error", aiRes.status);
     return json({ error: "AI request failed" }, 500);
   }
 
@@ -120,8 +122,8 @@ ${cvText.slice(0, 12000)}`;
     const args = JSON.parse(call?.function?.arguments ?? "{}");
     score = Math.max(0, Math.min(100, Math.round(Number(args.score))));
     reasoning = String(args.reasoning ?? "").trim();
-  } catch (e) {
-    console.error("parse error", e);
+  } catch {
+    console.error("parse error");
     return json({ error: "AI returned malformed output" }, 500);
   }
   if (!reasoning) return json({ error: "AI returned no reasoning" }, 500);
@@ -129,10 +131,11 @@ ${cvText.slice(0, 12000)}`;
   const { error: updErr } = await admin
     .from("jobs")
     .update({ fitness_score: score, fitness_reasoning: reasoning })
-    .eq("id", jobId);
+    .eq("id", jobId)
+    .eq("user_id", userId);
   if (updErr) {
-    console.error("update failed", updErr);
-    return json({ error: updErr.message }, 500);
+    console.error("update failed", updErr.code);
+    return json({ error: "Could not save the score" }, 500);
   }
 
   return json({ score, reasoning });

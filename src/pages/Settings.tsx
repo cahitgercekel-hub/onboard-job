@@ -1,24 +1,29 @@
-import { useState, useRef, useEffect } from "react";
+import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import { useTranslation } from "react-i18next";
 import {
   Download, Upload, Trash2, Sun, Moon, Monitor, Languages,
   Calendar as CalendarIcon, LogOut, User as UserIcon, FileText,
   Settings2, Shield, Palette, Hourglass, MessageSquare, HelpCircle,
-  ExternalLink,
+  Mail, Lock, Sparkles, Image as ImageIcon,
 } from "lucide-react";
 import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Input } from "@/components/ui/input";
-import { Textarea } from "@/components/ui/textarea";
+import { Switch } from "@/components/ui/switch";
 import {
   Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle,
 } from "@/components/ui/dialog";
 import { usePrefs, type Theme, type DateFormat } from "@/lib/preferences";
 import { LANGUAGES } from "@/lib/i18n";
 import { downloadJobsCsv, clearAllJobs } from "@/lib/jobsStore";
-import { clearAllChats } from "@/lib/chatStore";
+import { supabase } from "@/integrations/supabase/client";
+import { useAiAccess } from "@/lib/aiAccess";
+import { LEGAL } from "@/lib/legal";
+import { buildDataExport, downloadJson, type ExportClient } from "@/lib/dataExport";
+import { clearLocalChats } from "@/lib/localData";
+import { deleteMyAccount } from "@/lib/accountDeletion";
 import { ImportCsvDialog } from "@/components/settings/ImportCsvDialog";
 import { CvBaselineSection } from "@/components/settings/CvBaselineSection";
 import { CvVersionsSection } from "@/components/settings/CvVersionsSection";
@@ -52,8 +57,6 @@ export default function Settings() {
   const [confirmOpen, setConfirmOpen] = useState(false);
   const [importOpen, setImportOpen] = useState(false);
   const [deleteAccountOpen, setDeleteAccountOpen] = useState(false);
-  const [feedbackOpen, setFeedbackOpen] = useState(false);
-  const [legalOpen, setLegalOpen] = useState<{ open: boolean; type: "privacy" | "terms" }>({ open: false, type: "privacy" });
 
   const planLabel = plan === "free" ? t("settings.planLabelFree") : plan === "pro" ? t("common.plans.pro") : t("common.plans.business");
 
@@ -88,7 +91,7 @@ export default function Settings() {
             <h3 className="text-sm font-semibold text-destructive mb-1">{t("settings.danger")}</h3>
             <p className="text-sm font-medium text-foreground">{t("settings.deleteAccount")}</p>
             <p className="text-xs text-muted-foreground mt-0.5 mb-3">
-              {t("settings.deleteAccountDesc")}
+              {t("settings.deleteAccountDesc")} {t("settings.deleteAccountNote")}
             </p>
             <Button
               variant="outline"
@@ -217,7 +220,7 @@ export default function Settings() {
                   catch (e: any) { toast.error(e?.message || "Export failed"); }
                 }}
               >
-                <span>{t("settings.exportBtn")}</span>
+                <span>{t("settings.exportJobsCsv")}</span>
                 <Download className="h-4 w-4" />
               </Button>
               <Button
@@ -233,52 +236,57 @@ export default function Settings() {
 
           <div className="rounded-lg border border-destructive/30 bg-destructive/5 p-4">
             <h3 className="text-sm font-semibold text-destructive mb-1">{t("settings.danger")}</h3>
-            <p className="text-sm font-medium text-foreground">{t("settings.clearAll")}</p>
-            <p className="text-xs text-muted-foreground mt-0.5 mb-3">{t("settings.clearAllHint")}</p>
+            <p className="text-sm font-medium text-foreground">{t("settings.clearJobs")}</p>
+            <p className="text-xs text-muted-foreground mt-0.5 mb-3">{t("settings.clearJobsHint")}</p>
             <Button
               variant="outline"
               size="sm"
               onClick={() => setConfirmOpen(true)}
               className="text-destructive border-destructive/40 hover:bg-destructive/10 hover:text-destructive"
             >
-              <Trash2 className="h-4 w-4" /> {t("settings.clearAll")}
+              <Trash2 className="h-4 w-4" /> {t("settings.clearJobs")}
             </Button>
           </div>
         </section>
 
-        {/* 5. Feedback & Support */}
+        {/* 5. Privacy & data */}
+        <PrivacySection />
+
+        {/* 6. Feedback & Support */}
         <section className="surface-card p-6 space-y-6">
           <CardHeader icon={MessageSquare} title={t("settings.feedback")} />
           <div className="space-y-2">
             <p className="text-sm text-muted-foreground">
-              {t("settings.feedbackHint")}
+              {t("settings.feedbackHint")} {t("settings.contactHint", { email: LEGAL.operator.email })}
             </p>
-            <Button onClick={() => setFeedbackOpen(true)} className="w-full gap-2">
-              <MessageSquare className="h-4 w-4" />
-              {t("settings.feedbackBtn")}
+            <Button asChild className="w-full gap-2">
+              <a href={`mailto:${LEGAL.operator.email}?subject=${encodeURIComponent("ONboard beta feedback")}`}>
+                <Mail className="h-4 w-4" />
+                {t("settings.contactBtn")}
+              </a>
             </Button>
           </div>
 
           <div className="border-t border-border pt-6 space-y-4">
             <CardHeader icon={HelpCircle} title={t("settings.legal")} />
-            <div className="grid grid-cols-2 gap-3">
-              <Button 
-                variant="outline" 
-                size="sm" 
-                className="justify-start gap-2"
-                onClick={() => setLegalOpen({ open: true, type: "privacy" })}
-              >
-                <Shield className="h-4 w-4 text-muted-foreground" />
-                {t("settings.privacyPolicy")}
+            <div className="grid grid-cols-3 gap-3">
+              <Button asChild variant="outline" size="sm" className="justify-start gap-2">
+                <Link to="/privacy">
+                  <Shield className="h-4 w-4 text-muted-foreground" />
+                  {t("settings.privacyPolicy")}
+                </Link>
               </Button>
-              <Button 
-                variant="outline" 
-                size="sm" 
-                className="justify-start gap-2"
-                onClick={() => setLegalOpen({ open: true, type: "terms" })}
-              >
-                <FileText className="h-4 w-4 text-muted-foreground" />
-                {t("settings.termsOfUse")}
+              <Button asChild variant="outline" size="sm" className="justify-start gap-2">
+                <Link to="/terms">
+                  <FileText className="h-4 w-4 text-muted-foreground" />
+                  {t("settings.termsOfUse")}
+                </Link>
+              </Button>
+              <Button asChild variant="outline" size="sm" className="justify-start gap-2">
+                <Link to="/imprint">
+                  <FileText className="h-4 w-4 text-muted-foreground" />
+                  {t("settings.imprint")}
+                </Link>
               </Button>
             </div>
           </div>
@@ -287,157 +295,113 @@ export default function Settings() {
 
       <ClearAllDialog open={confirmOpen} onOpenChange={setConfirmOpen} />
       <ImportCsvDialog open={importOpen} onOpenChange={setImportOpen} />
-      <DeleteAccountDialog open={deleteAccountOpen} onOpenChange={setDeleteAccountOpen} onDeleted={signOut} />
-      <FeedbackDialog open={feedbackOpen} onOpenChange={setFeedbackOpen} />
-      <LegalDialog 
-        open={legalOpen.open} 
-        onOpenChange={(v) => setLegalOpen(prev => ({ ...prev, open: v }))} 
-        type={legalOpen.type} 
-      />
+      <DeleteAccountDialog open={deleteAccountOpen} onOpenChange={setDeleteAccountOpen} />
     </div>
   );
 }
 
-function FeedbackDialog({ open, onOpenChange }: { open: boolean; onOpenChange: (v: boolean) => void }) {
+function PrivacySection() {
   const { t } = useTranslation();
-  const [text, setText] = useState("");
-  const [isSending, setIsSending] = useState(false);
-  const textareaRef = useRef<HTMLTextAreaElement>(null);
+  const { user } = useAuth();
+  const { thirdPartyLogos, setThirdPartyLogos } = usePrefs();
+  const { aiEnabled, setAiEnabled } = useAiAccess();
+  const [savingAi, setSavingAi] = useState(false);
+  const [exporting, setExporting] = useState(false);
+  const [cvFile, setCvFile] = useState<{ path: string; name: string } | null>(null);
 
-  // Auto-resize textarea
   useEffect(() => {
-    if (textareaRef.current) {
-      textareaRef.current.style.height = "auto";
-      textareaRef.current.style.height = `${textareaRef.current.scrollHeight}px`;
-    }
-  }, [text]);
+    if (!user) return;
+    supabase
+      .from("cv_baseline")
+      .select("file_path, file_name")
+      .eq("user_id", user.id)
+      .maybeSingle()
+      .then(({ data }) => setCvFile(data?.file_path ? { path: data.file_path, name: data.file_name ?? "cv" } : null));
+  }, [user]);
 
-  const handleSend = async () => {
-    if (!text.trim()) return;
-    setIsSending(true);
-    
-    // Simulate sending feedback
-    // In a real app, this would call a Supabase function or an API
+  const toggleAi = async (on: boolean) => {
+    setSavingAi(true);
+    const ok = await setAiEnabled(on);
+    setSavingAi(false);
+    if (ok) toast.success(on ? "AI features turned on" : "AI features turned off");
+  };
+
+  const exportAll = async () => {
+    if (!user) return;
+    setExporting(true);
     try {
-      // Mocking the behavior of sending an email to info@cahitgercekel.com
-      await new Promise(resolve => setTimeout(resolve, 1000));
-      toast.success("Feedback sent! Thank you for your contribution.");
-      setText("");
-      onOpenChange(false);
+      const data = await buildDataExport(supabase as unknown as ExportClient, user);
+      downloadJson(`onboard-my-data-${new Date().toISOString().slice(0, 10)}.json`, data);
+      toast.success("Your data export was downloaded");
     } catch (e) {
-      toast.error("Failed to send feedback. Please try again later.");
+      toast.error(e instanceof Error ? e.message : "Export failed — nothing was downloaded");
     } finally {
-      setIsSending(false);
+      setExporting(false);
     }
   };
 
+  const downloadCv = async () => {
+    if (!cvFile) return;
+    const { data, error } = await supabase.storage.from("cvs").download(cvFile.path);
+    if (error || !data) return toast.error(error?.message || "Download failed");
+    const url = URL.createObjectURL(data);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = cvFile.name;
+    a.click();
+    URL.revokeObjectURL(url);
+  };
+
+  const clearChats = () => {
+    if (!user) return;
+    const count = clearLocalChats(user.id);
+    toast.success(t("settings.clearChatsDone", { count }));
+  };
+
   return (
-    <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="sm:max-w-[500px]">
-        <DialogHeader>
-          <DialogTitle>{t("feedback.title")}</DialogTitle>
-          <DialogDescription>
-            {t("settings.feedbackHint")}
-          </DialogDescription>
-        </DialogHeader>
-        <div className="py-4">
-          <Textarea
-            ref={textareaRef}
-            value={text}
-            onChange={(e) => setText(e.target.value)}
-            placeholder={t("feedback.placeholder")}
-            className="min-h-[120px] resize-none overflow-hidden transition-[height] duration-200"
-          />
+    <section className="surface-card p-6 space-y-6">
+      <CardHeader icon={Lock} title={t("settings.privacyTitle")} />
+
+      <div className="flex items-start justify-between gap-4">
+        <div>
+          <Label htmlFor="ai-toggle" className="text-sm font-medium flex items-center gap-1.5">
+            <Sparkles className="h-3.5 w-3.5" /> {t("settings.aiToggle")}
+          </Label>
+          <p className="text-xs text-muted-foreground mt-1">
+            {t("settings.aiToggleHint")} <Link to="/privacy" className="underline underline-offset-2">{t("settings.privacyPolicy")}</Link>
+          </p>
         </div>
-        <DialogFooter className="gap-2 sm:gap-0">
-          <Button variant="ghost" onClick={() => onOpenChange(false)}>
-            {t("feedback.cancel")}
-          </Button>
-          <Button onClick={handleSend} disabled={!text.trim() || isSending}>
-            {isSending ? "Sending..." : t("feedback.send")}
-          </Button>
-        </DialogFooter>
-      </DialogContent>
-    </Dialog>
-  );
-}
+        <Switch id="ai-toggle" checked={aiEnabled === true} disabled={aiEnabled === null || savingAi} onCheckedChange={toggleAi} />
+      </div>
 
-function LegalDialog({ open, onOpenChange, type }: { open: boolean; onOpenChange: (v: boolean) => void; type: "privacy" | "terms" }) {
-  const title = type === "privacy" ? "Privacy Policy" : "Terms of Use";
-  
-  return (
-    <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-3xl max-h-[80vh] overflow-y-auto">
-        <DialogHeader>
-          <DialogTitle>{title}</DialogTitle>
-        </DialogHeader>
-        <div className="prose prose-sm dark:prose-invert max-w-none py-4 space-y-4 text-muted-foreground">
-          {type === "privacy" ? (
-            <>
-              <p>Last updated: May 07, 2026</p>
-              <h3 className="text-foreground font-semibold">1. Introduction</h3>
-              <p>Welcome to ONboard. We value your privacy and are committed to protecting your personal data. This Privacy Policy explains how we collect, use, and safeguard your information when you use our application.</p>
-              
-              <h3 className="text-foreground font-semibold">2. Data We Collect</h3>
-              <p>ONboard is designed to give you full control over your data. Most of your job application data is stored locally in your browser or within your secure Supabase account if you are signed in.</p>
-              <ul className="list-disc pl-5 space-y-1">
-                <li><strong>Account Information:</strong> Email address and authentication details if you create an account.</li>
-                <li><strong>Application Data:</strong> Job details, status, company names, and notes you enter.</li>
-                <li><strong>CV Content:</strong> Text or files you upload for analysis by our AI tools.</li>
-                <li><strong>Usage Data:</strong> Anonymous technical data to help us improve app performance.</li>
-              </ul>
-
-              <h3 className="text-foreground font-semibold">3. How We Use Your Data</h3>
-              <p>We use your data strictly to provide the services offered by ONboard, including:</p>
-              <ul className="list-disc pl-5 space-y-1">
-                <li>Syncing your job tracker across devices.</li>
-                <li>Powering AI features like the Career Assistant and CV Analyzer.</li>
-                <li>Generating analytics for your job search progress.</li>
-              </ul>
-
-              <h3 className="text-foreground font-semibold">4. Data Security</h3>
-              <p>We implement industry-standard security measures. When you use AI features, your data is processed through secure API endpoints. We do not sell your personal information to third parties.</p>
-
-              <h3 className="text-foreground font-semibold">5. Your Rights</h3>
-              <p>You have the right to access, export, or delete your data at any time through the Settings page. Choosing "Delete Account" or "Clear All Data" will permanently remove your information from our systems.</p>
-
-              <h3 className="text-foreground font-semibold">6. Contact Us</h3>
-              <p>If you have questions about this policy, contact us at info@cahitgercekel.com.</p>
-            </>
-          ) : (
-            <>
-              <p>Last updated: May 07, 2026</p>
-              <h3 className="text-foreground font-semibold">1. Acceptance of Terms</h3>
-              <p>By accessing or using ONboard, you agree to be bound by these Terms of Use. If you do not agree, please do not use the application.</p>
-
-              <h3 className="text-foreground font-semibold">2. Description of Service</h3>
-              <p>ONboard provides job application tracking, CV analysis, and AI-powered career assistance tools. Some features require a paid subscription.</p>
-
-              <h3 className="text-foreground font-semibold">3. User Responsibilities</h3>
-              <p>You are responsible for maintaining the confidentiality of your account and for all activities that occur under your account. You agree to use the service only for lawful purposes related to your personal job search.</p>
-
-              <h3 className="text-foreground font-semibold">4. Intellectual Property</h3>
-              <p>The application, including its original content, features, and functionality, is owned by ONboard and is protected by international copyright and other intellectual property laws.</p>
-
-              <h3 className="text-foreground font-semibold">5. Limitation of Liability</h3>
-              <p>ONboard is provided "as is" without any warranties. We are not responsible for any job search outcomes, data loss, or inaccuracies generated by AI features. In no event shall ONboard be liable for any indirect or consequential damages.</p>
-
-              <h3 className="text-foreground font-semibold">6. Subscription and Payments</h3>
-              <p>Subscription fees are non-refundable unless required by law. You may cancel your subscription at any time through the Billing page.</p>
-
-              <h3 className="text-foreground font-semibold">7. Changes to Terms</h3>
-              <p>We reserve the right to modify these terms at any time. We will notify users of significant changes via the application.</p>
-
-              <h3 className="text-foreground font-semibold">8. Governing Law</h3>
-              <p>These terms shall be governed by and construed in accordance with the laws of the jurisdiction in which the owner operates.</p>
-            </>
-          )}
+      <div className="flex items-start justify-between gap-4">
+        <div>
+          <Label htmlFor="logo-toggle" className="text-sm font-medium flex items-center gap-1.5">
+            <ImageIcon className="h-3.5 w-3.5" /> {t("settings.logosToggle")}
+          </Label>
+          <p className="text-xs text-muted-foreground mt-1">{t("settings.logosToggleHint")}</p>
         </div>
-        <DialogFooter>
-          <Button onClick={() => onOpenChange(false)}>Close</Button>
-        </DialogFooter>
-      </DialogContent>
-    </Dialog>
+        <Switch id="logo-toggle" checked={thirdPartyLogos} onCheckedChange={setThirdPartyLogos} />
+      </div>
+
+      <div className="border-t border-border pt-6 space-y-2">
+        <Button variant="outline" className="w-full justify-between" onClick={exportAll} disabled={exporting}>
+          <span>{exporting ? "Preparing…" : t("settings.downloadData")}</span>
+          <Download className="h-4 w-4" />
+        </Button>
+        <p className="text-xs text-muted-foreground">{t("settings.downloadDataHint")}</p>
+        {cvFile && (
+          <Button variant="outline" className="w-full justify-between" onClick={downloadCv}>
+            <span>{t("settings.downloadCv")}</span>
+            <Download className="h-4 w-4" />
+          </Button>
+        )}
+        <Button variant="outline" className="w-full justify-between" onClick={clearChats}>
+          <span>{t("settings.clearChats")}</span>
+          <Trash2 className="h-4 w-4" />
+        </Button>
+      </div>
+    </section>
   );
 }
 
@@ -454,7 +418,7 @@ function ClearAllDialog({ open, onOpenChange }: { open: boolean; onOpenChange: (
       <DialogContent>
         <DialogHeader>
           <DialogTitle className="text-destructive">{t("settings.confirmTitle")}</DialogTitle>
-          <DialogDescription>{t("settings.confirmBody")}</DialogDescription>
+          <DialogDescription>{t("settings.clearJobsBody")}</DialogDescription>
         </DialogHeader>
         <div className="grid gap-2 py-2">
           <Label htmlFor="confirm-delete" className="text-xs">{t("settings.typeDelete")}</Label>
@@ -474,16 +438,15 @@ function ClearAllDialog({ open, onOpenChange }: { open: boolean; onOpenChange: (
             onClick={async () => {
               try {
                 await clearAllJobs();
-                clearAllChats();
                 onOpenChange(false);
                 setText("");
-                toast.success("All data cleared");
+                toast.success(t("settings.clearJobsDone"));
               } catch (e: any) {
-                toast.error(e?.message || "Failed to clear");
+                toast.error(e?.message || "Failed to delete jobs");
               }
             }}
           >
-            {t("settings.confirmBtn")}
+            {t("settings.clearJobs")}
           </Button>
         </DialogFooter>
       </DialogContent>
@@ -491,9 +454,7 @@ function ClearAllDialog({ open, onOpenChange }: { open: boolean; onOpenChange: (
   );
 }
 
-function DeleteAccountDialog({
-  open, onOpenChange, onDeleted,
-}: { open: boolean; onOpenChange: (v: boolean) => void; onDeleted: () => void | Promise<void> }) {
+function DeleteAccountDialog({ open, onOpenChange }: { open: boolean; onOpenChange: (v: boolean) => void }) {
   const { t } = useTranslation();
   const [text, setText] = useState("");
   const [busy, setBusy] = useState(false);
@@ -508,7 +469,7 @@ function DeleteAccountDialog({
         <DialogHeader>
           <DialogTitle className="text-destructive">{t("settings.deleteAccountTitle")}</DialogTitle>
           <DialogDescription>
-            {t("settings.deleteAccountConfirm")}
+            {t("settings.deleteAccountConfirm")} {t("settings.deleteAccountNote")}
           </DialogDescription>
         </DialogHeader>
         <div className="grid gap-2 py-2">
@@ -529,15 +490,14 @@ function DeleteAccountDialog({
             onClick={async () => {
               setBusy(true);
               try {
-                // Wipe local data first
-                await clearAllJobs().catch(() => {});
-                clearAllChats();
-                toast.success(t("settings.deleteAccountSuccess"));
+                // Server deletes files, rows and the auth account; only then is this browser wiped and signed out.
+                await deleteMyAccount();
                 onOpenChange(false);
                 setText("");
-                await onDeleted();
+                toast.success(t("settings.deleteAccountDone"));
               } catch (e: any) {
-                toast.error(e?.message || "Failed to delete account");
+                // Dialog stays open so the user can retry; nothing claims success.
+                toast.error(e?.message || "Account deletion did not finish. Please try again.");
               } finally {
                 setBusy(false);
               }

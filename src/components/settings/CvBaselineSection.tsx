@@ -8,6 +8,13 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { toast } from "sonner";
 
+// Must match the CV bucket's allowed_mime_types (see the privacy_hardening migration).
+const CONTENT_TYPES: Record<string, string> = {
+  pdf: "application/pdf",
+  docx: "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+  txt: "text/plain",
+};
+
 interface CvRow {
   cv_text: string | null;
   file_path: string | null;
@@ -52,15 +59,12 @@ export function CvBaselineSection() {
       if (!extracted.trim()) throw new Error("Couldn't extract text from this file");
 
       // Upload file (replace existing if any)
-      const ext = file.name.split(".").pop() || "bin";
+      const ext = (file.name.split(".").pop() || "").toLowerCase();
+      const contentType = CONTENT_TYPES[ext];
+      if (!contentType) throw new Error("Unsupported file type. Upload a PDF, DOCX, or TXT file.");
       const path = `${user.id}/cv-${Date.now()}.${ext}`;
-      const { error: upErr } = await supabase.storage.from("cvs").upload(path, file, { upsert: false });
+      const { error: upErr } = await supabase.storage.from("cvs").upload(path, file, { upsert: false, contentType });
       if (upErr) throw upErr;
-
-      // Remove previous file if present
-      if (cv?.file_path && cv.file_path !== path) {
-        await supabase.storage.from("cvs").remove([cv.file_path]);
-      }
 
       const { error: dbErr } = await supabase
         .from("cv_baseline")
@@ -68,7 +72,17 @@ export function CvBaselineSection() {
           { user_id: user.id, cv_text: extracted, file_path: path, file_name: file.name },
           { onConflict: "user_id" }
         );
-      if (dbErr) throw dbErr;
+      if (dbErr) {
+        // Don't leave an unreferenced copy of the CV behind.
+        await supabase.storage.from("cvs").remove([path]);
+        throw dbErr;
+      }
+
+      // The new file is saved; now remove the previous one.
+      if (cv?.file_path && cv.file_path !== path) {
+        const { error: rmErr } = await supabase.storage.from("cvs").remove([cv.file_path]);
+        if (rmErr) toast.warning("New CV saved, but the previous file could not be deleted. Remove it again later.");
+      }
 
       setCv({ cv_text: extracted, file_path: path, file_name: file.name, updated_at: new Date().toISOString() });
       setText(extracted);
@@ -99,7 +113,12 @@ export function CvBaselineSection() {
     if (!user) return;
     setBusy(true);
     if (cv?.file_path) {
-      await supabase.storage.from("cvs").remove([cv.file_path]);
+      const { error: rmErr } = await supabase.storage.from("cvs").remove([cv.file_path]);
+      if (rmErr) {
+        setBusy(false);
+        toast.error(`CV file could not be deleted: ${rmErr.message}`);
+        return;
+      }
     }
     const { error } = await supabase.from("cv_baseline").delete().eq("user_id", user.id);
     setBusy(false);

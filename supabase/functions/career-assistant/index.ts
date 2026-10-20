@@ -1,6 +1,8 @@
 // @ts-nocheck
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.45.0";
+import { redactContactDetails } from "../_shared/redact.ts";
+import { AI_DISABLED_BODY, isAiEnabled } from "../_shared/aiAccess.ts";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -214,6 +216,23 @@ const OPTIMIZE_TOOL = {
   },
 };
 
+const MAX_FIELD_CHARS = 20000;
+const MAX_LIST_ITEMS = 50;
+
+// Accept only plain strings/booleans/short string lists, each size-capped.
+type Payload = Record<string, string | boolean | string[]>;
+
+function capPayload(raw: unknown): Payload {
+  const out: Payload = {};
+  if (!raw || typeof raw !== "object") return out;
+  for (const [k, v] of Object.entries(raw as Record<string, unknown>)) {
+    if (typeof v === "string") out[k] = v.slice(0, MAX_FIELD_CHARS);
+    else if (typeof v === "boolean") out[k] = v;
+    else if (Array.isArray(v)) out[k] = v.filter((x) => typeof x === "string").slice(0, MAX_LIST_ITEMS).map((x) => x.slice(0, 200));
+  }
+  return out;
+}
+
 serve(async (req) => {
   if (req.method === "OPTIONS") return new Response(null, { headers: corsHeaders });
 
@@ -237,7 +256,18 @@ serve(async (req) => {
       });
     }
 
-    const { tool, payload } = await req.json();
+    const { tool, payload: rawPayload } = await req.json();
+    if (typeof tool !== "string" || !(tool in SYSTEM)) {
+      return new Response(JSON.stringify({ error: "Unknown tool" }), {
+        status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
+    }
+    if (!(await isAiEnabled(sb, userData.user.id))) {
+      return new Response(JSON.stringify(AI_DISABLED_BODY), {
+        status: 403, headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
+    }
+    const payload = capPayload(rawPayload);
     const LOVABLE_API_KEY = Deno.env.get("LOVABLE_API_KEY");
     if (!LOVABLE_API_KEY) throw new Error("LOVABLE_API_KEY is not configured");
 
@@ -257,11 +287,12 @@ serve(async (req) => {
     } else if (tool === "extract") {
       userPrompt = `${payload.url ? `Source URL: ${payload.url}\n\n` : ""}Job posting text:\n"""\n${payload.text}\n"""`;
     } else if (tool === "interview") {
-      userPrompt = `Company: ${payload.company}\nRole: ${payload.role}\n\nJob Description:\n"""\n${payload.jobDescription || payload.notes || "(no JD provided — infer from role/company)"}\n"""`;
+      // Personal job notes are deliberately not sent; only the posting itself.
+      userPrompt = `Company: ${payload.company}\nRole: ${payload.role}\n\nJob Description:\n"""\n${payload.jobDescription || "(no JD provided — infer from role/company)"}\n"""`;
     } else if (tool === "cv") {
-      userPrompt = `CV text:\n"""\n${payload.cv}\n"""`;
+      userPrompt = `CV text:\n"""\n${redactContactDetails(payload.cv ?? "")}\n"""`;
     } else if (tool === "optimize_cv") {
-      userPrompt = `Missing skills (high demand across the user's target jobs):\n${(payload.missingSkills || []).join(", ")}\n\nTop demanded skills overall (for context):\n${(payload.topSkills || []).join(", ")}\n\nUser's current CV:\n"""\n${payload.cv}\n"""`;
+      userPrompt = `Missing skills (high demand across the user's target jobs):\n${(payload.missingSkills || []).join(", ")}\n\nTop demanded skills overall (for context):\n${(payload.topSkills || []).join(", ")}\n\nUser's current CV:\n"""\n${redactContactDetails(payload.cv ?? "")}\n"""`;
     } else {
       return new Response(JSON.stringify({ error: "Unknown tool" }), {
         status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" },
@@ -308,8 +339,8 @@ serve(async (req) => {
       });
     }
     if (!resp.ok) {
-      const t = await resp.text();
-      console.error("AI gateway error", resp.status, t);
+      // Status only: gateway error bodies can echo request content.
+      console.error("AI gateway error", resp.status);
       return new Response(JSON.stringify({ error: "AI request failed" }), {
         status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" },
       });
@@ -342,8 +373,8 @@ serve(async (req) => {
       headers: { ...corsHeaders, "Content-Type": "application/json" },
     });
   } catch (e) {
-    console.error("career-assistant error", e);
-    return new Response(JSON.stringify({ error: e instanceof Error ? e.message : "Unknown error" }), {
+    console.error("career-assistant error", e instanceof Error ? e.name : "unknown");
+    return new Response(JSON.stringify({ error: "AI request failed" }), {
       status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" },
     });
   }

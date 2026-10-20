@@ -20,6 +20,7 @@ import { extractTextFromFile } from "@/lib/fileExtract";
 import { useJobs } from "@/lib/jobsStore";
 import { cn } from "@/lib/utils";
 import { usePlan } from "@/lib/usePlan";
+import { useAiAccess } from "@/lib/aiAccess";
 
 type Tool = "tone" | "translate" | "polish" | "interview" | "cv";
 
@@ -110,6 +111,7 @@ function scoreTone(s: number): { label: string; ring: string; bg: string; fg: st
 
 export function ToneAnalyzer() {
   const { t } = useTranslation();
+  const { requestAi } = useAiAccess();
   const [company, setCompany] = useState("");
   const [draft, setDraft] = useState("");
   const [result, setResult] = useState<ToneResult | null>(null);
@@ -117,6 +119,7 @@ export function ToneAnalyzer() {
 
   const run = async () => {
     if (!company.trim() || !draft.trim()) return toast.error("Add the company and a draft.");
+    if (!(await requestAi("tone"))) return;
     setLoading(true); setResult(null);
     try {
       const r = await runStructured<ToneResult>("tone", { company, draft });
@@ -236,6 +239,7 @@ interface TranslateResult {
 
 export function SkillTranslator() {
   const { t } = useTranslation();
+  const { requestAi } = useAiAccess();
   const [experience, setExperience] = useState("");
   const [jobDescription, setJobDescription] = useState("");
   const [result, setResult] = useState<TranslateResult | null>(null);
@@ -243,6 +247,7 @@ export function SkillTranslator() {
 
   const run = async () => {
     if (!experience.trim() || !jobDescription.trim()) return toast.error("Add both fields.");
+    if (!(await requestAi("translate"))) return;
     setLoading(true); setResult(null);
     try {
       const r = await runStructured<TranslateResult>("translate", { experience, jobDescription });
@@ -338,6 +343,7 @@ export function SkillTranslator() {
 
 export function PolishTool() {
   const { t } = useTranslation();
+  const { requestAi } = useAiAccess();
   const [text, setText] = useState("");
   const [language, setLanguage] = useState("English");
   const [businessGerman, setBusinessGerman] = useState(false);
@@ -346,6 +352,7 @@ export function PolishTool() {
 
   const run = async () => {
     if (!text.trim()) return toast.error("Paste some text first.");
+    if (!(await requestAi("polish"))) return;
     setLoading(true); setResult(null);
     try {
       const r = await runStructured<PolishResult>("polish", { text, language, businessGerman });
@@ -438,6 +445,7 @@ export function PolishTool() {
 
 export function InterviewPrep() {
   const { t } = useTranslation();
+  const { requestAi } = useAiAccess();
   const { jobs } = useJobs();
   const interviewJobs = useMemo(() => jobs.filter((j) => j.status === "interviewing"), [jobs]);
   const [selectedId, setSelectedId] = useState<string>("");
@@ -447,11 +455,12 @@ export function InterviewPrep() {
   const run = async () => {
     const job = interviewJobs.find((j) => j.id === selectedId);
     if (!job) return toast.error("Select a job first.");
+    if (!(await requestAi("interview"))) return;
     setLoading(true); setResult(null);
     try {
       const r = await runStructured<InterviewResult>("interview", {
         company: job.company, role: job.role,
-        jobDescription: job.jobDescription, notes: job.notes,
+        jobDescription: job.jobDescription,
       });
       if (typeof r === "string") throw new Error("Unexpected response format");
       setResult(r);
@@ -645,6 +654,7 @@ function bumpScanCount() {
 
 export function CvAnalyzer() {
   const { t } = useTranslation();
+  const { requestAi } = useAiAccess();
   const [text, setText] = useState("");
   const [loading, setLoading] = useState(false);
   const [aiResult, setAiResult] = useState<CvAiResult | null>(null);
@@ -666,6 +676,7 @@ export function CvAnalyzer() {
   const run = async () => {
     if (!text.trim()) return toast.error("Paste or upload your CV first.");
     if (limitReached) return toast.error(t("assistant.cv.limitReached"));
+    if (!(await requestAi("cv_review"))) return;
     setLoading(true); setAiResult(null);
     try {
       const r = await runStructured<CvAiResult>("cv", { cv: text });

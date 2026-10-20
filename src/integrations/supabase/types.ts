@@ -193,6 +193,60 @@ export type Database = {
           },
         ]
       }
+      privacy_events: {
+        Row: {
+          created_at: string
+          event: string
+          id: string
+          notice_version: string | null
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          event: string
+          id?: string
+          notice_version?: string | null
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          event?: string
+          id?: string
+          notice_version?: string | null
+          user_id?: string
+        }
+        Relationships: []
+      }
+      privacy_settings: {
+        Row: {
+          ai_disabled_at: string | null
+          ai_enabled: boolean
+          ai_enabled_at: string | null
+          ai_notice_version: string | null
+          created_at: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          ai_disabled_at?: string | null
+          ai_enabled?: boolean
+          ai_enabled_at?: string | null
+          ai_notice_version?: string | null
+          created_at?: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          ai_disabled_at?: string | null
+          ai_enabled?: boolean
+          ai_enabled_at?: string | null
+          ai_notice_version?: string | null
+          created_at?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       profiles: {
         Row: {
           avatar_url: string | null
@@ -252,6 +306,14 @@ export type Database = {
           _user_id: string
         }
         Returns: boolean
+      }
+      inactive_user_ids: {
+        Args: { _inactive_for: unknown }
+        Returns: { last_activity_at: string; user_id: string }[]
+      }
+      purge_user_data: {
+        Args: { _user_id: string }
+        Returns: Json
       }
     }
     Enums: {

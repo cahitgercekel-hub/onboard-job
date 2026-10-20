@@ -1,6 +1,8 @@
 // @ts-nocheck
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.45.0";
+import { redactContactDetails } from "../_shared/redact.ts";
+import { AI_DISABLED_BODY, isAiEnabled } from "../_shared/aiAccess.ts";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -19,13 +21,26 @@ Style:
 - For mock interviews: ask ONE question, wait, then critique the answer using STAR.
 - Never invent experience. Reframe what's there.`;
 
+const MAX_MESSAGES = 24;
+const MAX_MESSAGE_CHARS = 6000;
+
+// Only plain user/assistant turns are forwarded (no injected system prompts), newest last, size-capped.
+function sanitizeMessages(raw: unknown): { role: "user" | "assistant"; content: string }[] | null {
+  if (!Array.isArray(raw)) return null;
+  return raw
+    .filter((m) => m && (m.role === "user" || m.role === "assistant") && typeof m.content === "string")
+    .slice(-MAX_MESSAGES)
+    .map((m) => ({ role: m.role, content: m.content.slice(0, MAX_MESSAGE_CHARS) }));
+}
+
 serve(async (req) => {
   if (req.method === "OPTIONS") return new Response(null, { headers: corsHeaders });
 
   try {
-    const { messages, jobContext } = await req.json();
-    if (!Array.isArray(messages)) {
-      return new Response(JSON.stringify({ error: "messages must be an array" }), {
+    const { messages: rawMessages, jobContext, includeCv } = await req.json();
+    const messages = sanitizeMessages(rawMessages);
+    if (!messages || messages.length === 0) {
+      return new Response(JSON.stringify({ error: "messages must be a non-empty array" }), {
         status: 400,
         headers: { ...corsHeaders, "Content-Type": "application/json" },
       });
@@ -53,24 +68,34 @@ serve(async (req) => {
       });
     }
 
-    // Pull baseline CV using the caller's JWT so RLS applies.
+    if (!(await isAiEnabled(sb, userData.user.id))) {
+      return new Response(JSON.stringify(AI_DISABLED_BODY), {
+        status: 403, headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
+    }
+
+    // The CV is only shared when the user switched "Share my CV" on for this chat.
+    // Read with the caller's JWT so RLS applies; contact details are stripped before sending.
     let cvText = "";
-    try {
-      const { data } = await sb.from("cv_baseline").select("cv_text").maybeSingle();
-      if (data?.cv_text) cvText = String(data.cv_text).slice(0, 8000);
-    } catch (e) {
-      console.warn("cv fetch failed", e);
+    if (includeCv === true) {
+      const { data, error } = await sb.from("cv_baseline").select("cv_text").maybeSingle();
+      if (error) console.warn("cv fetch failed", error.code);
+      if (data?.cv_text) cvText = redactContactDetails(String(data.cv_text)).slice(0, 8000);
     }
 
     let systemPrompt = BASE_PERSONA;
     if (cvText) {
       systemPrompt += `\n\n--- USER'S BASELINE CV ---\n${cvText}\n--- END CV ---`;
-    } else {
+    } else if (includeCv === true) {
       systemPrompt += `\n\nNote: the user has not uploaded a baseline CV yet. If a question requires CV details, ask them to add one in Settings.`;
+    } else {
+      systemPrompt += `\n\nNote: the user has chosen not to share their CV in this chat. If a question requires CV details, ask for the relevant details or suggest turning on "Share my CV".`;
     }
     if (jobContext && typeof jobContext === "object") {
       const { company, role, jobDescription, fitness_score } = jobContext;
-      systemPrompt += `\n\n--- ATTACHED JOB CONTEXT ---\nCompany: ${company || "?"}\nRole: ${role || "?"}\nMatch score: ${fitness_score ?? "n/a"}\nJob description:\n${(jobDescription || "").slice(0, 4000)}\n--- END JOB ---`;
+      const str = (v: unknown, max: number) => (typeof v === "string" ? v.slice(0, max) : "");
+      const score = Number.isFinite(Number(fitness_score)) ? Number(fitness_score) : "n/a";
+      systemPrompt += `\n\n--- ATTACHED JOB CONTEXT ---\nCompany: ${str(company, 200) || "?"}\nRole: ${str(role, 200) || "?"}\nMatch score: ${score}\nJob description:\n${str(jobDescription, 4000)}\n--- END JOB ---`;
     }
 
     const response = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
@@ -99,8 +124,8 @@ serve(async (req) => {
       );
     }
     if (!response.ok) {
-      const t = await response.text();
-      console.error("AI gateway error:", response.status, t);
+      // Status only: gateway error bodies can echo request content (CV, messages).
+      console.error("AI gateway error:", response.status);
       return new Response(JSON.stringify({ error: "AI gateway error" }), {
         status: 500,
         headers: { ...corsHeaders, "Content-Type": "application/json" },
@@ -111,8 +136,8 @@ serve(async (req) => {
       headers: { ...corsHeaders, "Content-Type": "text/event-stream" },
     });
   } catch (e) {
-    console.error("career-chat error", e);
-    return new Response(JSON.stringify({ error: e instanceof Error ? e.message : "Unknown error" }), {
+    console.error("career-chat error", e instanceof Error ? e.name : "unknown");
+    return new Response(JSON.stringify({ error: "Chat request failed" }), {
       status: 500,
       headers: { ...corsHeaders, "Content-Type": "application/json" },
     });

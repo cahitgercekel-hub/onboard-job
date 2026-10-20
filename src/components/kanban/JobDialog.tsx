@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { Sparkles, Loader2, Mail } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
+import { useAiAccess } from "@/lib/aiAccess";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -39,6 +40,7 @@ interface Props {
 export function JobDialog({ open, onOpenChange, initialStatus = "saved", job, onSave, onDelete, onArchive }: Props) {
   const { t } = useTranslation();
   const { versions } = useCvVersions();
+  const { requestAi } = useAiAccess();
   const [company, setCompany] = useState(job?.company ?? "");
   const [role, setRole] = useState(job?.role ?? "");
   const [url, setUrl] = useState(job?.url ?? "");
@@ -73,6 +75,7 @@ export function JobDialog({ open, onOpenChange, initialStatus = "saved", job, on
   const calculateFitness = async () => {
     if (!job?.id) return toast.error("Save the job first, then calculate fitness.");
     if (!jobDescription.trim()) return toast.error("Add a job description first.");
+    if (!(await requestAi("fitness"))) return;
     setScoring(true);
     try {
       const { data, error } = await supabase.functions.invoke("calculate-fitness", { body: { jobId: job.id } });

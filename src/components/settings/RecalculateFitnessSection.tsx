@@ -3,16 +3,19 @@ import { Sparkles, Loader2 } from "lucide-react";
 import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
 import { supabase } from "@/integrations/supabase/client";
+import { useAiAccess } from "@/lib/aiAccess";
 import { useAuth } from "@/lib/auth";
 import { toast } from "sonner";
 
 export function RecalculateFitnessSection() {
   const { user } = useAuth();
+  const { requestAi } = useAiAccess();
   const [running, setRunning] = useState(false);
   const [progress, setProgress] = useState<{ done: number; total: number } | null>(null);
 
   async function handleRecalculate() {
     if (!user) return;
+    if (!(await requestAi("fitness_bulk"))) return;
     setRunning(true);
     setProgress(null);
     try {

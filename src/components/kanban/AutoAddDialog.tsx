@@ -7,6 +7,7 @@ import { Button } from "@/components/ui/button";
 import { Sparkles, Loader2 } from "lucide-react";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
+import { useAiAccess } from "@/lib/aiAccess";
 import {
   APPLICATION_TYPES,
   INDUSTRIES,
@@ -24,6 +25,7 @@ interface Props {
 }
 
 export function AutoAddDialog({ open, onOpenChange, onExtracted }: Props) {
+  const { requestAi } = useAiAccess();
   const [text, setText] = useState("");
   const [url, setUrl] = useState("");
   const [loading, setLoading] = useState(false);
@@ -32,6 +34,7 @@ export function AutoAddDialog({ open, onOpenChange, onExtracted }: Props) {
     if (!text.trim() || text.trim().length < 30) {
       return toast.error("Paste a job description (at least a few sentences).");
     }
+    if (!(await requestAi("extract"))) return;
     setLoading(true);
     try {
       const { data, error } = await supabase.functions.invoke("career-assistant", {

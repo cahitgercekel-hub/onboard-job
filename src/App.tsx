@@ -4,6 +4,7 @@ import { Toaster as Sonner } from "@/components/ui/sonner";
 import { Toaster } from "@/components/ui/toaster";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { AuthProvider } from "@/lib/auth";
+import { AiAccessProvider } from "@/lib/aiAccess";
 import ProtectedRoute from "@/components/ProtectedRoute";
 import AppLayout from "./components/AppLayout";
 import Tracker from "./pages/Tracker";
@@ -20,6 +21,9 @@ import Billing from "./pages/Billing";
 import Auth from "./pages/Auth";
 import ResetPassword from "./pages/ResetPassword";
 import NotFound from "./pages/NotFound.tsx";
+import Privacy from "./pages/legal/Privacy";
+import Terms from "./pages/legal/Terms";
+import Imprint from "./pages/legal/Imprint";
 
 const queryClient = new QueryClient();
 
@@ -30,9 +34,14 @@ const App = () => (
       <Sonner />
       <BrowserRouter>
         <AuthProvider>
+          <AiAccessProvider>
           <Routes>
             <Route path="/auth" element={<Auth />} />
             <Route path="/reset-password" element={<ResetPassword />} />
+            {/* Public: reachable without signing in */}
+            <Route path="/privacy" element={<Privacy />} />
+            <Route path="/terms" element={<Terms />} />
+            <Route path="/imprint" element={<Imprint />} />
             <Route
               element={
                 <ProtectedRoute>
@@ -54,6 +63,7 @@ const App = () => (
             </Route>
             <Route path="*" element={<NotFound />} />
           </Routes>
+          </AiAccessProvider>
         </AuthProvider>
       </BrowserRouter>
     </TooltipProvider>

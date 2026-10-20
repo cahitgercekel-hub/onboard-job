@@ -23,6 +23,7 @@ import { PremiumRail } from "@/components/assistant/PremiumRail";
 import { usePlan } from "@/lib/usePlan";
 import { useAuth } from "@/lib/auth";
 import { loadChatThread, saveChatThread, clearChatThread, type ChatMsg } from "@/lib/chatStore";
+import { useAiAccess } from "@/lib/aiAccess";
 
 type Msg = ChatMsg;
 
@@ -36,6 +37,7 @@ export default function ChatAssistant() {
   const { user } = useAuth();
   const { plan } = usePlan();
   const isPro = plan !== "free";
+  const { requestAi } = useAiAccess();
 
   const PRIMARY_QUICK = useMemo(() => [
     { label: t("assistant.chat.quick.tailorCv"), icon: FileText, prompt: "Tailor my baseline CV to the attached job. Show the rewritten summary and 3 most-improved bullet points." },
@@ -71,6 +73,22 @@ export default function ChatAssistant() {
     }
   });
   const [hasCv, setHasCv] = useState<boolean | null>(null);
+  // The baseline CV is only sent to the AI while this is on. Off by default; remembered per user on this device.
+  const SHARE_CV_KEY = `jat.chat.shareCv.${user?.id || "anon"}`;
+  const [shareCv, setShareCv] = useState<boolean>(() => {
+    try {
+      return localStorage.getItem(SHARE_CV_KEY) === "1";
+    } catch {
+      return false;
+    }
+  });
+  useEffect(() => {
+    try {
+      localStorage.setItem(SHARE_CV_KEY, shareCv ? "1" : "0");
+    } catch {
+      // ignore
+    }
+  }, [shareCv, SHARE_CV_KEY]);
   const [moreOpen, setMoreOpen] = useState(false);
   const [hydrated, setHydrated] = useState(false);
   const [railCollapsed, setRailCollapsed] = useState<boolean>(() => {
@@ -209,6 +227,7 @@ export default function ChatAssistant() {
   const send = async (raw: string) => {
     const text = raw.trim();
     if (!text || isStreaming) return;
+    if (!(await requestAi("chat"))) return;
     const userMsg: Msg = { role: "user", content: text };
     const next = [...messages, userMsg];
     setMessages(next);
@@ -251,7 +270,7 @@ export default function ChatAssistant() {
           "Content-Type": "application/json",
           ...(token ? { Authorization: `Bearer ${token}` } : {}),
         },
-        body: JSON.stringify({ messages: next, jobContext }),
+        body: JSON.stringify({ messages: next, jobContext, includeCv: shareCv }),
       });
 
       if (!resp.ok || !resp.body) {
@@ -401,6 +420,15 @@ export default function ChatAssistant() {
                         </SelectContent>
                       </Select>
                     </div>
+                    <div className="flex items-start justify-between gap-3 border-t border-border pt-3">
+                      <div>
+                        <label htmlFor="share-cv" className="text-xs font-medium">Share my CV</label>
+                        <p className="text-[11px] text-muted-foreground leading-snug">
+                          Sends your baseline CV (without email, phone and links) with each message.
+                        </p>
+                      </div>
+                      <Switch id="share-cv" checked={shareCv} onCheckedChange={setShareCv} />
+                    </div>
                     {messages.length > 0 && (
                       <Button variant="ghost" size="sm" onClick={reset} className="w-full h-8 text-xs">
                         Start new chat
@@ -474,9 +502,14 @@ export default function ChatAssistant() {
             </div>
           )}
 
-          {hasCv === false && (
+          {hasCv === false && shareCv && (
             <div className="text-xs px-4 py-2 bg-warning/10 border-b border-warning/30 text-foreground">
               No baseline CV found. Add one in Settings so the agent knows your background.
+            </div>
+          )}
+          {hasCv && !shareCv && (
+            <div className="text-xs px-4 py-2 bg-muted/50 border-b border-border text-muted-foreground">
+              Your CV is not shared with the assistant. Turn on "Share my CV" in the job menu above for CV-based answers.
             </div>
           )}
 

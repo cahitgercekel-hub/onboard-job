@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { useNavigate, useLocation } from "react-router-dom";
+import { useNavigate, useLocation, Link } from "react-router-dom";
 import { useTranslation } from "react-i18next";
 import { z } from "zod";
 import { supabase } from "@/integrations/supabase/client";
@@ -11,6 +11,7 @@ import { Label } from "@/components/ui/label";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import { PasswordStrength, getPasswordScore } from "@/components/PasswordStrength";
 import { Logo } from "@/components/Logo";
+import { LegalFooterLinks } from "@/pages/legal/LegalLayout";
 import { toast } from "sonner";
 
 export default function AuthPage() {
@@ -49,7 +50,7 @@ export default function AuthPage() {
       } else if (tab === "signup") {
         if (password.length < 8) throw new Error("Password must be at least 8 characters");
         if (getPasswordScore(password) < 2) throw new Error("Please choose a stronger password");
-        const { error } = await supabase.auth.signUp({
+        const { data, error } = await supabase.auth.signUp({
           email: emailParsed.data,
           password,
           options: {
@@ -58,7 +59,9 @@ export default function AuthPage() {
           },
         });
         if (error) throw error;
-        toast.success("Account created — you're signed in!");
+        // With email confirmation on, there is no session yet — don't claim the user is signed in.
+        if (data.session) toast.success("Account created — you're signed in!");
+        else toast.success("Check your inbox and confirm your email address to finish signing up.");
       } else {
         if (!password) throw new Error("Password is required");
         const { error } = await supabase.auth.signInWithPassword({
@@ -100,9 +103,13 @@ export default function AuthPage() {
           </div>
         </div>
 
-        <Button type="button" variant="outline" className="w-full mb-4" disabled={busy} onClick={signInWithGoogle}>
+        <Button type="button" variant="outline" className="w-full mb-2" disabled={busy} onClick={signInWithGoogle}>
           <GoogleIcon /> {t("auth.googleBtn")}
         </Button>
+        <p className="mb-4 text-[11px] leading-snug text-muted-foreground text-center">
+          Google shares only your name, email address and profile picture with ONboard — no access to Gmail, Drive
+          or other Google data.
+        </p>
 
         <div className="relative my-4">
           <div className="absolute inset-0 flex items-center"><span className="w-full border-t border-border" /></div>
@@ -153,9 +160,15 @@ export default function AuthPage() {
               <Button type="submit" disabled={busy} className="w-full">
                 {busy ? t("auth.creatingAccount") : t("auth.createAccount")}
               </Button>
+              <p className="text-[11px] leading-snug text-muted-foreground text-center">
+                By creating an account you accept the <Link to="/terms" className="underline underline-offset-2">Terms</Link>.
+                How we handle your data: <Link to="/privacy" className="underline underline-offset-2">Privacy Notice</Link>.
+              </p>
             </form>
           </TabsContent>
         </Tabs>
+
+        <LegalFooterLinks className="mt-6 border-t border-border pt-4" />
       </div>
     </div>
   );
