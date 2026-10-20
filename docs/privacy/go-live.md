@@ -1,6 +1,6 @@
 # Canlıya geçiş: migration, ayarlar, manuel test
 
-Bu dal (`privacy/beta-gdpr-readiness`) canlıya **otomatik uygulanmadı**. Canlı veritabanına yazma yapılmadı.
+**Durum (2026-10-20): canlıda.** Migration canlı veritabanına uygulandı ve doğrulandı (veri kaybı yok: 122 iş, 5 kullanıcı aynen). Kod `main`'de (`1ce95cb` + Lovable'ın otomatik commit'leri). 7 edge function deploy edildi, site yeniden yayınlandı. Test ortamında deneme yapılmadan, operatörün kararıyla doğrudan canlıya alındı. §7'deki manuel testler kendi hesabınızla (hesap silme hariç) hâlâ yapılmalı.
 
 ## 0. Sıra neden önemli
 
@@ -44,7 +44,7 @@ Not: Mevcut 5 kullanıcı için AI başlangıçta **kapalı**. İlk AI kullanım
 ## 3. Kodu yayınla
 
 1. Dalı incele, `main`'e birleştir, GitHub'a gönder (Lovable GitHub ile senkron).
-2. **More → Cloud → Edge Functions**: `delete-account` ve `retention-cleanup` listede mi, diğer fonksiyonlar yeniden deploy edildi mi? (`_shared/` klasöründen import kullanılıyor; deploy hatası varsa loglarda görünür.)
+2. **Edge function'lar GitHub push'uyla otomatik deploy edilmiyor** (2026-10-20'de doğrulandı: push'tan 8 dakika sonra yeni fonksiyonlar hâlâ 404 veriyordu). Lovable sohbetine şunu yazın: *"Deploy all edge functions in supabase/functions exactly as they are. Do not edit any files, run SQL or change secrets."* Sonra kontrol edin: kimlik doğrulamasız bir POST, `delete-account` için 401, `retention-cleanup` için 503, `discover-jobs` için 410 dönmeli. Kod yayınlanmadan **önce** fonksiyonlar deploy edilmiş olmalı; aksi hâlde yeni arayüz eski fonksiyonlarla çalışır (örneğin eski `career-chat` CV'yi her mesajda gönderir).
 3. Lovable'da **Publish / Update**.
 
 ## 4. Hesap ayarları (koddan yapılamaz)

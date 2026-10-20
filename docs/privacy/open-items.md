@@ -35,8 +35,8 @@ Durum (2026-10-20): **Yeni kayıtlar sunucuda kapatıldı** (Cloud → Users →
 1. `src/lib/legal.ts` boş alanları dolu değil → sayfalar "Draft — not final" gösteriyor.
 2. Lovable ile DPA yok (Free plan; Lovable yalnızca Business'ta veriyor).
 3. ~~Lovable visitor analytics ve olay/replay SDK'sı~~ → kapatıldı ve doğrulandı (2026-10-20). Yeniden yayınladıktan sonra tekrar kontrol et.
-4. Migration canlıya uygulanmadı; yeni edge function'lar deploy edilmedi.
-5. Manuel uçtan uca test (`go-live.md` §7) gerçek test hesaplarıyla yapılmadı.
+4. ~~Migration ve edge function'lar~~ → 2026-10-20'de canlıya alındı ve doğrulandı.
+5. Manuel uçtan uca test (`go-live.md` §7) yapılmadı. Kendi hesabınızla yapılabilecekler: AI açma/kapama, sohbette Share my CV, veri indirme, logo ayarı. Hesap silme ancak ikinci bir test hesabıyla test edilmeli; yeni kayıtlar kapalı olduğu için bu hesabı Cloud → Users → Add user ile oluşturmanız gerekir.
 6. Hukuki inceleme (B bölümü) yapılmadı.
 
 ## D. Bu çalışmada test edilemeyenler
