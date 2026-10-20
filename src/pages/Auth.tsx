@@ -9,7 +9,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
-import { PasswordStrength, getPasswordScore } from "@/components/PasswordStrength";
+import { getPasswordScore } from "@/components/PasswordStrength";
 import { Logo } from "@/components/Logo";
 import { LegalFooterLinks } from "@/pages/legal/LegalLayout";
 import { toast } from "sonner";
@@ -149,22 +149,20 @@ export default function AuthPage() {
           </TabsContent>
 
           <TabsContent value="signup" className="mt-0">
-            <form onSubmit={handleSubmit} className="space-y-3">
-              <Field id="signup-name" label={t("auth.displayNameLabel")} type="text" value={displayName} onChange={setDisplayName} />
-              <Field id="signup-email" label={t("auth.emailLabel")} type="email" value={email} onChange={setEmail} />
-              <div className="grid gap-1.5">
-                <Label htmlFor="signup-password">{t("auth.passwordLabel")}</Label>
-                <Input id="signup-password" type="password" value={password} onChange={(e) => setPassword(e.target.value)} required />
-                <PasswordStrength password={password} />
-              </div>
-              <Button type="submit" disabled={busy} className="w-full">
-                {busy ? t("auth.creatingAccount") : t("auth.createAccount")}
-              </Button>
-              <p className="text-[11px] leading-snug text-muted-foreground text-center">
-                By creating an account you accept the <Link to="/terms" className="underline underline-offset-2">Terms</Link>.
-                How we handle your data: <Link to="/privacy" className="underline underline-offset-2">Privacy Notice</Link>.
+            {/* New sign-ups are disabled on the server (Lovable Cloud → Users → Settings → Disable sign-up).
+                Existing accounts can still log in. Restore the sign-up form (with its Terms/Privacy note, see commit 5d355ad) when the beta opens. */}
+            <div className="space-y-2 rounded-md border border-border bg-muted/40 p-4 text-sm">
+              <p className="font-medium text-foreground">ONboard is in a closed beta.</p>
+              <p className="text-muted-foreground">
+                New sign-ups are not open yet. If you'd like to try it, write to{" "}
+                <a href="mailto:info@cahitgercekel.com?subject=ONboard%20beta" className="underline underline-offset-2">
+                  info@cahitgercekel.com
+                </a>.
               </p>
-            </form>
+              <p className="text-xs text-muted-foreground">
+                How ONboard handles data: <Link to="/privacy" className="underline underline-offset-2">Privacy Notice</Link>.
+              </p>
+            </div>
           </TabsContent>
         </Tabs>
 
