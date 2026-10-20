@@ -3,7 +3,7 @@ import {
   Radar, RadarChart, PolarGrid, PolarAngleAxis, PolarRadiusAxis, ResponsiveContainer, Legend, Tooltip,
 } from "recharts";
 import { Sparkles, Target, Loader2, AlertCircle } from "lucide-react";
-import { supabase } from "@/integrations/supabase/client";
+import { supabase } from "@/lib/db";
 import { useAiAccess } from "@/lib/aiAccess";
 import { useAuth } from "@/lib/auth";
 import { Button } from "@/components/ui/button";

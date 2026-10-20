@@ -1,10 +1,11 @@
 import { createContext, useCallback, useContext, useEffect, useRef, useState, type ReactNode } from "react";
 import { Sparkles } from "lucide-react";
 import { toast } from "sonner";
-import { supabase } from "@/integrations/supabase/client";
+import { supabase } from "@/lib/db";
 import { useAuth } from "@/lib/auth";
 import { AI_NOTICE_VERSION } from "@/lib/legal";
 import { AI_FEATURES, type AiFeature } from "@/lib/aiFeatures";
+import { DEMO_AI_MESSAGE, isDemo } from "@/lib/demo/demoMode";
 import { Button } from "@/components/ui/button";
 import {
   Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle,
@@ -58,6 +59,10 @@ export function AiAccessProvider({ children }: { children: ReactNode }) {
   useEffect(() => {
     setEnabledState(null);
     if (!user) return;
+    if (isDemo()) {
+      setEnabledState(false);
+      return;
+    }
     let cancelled = false;
     supabase
       .from("privacy_settings")
@@ -90,6 +95,10 @@ export function AiAccessProvider({ children }: { children: ReactNode }) {
 
   const requestAi = useCallback(async (feature: AiFeature) => {
     if (!user) return false;
+    if (isDemo()) {
+      toast.info(DEMO_AI_MESSAGE);
+      return false;
+    }
     if (aiEnabled && readAcks(user.id).includes(feature)) return true;
     resolver.current?.(false);
     return new Promise<boolean>((resolve) => {

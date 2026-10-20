@@ -18,12 +18,13 @@ import {
 import { usePrefs, type Theme, type DateFormat } from "@/lib/preferences";
 import { LANGUAGES } from "@/lib/i18n";
 import { downloadJobsCsv, clearAllJobs } from "@/lib/jobsStore";
-import { supabase } from "@/integrations/supabase/client";
+import { supabase } from "@/lib/db";
 import { useAiAccess } from "@/lib/aiAccess";
 import { LEGAL } from "@/lib/legal";
 import { buildDataExport, downloadJson, type ExportClient } from "@/lib/dataExport";
 import { clearLocalChats } from "@/lib/localData";
 import { deleteMyAccount } from "@/lib/accountDeletion";
+import { DEMO_AI_MESSAGE, isDemo } from "@/lib/demo/demoMode";
 import { ImportCsvDialog } from "@/components/settings/ImportCsvDialog";
 import { CvBaselineSection } from "@/components/settings/CvBaselineSection";
 import { CvVersionsSection } from "@/components/settings/CvVersionsSection";
@@ -87,6 +88,7 @@ export default function Settings() {
             </div>
           </div>
 
+          {!isDemo() && (
           <div className="mt-6 rounded-lg border border-destructive/30 bg-destructive/5 p-4">
             <h3 className="text-sm font-semibold text-destructive mb-1">{t("settings.danger")}</h3>
             <p className="text-sm font-medium text-foreground">{t("settings.deleteAccount")}</p>
@@ -102,6 +104,7 @@ export default function Settings() {
               <Trash2 className="h-4 w-4" /> {t("settings.deleteAccount")}
             </Button>
           </div>
+          )}
 
           {user?.email && (
             <div className="mt-6 pt-4 border-t border-border flex items-center justify-between gap-3">
@@ -207,7 +210,7 @@ export default function Settings() {
         <section className="surface-card p-6 space-y-6">
           <CardHeader icon={Shield} title={t("settings.dataTitle")} />
 
-          <ApiTokensSection />
+          {!isDemo() && <ApiTokensSection />}
 
           <div className="border-t border-border pt-6">
             <h3 className="text-sm font-semibold text-foreground mb-3">{t("settings.exportImportTitle")}</h3>
@@ -368,12 +371,15 @@ function PrivacySection() {
             <Sparkles className="h-3.5 w-3.5" /> {t("settings.aiToggle")}
           </Label>
           <p className="text-xs text-muted-foreground mt-1">
-            {t("settings.aiToggleHint")} <Link to="/privacy" className="underline underline-offset-2">{t("settings.privacyPolicy")}</Link>
+            {isDemo()
+              ? DEMO_AI_MESSAGE
+              : <>{t("settings.aiToggleHint")} <Link to="/privacy" className="underline underline-offset-2">{t("settings.privacyPolicy")}</Link></>}
           </p>
         </div>
-        <Switch id="ai-toggle" checked={aiEnabled === true} disabled={aiEnabled === null || savingAi} onCheckedChange={toggleAi} />
+        <Switch id="ai-toggle" checked={aiEnabled === true} disabled={isDemo() || aiEnabled === null || savingAi} onCheckedChange={toggleAi} />
       </div>
 
+      {!isDemo() && (
       <div className="flex items-start justify-between gap-4">
         <div>
           <Label htmlFor="logo-toggle" className="text-sm font-medium flex items-center gap-1.5">
@@ -383,6 +389,7 @@ function PrivacySection() {
         </div>
         <Switch id="logo-toggle" checked={thirdPartyLogos} onCheckedChange={setThirdPartyLogos} />
       </div>
+      )}
 
       <div className="border-t border-border pt-6 space-y-2">
         <Button variant="outline" className="w-full justify-between" onClick={exportAll} disabled={exporting}>

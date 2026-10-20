@@ -10,6 +10,7 @@ import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/comp
 import { Logo } from "@/components/Logo";
 import { PlanBadge } from "@/components/PlanBadge";
 import { usePlan } from "@/lib/usePlan";
+import { exitDemo, isDemo } from "@/lib/demo/demoMode";
 
 export default function AppLayout() {
   const { t } = useTranslation();
@@ -174,6 +175,17 @@ export default function AppLayout() {
         </aside>
 
         <div className="flex-1 flex flex-col min-w-0 transition-all duration-300 ease-in-out">
+          {isDemo() && (
+            <div role="status" className="flex flex-wrap items-center justify-between gap-x-3 gap-y-1 border-b border-accent/30 bg-accent/10 px-4 py-2 text-xs text-foreground">
+              <span>
+                <strong>Demo mode</strong> — sample data that stays in this browser tab and disappears when you close it.
+                Nothing is sent to our servers.
+              </span>
+              <button type="button" onClick={() => exitDemo()} className="font-medium underline underline-offset-2">
+                Exit demo
+              </button>
+            </div>
+          )}
           {/* Mobile top header */}
           <header className="md:hidden flex items-center border-b border-border px-4 h-12 bg-card">
             <div className="flex items-center gap-2">

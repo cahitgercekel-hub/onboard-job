@@ -15,7 +15,7 @@ import { Badge } from "@/components/ui/badge";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Progress } from "@/components/ui/progress";
 import { toast } from "sonner";
-import { supabase } from "@/integrations/supabase/client";
+import { supabase } from "@/lib/db";
 import { extractTextFromFile } from "@/lib/fileExtract";
 import { useJobs } from "@/lib/jobsStore";
 import { cn } from "@/lib/utils";

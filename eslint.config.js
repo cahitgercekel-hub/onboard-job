@@ -23,4 +23,15 @@ export default tseslint.config(
       "@typescript-eslint/no-unused-vars": "off",
     },
   },
+  {
+    // App code must use "@/lib/db" so demo mode can swap in the in-memory client.
+    files: ["src/**/*.{ts,tsx}"],
+    ignores: ["src/lib/db.ts", "src/integrations/**", "src/test/**"],
+    rules: {
+      "no-restricted-imports": ["error", {
+        paths: [{ name: "@/integrations/supabase/client", message: "Import { supabase } from \"@/lib/db\" instead (demo mode)." }],
+        patterns: [{ group: ["**/integrations/supabase/client"], message: "Import { supabase } from \"@/lib/db\" instead (demo mode)." }],
+      }],
+    },
+  },
 );

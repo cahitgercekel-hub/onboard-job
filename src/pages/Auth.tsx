@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 import { useNavigate, useLocation, Link } from "react-router-dom";
 import { useTranslation } from "react-i18next";
 import { z } from "zod";
-import { supabase } from "@/integrations/supabase/client";
+import { supabase } from "@/lib/db";
 import { lovable } from "@/integrations/lovable/index";
 import { useAuth } from "@/lib/auth";
 import { Button } from "@/components/ui/button";
@@ -12,6 +12,7 @@ import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import { getPasswordScore } from "@/components/PasswordStrength";
 import { Logo } from "@/components/Logo";
 import { LegalFooterLinks } from "@/pages/legal/LegalLayout";
+import { enterDemo } from "@/lib/demo/demoMode";
 import { toast } from "sonner";
 
 export default function AuthPage() {
@@ -101,6 +102,21 @@ export default function AuthPage() {
             <h1 className="text-lg font-semibold">{t("app.name")}</h1>
             <p className="text-xs text-muted-foreground">{t("app.tagline")}</p>
           </div>
+        </div>
+
+        <div className="mb-5 rounded-md border border-accent/30 bg-accent/5 p-3">
+          <Button
+            type="button"
+            className="w-full"
+            onClick={() => {
+              if (!enterDemo()) toast.error("Your browser blocks session storage, which the demo needs.");
+            }}
+          >
+            Try the demo — no sign-up
+          </Button>
+          <p className="mt-2 text-center text-[11px] leading-snug text-muted-foreground">
+            Sample data in your browser tab only. Nothing is sent to our servers; AI tools are off in the demo.
+          </p>
         </div>
 
         <Button type="button" variant="outline" className="w-full mb-2" disabled={busy} onClick={signInWithGoogle}>

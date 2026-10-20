@@ -2,7 +2,7 @@ import { useState } from "react";
 import { Sparkles, Loader2 } from "lucide-react";
 import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
-import { supabase } from "@/integrations/supabase/client";
+import { supabase } from "@/lib/db";
 import { useAiAccess } from "@/lib/aiAccess";
 import { useAuth } from "@/lib/auth";
 import { toast } from "sonner";

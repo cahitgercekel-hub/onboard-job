@@ -16,7 +16,7 @@ import { Switch } from "@/components/ui/switch";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Badge } from "@/components/ui/badge";
 import { useJobs } from "@/lib/jobsStore";
-import { supabase } from "@/integrations/supabase/client";
+import { supabase } from "@/lib/db";
 import { cn } from "@/lib/utils";
 import { Logo } from "@/components/Logo";
 import { PremiumRail } from "@/components/assistant/PremiumRail";

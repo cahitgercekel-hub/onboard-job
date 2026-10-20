@@ -105,6 +105,14 @@ export default function Privacy() {
         requested). You can delete the chat history in Settings at any time.
       </p>
 
+      <h3>Demo mode (no account)</h3>
+      <p>
+        If you use <em>Try the demo</em>, no account is created. The sample data and anything you change are kept
+        only in your browser tab (session storage) and are discarded when you close it; nothing is sent to our
+        backend, and AI tools and company logos are switched off. Only the normal hosting data described below is
+        processed when the page loads.
+      </p>
+
       <h3>Hosting, security and logs</h3>
       <p>
         When you use ONboard, our hosting providers process technical data such as your IP address, browser

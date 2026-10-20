@@ -1,12 +1,13 @@
 import { useEffect, useRef, useState } from "react";
 import { FileText, Upload, Trash2, Loader2 } from "lucide-react";
-import { supabase } from "@/integrations/supabase/client";
+import { supabase } from "@/lib/db";
 import { useAuth } from "@/lib/auth";
 import { extractTextFromFile } from "@/lib/fileExtract";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { toast } from "sonner";
+import { isDemo } from "@/lib/demo/demoMode";
 
 // Must match the CV bucket's allowed_mime_types (see the privacy_hardening migration).
 const CONTENT_TYPES: Record<string, string> = {
@@ -150,10 +151,10 @@ export function CvBaselineSection() {
               if (f) handleFile(f);
             }}
           />
-          <Button variant="outline" size="sm" disabled={busy} onClick={() => fileRef.current?.click()}>
+          {!isDemo() && <Button variant="outline" size="sm" disabled={busy} onClick={() => fileRef.current?.click()}>
             {busy ? <Loader2 className="h-4 w-4 animate-spin" /> : <Upload className="h-4 w-4" />}
             {cv?.file_name ? "Replace CV" : "Upload CV"}
-          </Button>
+          </Button>}
           {(cv?.file_name || cv?.cv_text) && (
             <Button
               variant="outline"
