@@ -31,7 +31,7 @@ export function CvVersionsSection() {
       ) : versions.length === 0 ? (
         <div className="rounded-md border border-dashed border-border bg-muted/20 px-4 py-6 text-center">
           <p className="text-xs text-muted-foreground mb-1">
-            Track different resume variants (e.g. "Tech V1", "Manager V2"). Tag jobs with the version you used to compare conversion rates in the A/B Lab.
+            Track different resume variants (e.g. "Tech V1", "Manager V2"). Tag jobs with the version you used to compare interview rates in Analytics → CV version comparison.
           </p>
           <p className="text-sm text-muted-foreground mt-2">
             No CV versions yet — create one to start tagging jobs.
