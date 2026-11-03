@@ -360,36 +360,64 @@ export default function Tracker() {
         </div>
       </div>
 
-      {dialog.open && (
-        <JobDialog
-          key={dialog.key}
-          open={dialog.open}
-          onOpenChange={(v) => setDialog((d) => ({ ...d, open: v }))}
-          initialStatus={dialog.status}
-          job={dialog.job}
-          draft={dialog.draft}
-          onSave={(data) => {
-            if (dialog.job) updateJob(dialog.job.id, data);
-            else addJob(data);
-          }}
-          onDelete={dialog.job ? () => {
-            const snapshot = dialog.job!;
-            removeJob(snapshot.id);
-            toast(t("tracker.deletedToast", { role: snapshot.role, company: snapshot.company }), {
+      <JobDialog
+        key={dialog.key}
+        open={dialog.open}
+        onOpenChange={(v) => setDialog((d) => ({ ...d, open: v }))}
+        initialStatus={dialog.status}
+        job={dialog.job}
+        draft={dialog.draft}
+        onSave={async (data) => {
+          const editing = dialog.job;
+          if (editing) {
+            const previous = editing;
+            updateJob(editing.id, withNulls(data));
+            toast(t("ux.job.changesSaved"), {
+              duration: 5000,
+              position: "bottom-right",
               action: {
                 label: t("common.undo"),
                 onClick: () => {
-                  const { id, createdAt, updatedAt, ...rest } = snapshot;
-                  addJob(rest);
+                  const { id, createdAt, updatedAt, ...rest } = previous;
+                  updateJob(id, withNulls(rest));
                 },
               },
-              duration: 6000,
-              position: "bottom-right",
             });
-          } : undefined}
-          onArchive={dialog.job ? () => { setArchiveTarget(dialog.job!); setDialog((d) => ({ ...d, open: false })); } : undefined}
-        />
-      )}
+          } else {
+            const created = await addJob(data);
+            if (!created) return;
+            toast(t("ux.job.jobAdded", { status: t(`tracker.status.${created.status}`) }), {
+              duration: 5000,
+              position: "bottom-right",
+              action: { label: t("common.undo"), onClick: () => removeJob(created.id) },
+            });
+          }
+        }}
+        onDelete={dialog.job ? () => {
+          const snapshot = dialog.job!;
+          removeJob(snapshot.id);
+          toast(t("tracker.deletedToast", { role: snapshot.role, company: snapshot.company }), {
+            action: {
+              label: t("common.undo"),
+              onClick: () => {
+                const { id, createdAt, updatedAt, ...rest } = snapshot;
+                addJob(rest);
+              },
+            },
+            duration: 6000,
+            position: "bottom-right",
+          });
+        } : undefined}
+        onArchive={dialog.job ? () => {
+          const snapshot = dialog.job!;
+          archiveJob(snapshot.id, "closed");
+          toast(t("ux.job.archived"), {
+            duration: 5000,
+            position: "bottom-right",
+            action: { label: t("common.undo"), onClick: () => updateJob(snapshot.id, { status: snapshot.status }) },
+          });
+        } : undefined}
+      />
 
       <ArchiveDialog
         open={!!archiveTarget}
@@ -423,6 +451,14 @@ export default function Tracker() {
       />
     </div>
   );
+}
+
+/** Turn empty optional fields into explicit nulls so clearing a field is saved too. */
+function withNulls(data: Partial<Job>): Partial<Job> {
+  const keys = ["url", "dateApplied", "applicationType", "industry", "workModel", "location", "jobDescription", "notes", "cvVersionId"] as const;
+  const out: Record<string, unknown> = { ...data };
+  for (const k of keys) if (out[k] === undefined) out[k] = null;
+  return out as unknown as Partial<Job>;
 }
 
 function DateRangeField({ label, value, onChange }: { label: string; value?: Date; onChange: (d: Date | undefined) => void }) {
