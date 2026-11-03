@@ -380,7 +380,7 @@ function PrivacySection() {
           </Label>
           <p className="text-xs text-muted-foreground mt-1">
             {isDemo()
-              ? DEMO_AI_MESSAGE
+              ? t("ux.demo.privacyAi")
               : <>{t("settings.aiToggleHint")} <Link to="/privacy" className="underline underline-offset-2">{t("settings.privacyPolicy")}</Link></>}
           </p>
         </div>

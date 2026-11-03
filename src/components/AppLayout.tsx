@@ -11,7 +11,7 @@ import { Logo } from "@/components/Logo";
 import { PlanBadge } from "@/components/PlanBadge";
 import { usePlan } from "@/lib/usePlan";
 import { exitDemo, isDemo } from "@/lib/demo/demoMode";
-import { WelcomeTour, hasSeenWelcome, markWelcomeSeen } from "@/components/shared/welcome-tour";
+import { WelcomeTour, hasSeenWelcome } from "@/components/shared/welcome-tour";
 
 export default function AppLayout() {
   const { t } = useTranslation();
@@ -22,7 +22,6 @@ export default function AppLayout() {
   // First visit straight into the demo: show the welcome tour once.
   useEffect(() => {
     if (isDemo() && !hasSeenWelcome()) {
-      markWelcomeSeen();
       setTourOpen(true);
     }
   }, []);

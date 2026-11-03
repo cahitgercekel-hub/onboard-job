@@ -2,6 +2,7 @@ import { createContext, useCallback, useContext, useEffect, useMemo, useState, t
 import { useTranslation } from "react-i18next";
 import { format as fmt } from "date-fns";
 import { isDemo } from "@/lib/demo/demoMode";
+import i18n from "@/lib/i18n";
 
 export type Theme = "light" | "dark" | "system";
 export type DateFormat = "DD.MM.YYYY" | "MM/DD/YYYY";
@@ -27,12 +28,23 @@ interface Ctx extends Prefs {
 const STORAGE = "jat.prefs.v1";
 const PreferencesContext = createContext<Ctx | null>(null);
 
-function readPrefs(): Prefs {
+const DEFAULTS: Omit<Prefs, "language"> = { theme: "system", dateFormat: "DD.MM.YYYY", ghostingDays: 30, thirdPartyLogos: false };
+
+/** What the user explicitly saved. `language` is only present after an explicit pick. */
+function readStored(): Partial<Prefs> {
   try {
     const raw = localStorage.getItem(STORAGE);
-    if (raw) return { theme: "system", language: "en", dateFormat: "DD.MM.YYYY", ghostingDays: 30, thirdPartyLogos: false, ...JSON.parse(raw) };
+    if (raw) return JSON.parse(raw) as Partial<Prefs>;
   } catch {/* ignore */}
-  return { theme: "system", language: localStorage.getItem("jat.lang") || "en", dateFormat: "DD.MM.YYYY", ghostingDays: 30, thirdPartyLogos: false };
+  return {};
+}
+
+function readPrefs(): Prefs {
+  const stored = readStored();
+  let saved: string | null = null;
+  try { saved = localStorage.getItem("jat.lang"); } catch {/* ignore */}
+  // Without an explicit pick, follow the auto-detected browser language (never cached).
+  return { ...DEFAULTS, ...stored, language: stored.language ?? saved ?? i18n.language ?? "en" };
 }
 
 function applyTheme(theme: Theme) {
@@ -66,9 +78,13 @@ export function PreferencesProvider({ children }: { children: ReactNode }) {
       setPrefs((p) => ({ ...p, language }));
       return;
     }
-    const stored = { ...readPrefs(), ...patch };
-    localStorage.setItem(STORAGE, JSON.stringify(stored));
-    setPrefs((p) => (isDemo() ? { ...stored, language: p.language } : stored));
+    const stored = { ...readStored(), ...patch };
+    try {
+      localStorage.setItem(STORAGE, JSON.stringify(stored));
+      if (patch.language !== undefined) localStorage.setItem("jat.lang", patch.language);
+    } catch {/* ignore */}
+    const full = { ...readPrefs(), ...patch };
+    setPrefs((p) => (isDemo() ? { ...full, language: p.language } : full));
   };
 
   const setTheme = useCallback((theme: Theme) => persist({ theme }), []);

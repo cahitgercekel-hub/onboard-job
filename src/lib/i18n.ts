@@ -34,7 +34,8 @@ i18n
     detection: {
       order: ["localStorage", "navigator"],
       lookupLocalStorage: "jat.lang",
-      caches: demo ? [] : ["localStorage"],
+      // Never cache the detected language; jat.lang is written only on an explicit pick (see preferences).
+      caches: [],
     },
   });
 

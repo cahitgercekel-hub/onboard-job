@@ -35,27 +35,30 @@ interface Props {
   onOpenChange: (v: boolean) => void;
   initialStatus?: JobStatus;
   job?: Job;
+  /** Prefilled values for a new, unsaved job (e.g. from Auto-add). Nothing is created until Save. */
+  draft?: Partial<Omit<Job, "id" | "createdAt" | "updatedAt">>;
   onSave: (data: Omit<Job, "id" | "createdAt" | "updatedAt">) => void;
   onDelete?: () => void;
   onArchive?: () => void;
 }
 
-export function JobDialog({ open, onOpenChange, initialStatus = "saved", job, onSave, onDelete, onArchive }: Props) {
+export function JobDialog({ open, onOpenChange, initialStatus = "saved", job, draft, onSave, onDelete, onArchive }: Props) {
   const { t } = useTranslation();
   const { versions } = useCvVersions();
   const { requestAi } = useAiAccess();
-  const [company, setCompany] = useState(job?.company ?? "");
-  const [role, setRole] = useState(job?.role ?? "");
-  const [url, setUrl] = useState(job?.url ?? "");
-  const [dateApplied, setDateApplied] = useState(job?.dateApplied?.slice(0, 10) ?? "");
-  const [status, setStatus] = useState<JobStatus>(job?.status ?? initialStatus);
-  const [appType, setAppType] = useState<ApplicationType | "">((job?.applicationType as ApplicationType) ?? "");
-  const [industry, setIndustry] = useState<Industry | "">((job?.industry as Industry) ?? "");
-  const [workModel, setWorkModel] = useState<WorkModel | "">((job?.workModel as WorkModel) ?? "");
-  const [location, setLocation] = useState(job?.location ?? "");
-  const [jobDescription, setJobDescription] = useState(job?.jobDescription ?? "");
-  const [notes, setNotes] = useState(job?.notes ?? "");
-  const [cvVersionId, setCvVersionId] = useState<string>(job?.cvVersionId ?? "");
+  const src = job ?? draft;
+  const [company, setCompany] = useState(src?.company ?? "");
+  const [role, setRole] = useState(src?.role ?? "");
+  const [url, setUrl] = useState(src?.url ?? "");
+  const [dateApplied, setDateApplied] = useState(src?.dateApplied?.slice(0, 10) ?? "");
+  const [status, setStatus] = useState<JobStatus>(src?.status ?? initialStatus);
+  const [appType, setAppType] = useState<ApplicationType | "">((src?.applicationType as ApplicationType) ?? "");
+  const [industry, setIndustry] = useState<Industry | "">((src?.industry as Industry) ?? "");
+  const [workModel, setWorkModel] = useState<WorkModel | "">((src?.workModel as WorkModel) ?? "");
+  const [location, setLocation] = useState(src?.location ?? "");
+  const [jobDescription, setJobDescription] = useState(src?.jobDescription ?? "");
+  const [notes, setNotes] = useState(src?.notes ?? "");
+  const [cvVersionId, setCvVersionId] = useState<string>(src?.cvVersionId ?? "");
   const [scoring, setScoring] = useState(false);
   const [coverOpen, setCoverOpen] = useState(false);
   const [demoFit, setDemoFit] = useState<{ score: number; reasoning: string } | null>(null);
@@ -65,19 +68,19 @@ export function JobDialog({ open, onOpenChange, initialStatus = "saved", job, on
   useEffect(() => {
     if (!open) return;
     setDemoFit(null);
-    setCompany(job?.company ?? "");
-    setRole(job?.role ?? "");
-    setUrl(job?.url ?? "");
-    setDateApplied(job?.dateApplied?.slice(0, 10) ?? "");
-    setStatus(job?.status ?? initialStatus);
-    setAppType((job?.applicationType as ApplicationType) ?? "");
-    setIndustry((job?.industry as Industry) ?? "");
-    setWorkModel((job?.workModel as WorkModel) ?? "");
-    setLocation(job?.location ?? "");
-    setJobDescription(job?.jobDescription ?? "");
-    setNotes(job?.notes ?? "");
-    setCvVersionId(job?.cvVersionId ?? "");
-  }, [open, job, initialStatus]);
+    setCompany(src?.company ?? "");
+    setRole(src?.role ?? "");
+    setUrl(src?.url ?? "");
+    setDateApplied(src?.dateApplied?.slice(0, 10) ?? "");
+    setStatus(src?.status ?? initialStatus);
+    setAppType((src?.applicationType as ApplicationType) ?? "");
+    setIndustry((src?.industry as Industry) ?? "");
+    setWorkModel((src?.workModel as WorkModel) ?? "");
+    setLocation(src?.location ?? "");
+    setJobDescription(src?.jobDescription ?? "");
+    setNotes(src?.notes ?? "");
+    setCvVersionId(src?.cvVersionId ?? "");
+  }, [open, job, draft, initialStatus]);
 
   const calculateFitness = async () => {
     if (!job?.id) return toast.error("Save the job first, then calculate fitness.");
@@ -128,14 +131,14 @@ export function JobDialog({ open, onOpenChange, initialStatus = "saved", job, on
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent
-        className="sm:max-w-[560px] max-h-[90vh] overflow-y-auto"
+        className="sm:max-w-[560px] max-h-[90vh] flex flex-col gap-0 p-0 overflow-hidden"
         onOpenAutoFocus={(e) => {
           // Focus the dialog itself instead of selecting the Company field's text.
           e.preventDefault();
           (e.currentTarget as HTMLElement | null)?.focus();
         }}
       >
-        <DialogHeader>
+        <DialogHeader className="px-6 pt-6 pb-3 border-b border-border shrink-0">
           <div className="flex items-center gap-3">
             <CompanyLogo company={company} url={url} size={32} />
             <div className="min-w-0 text-left">
@@ -148,7 +151,7 @@ export function JobDialog({ open, onOpenChange, initialStatus = "saved", job, on
             </div>
           </div>
         </DialogHeader>
-        <div className="grid gap-3 py-1">
+        <div className="grid gap-3 px-6 py-4 overflow-y-auto min-h-0 flex-1">
           <div className="grid grid-cols-2 gap-3">
             <div className="grid gap-1.5">
               <Label htmlFor="company">{t("common.company")}</Label>
@@ -261,7 +264,7 @@ export function JobDialog({ open, onOpenChange, initialStatus = "saved", job, on
             <Textarea id="notes" rows={2} value={notes} onChange={(e) => setNotes(e.target.value)} />
           </div>
         </div>
-        <DialogFooter className="gap-2 sm:justify-between">
+        <DialogFooter className="gap-2 sm:justify-between shrink-0 border-t border-border bg-background px-6 py-3">
           <div className="flex gap-1">
             {job && onDelete && (
               <Button variant="ghost" className="text-destructive hover:bg-destructive hover:text-destructive-foreground" onClick={() => { onDelete(); onOpenChange(false); }}>
