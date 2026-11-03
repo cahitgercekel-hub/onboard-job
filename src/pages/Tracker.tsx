@@ -39,7 +39,7 @@ export default function Tracker() {
   const [dateChip, setDateChip] = useState<DateChip>("any");
   const [customFrom, setCustomFrom] = useState<Date | undefined>();
   const [customTo, setCustomTo] = useState<Date | undefined>();
-  const [dialog, setDialog] = useState<{ open: boolean; status: JobStatus; job?: Job; key: number }>({
+  const [dialog, setDialog] = useState<{ open: boolean; status: JobStatus; job?: Job; draft?: Omit<Job, "id" | "createdAt" | "updatedAt">; key: number }>({
     open: false, status: "saved", key: 0,
   });
   const [autoOpen, setAutoOpen] = useState(false);
@@ -367,6 +367,7 @@ export default function Tracker() {
           onOpenChange={(v) => setDialog((d) => ({ ...d, open: v }))}
           initialStatus={dialog.status}
           job={dialog.job}
+          draft={dialog.draft}
           onSave={(data) => {
             if (dialog.job) updateJob(dialog.job.id, data);
             else addJob(data);
@@ -415,9 +416,9 @@ export default function Tracker() {
       <AutoAddDialog
         open={autoOpen}
         onOpenChange={setAutoOpen}
-        onExtracted={async (data) => {
-          const newJob = await addJob(data);
-          if (newJob) setDialog({ open: true, status: newJob.status, job: newJob, key: Date.now() });
+        onExtracted={(data) => {
+          // Prefill only: the job is created when the user presses Save in the dialog.
+          setDialog({ open: true, status: data.status, job: undefined, draft: data, key: Date.now() });
         }}
       />
     </div>
