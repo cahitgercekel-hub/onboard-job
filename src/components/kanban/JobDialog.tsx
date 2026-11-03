@@ -217,6 +217,7 @@ export function JobDialog({ open, onOpenChange, initialStatus = "saved", job, dr
                   <Calendar
                     mode="single"
                     selected={dateApplied ? parseISO(dateApplied) : undefined}
+                    defaultMonth={dateApplied ? parseISO(dateApplied) : undefined}
                     onSelect={(d) => setDateApplied(d ? fmtDate(d, "yyyy-MM-dd") : "")}
                     initialFocus
                     className={cn("p-3 pointer-events-auto")}
@@ -228,10 +229,7 @@ export function JobDialog({ open, onOpenChange, initialStatus = "saved", job, dr
               <Label>{t("common.status")}</Label>
               <Select value={status} onValueChange={(v) => setStatus(v as JobStatus)}>
                 <SelectTrigger className={cn(STATUS_TINT[status])}>
-                  <span className="flex items-center gap-2">
-                    <StatusDot status={status} />
-                    <SelectValue />
-                  </span>
+                  <SelectValue />
                 </SelectTrigger>
                 <SelectContent>
                   {STATUS_ORDER.map((s) => (
