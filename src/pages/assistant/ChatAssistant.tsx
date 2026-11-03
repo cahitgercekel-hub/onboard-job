@@ -568,6 +568,7 @@ export default function ChatAssistant() {
                       <span className="whitespace-pre-wrap">{m.content}</span>
                     ) : (
                       <article className="assistant-md text-[13.5px] leading-[1.65] text-foreground/90">
+                        <DemoExampleLabel className="mb-2" />
                         <ReactMarkdown
                           remarkPlugins={[remarkGfm]}
                           components={{
