@@ -1,12 +1,17 @@
 import { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
-import { Sparkles, Loader2, Mail } from "lucide-react";
+import { Sparkles, Loader2, Mail, CalendarIcon } from "lucide-react";
+import { format as fmtDate, parseISO } from "date-fns";
+import { cn } from "@/lib/utils";
+import { usePrefs } from "@/lib/preferences";
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+import { Calendar } from "@/components/ui/calendar";
 import { supabase } from "@/lib/db";
 import { useAiAccess } from "@/lib/aiAccess";
 import { isDemo } from "@/lib/demo/demoMode";
 import { demoDelay, demoFitness } from "@/lib/demo/demo-examples";
 import { DemoExampleLabel } from "@/components/shared/demo-bits";
-import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
+import { Sheet, SheetContent, SheetDescription, SheetHeader, SheetTitle, SheetFooter } from "@/components/ui/sheet";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
@@ -42,10 +47,33 @@ interface Props {
   onArchive?: () => void;
 }
 
+const STATUS_DOT: Record<JobStatus, string> = {
+  saved: "bg-column-saved",
+  applied: "bg-column-applied",
+  interviewing: "bg-column-interviewing",
+  offer: "bg-column-offer",
+  rejected: "bg-column-rejected",
+  archived: "bg-muted-foreground",
+};
+
+const STATUS_TINT: Record<JobStatus, string> = {
+  saved: "bg-column-saved/10 border-column-saved/40",
+  applied: "bg-column-applied/10 border-column-applied/40",
+  interviewing: "bg-column-interviewing/10 border-column-interviewing/40",
+  offer: "bg-column-offer/10 border-column-offer/40",
+  rejected: "bg-column-rejected/10 border-column-rejected/40",
+  archived: "bg-muted border-border",
+};
+
+function StatusDot({ status }: { status: JobStatus }) {
+  return <span aria-hidden className={cn("inline-block h-2 w-2 shrink-0 rounded-full", STATUS_DOT[status])} />;
+}
+
 export function JobDialog({ open, onOpenChange, initialStatus = "saved", job, draft, onSave, onDelete, onArchive }: Props) {
   const { t } = useTranslation();
   const { versions } = useCvVersions();
   const { requestAi } = useAiAccess();
+  const { formatDate } = usePrefs();
   const src = job ?? draft;
   const [company, setCompany] = useState(src?.company ?? "");
   const [role, setRole] = useState(src?.role ?? "");
@@ -129,29 +157,33 @@ export function JobDialog({ open, onOpenChange, initialStatus = "saved", job, dr
   };
 
   return (
-    <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent
-        className="sm:max-w-[560px] max-h-[90vh] flex flex-col gap-0 p-0 overflow-hidden"
+    <Sheet open={open} onOpenChange={onOpenChange}>
+      <SheetContent
+        side="right"
+        overlayClassName="bg-foreground/20"
+        className="w-full max-w-[100vw] sm:w-[600px] sm:max-w-[600px] h-full flex flex-col gap-0 p-0 overflow-hidden"
         onOpenAutoFocus={(e) => {
           // Focus the dialog itself instead of selecting the Company field's text.
           e.preventDefault();
           (e.currentTarget as HTMLElement | null)?.focus();
         }}
       >
-        <DialogHeader className="px-6 pt-6 pb-3 border-b border-border shrink-0">
+        <SheetHeader className="px-6 pt-5 pb-4 pr-12 border-b border-border shrink-0 space-y-0">
           <div className="flex items-center gap-3">
             <CompanyLogo company={company} url={url} size={32} />
             <div className="min-w-0 text-left">
-              <DialogTitle>{job ? t("ux.job.editTitle") : t("common.add")}</DialogTitle>
-              {job ? (
-                <DialogDescription className="truncate">{job.company}</DialogDescription>
-              ) : (
-                <DialogDescription className="sr-only">{t("common.add")}</DialogDescription>
-              )}
+              <div className="flex flex-wrap items-center gap-2">
+                <SheetTitle>{job ? t("ux.job.editTitle") : t("ux.job.addTitle")}</SheetTitle>
+                <span className={cn("inline-flex items-center gap-1.5 rounded-full border px-2 py-0.5 text-xs font-medium text-foreground", STATUS_TINT[status])}>
+                  <StatusDot status={status} />
+                  {t(`tracker.status.${status}`)}
+                </span>
+              </div>
+              <SheetDescription className="truncate">{company || job?.company || t("ux.job.addTitle")}</SheetDescription>
             </div>
           </div>
-        </DialogHeader>
-        <div className="grid gap-3 px-6 py-4 overflow-y-auto min-h-0 flex-1">
+        </SheetHeader>
+        <div className="grid content-start gap-4 px-6 py-5 overflow-y-auto min-h-0 flex-1">
           <div className="grid grid-cols-2 gap-3">
             <div className="grid gap-1.5">
               <Label htmlFor="company">{t("common.company")}</Label>
@@ -169,15 +201,44 @@ export function JobDialog({ open, onOpenChange, initialStatus = "saved", job, dr
           <div className="grid grid-cols-2 gap-3">
             <div className="grid gap-1.5">
               <Label htmlFor="date">{t("common.date")}</Label>
-              <Input id="date" type="date" value={dateApplied} onChange={(e) => setDateApplied(e.target.value)} />
+              <Popover>
+                <PopoverTrigger asChild>
+                  <Button
+                    id="date"
+                    type="button"
+                    variant="outline"
+                    className={cn("w-full justify-start text-left font-normal", !dateApplied && "text-muted-foreground")}
+                  >
+                    <CalendarIcon className="h-4 w-4" />
+                    {dateApplied ? formatDate(dateApplied) : <span>{t("ux.job.pickDate")}</span>}
+                  </Button>
+                </PopoverTrigger>
+                <PopoverContent className="w-auto p-0" align="start">
+                  <Calendar
+                    mode="single"
+                    selected={dateApplied ? parseISO(dateApplied) : undefined}
+                    defaultMonth={dateApplied ? parseISO(dateApplied) : undefined}
+                    onSelect={(d) => setDateApplied(d ? fmtDate(d, "yyyy-MM-dd") : "")}
+                    initialFocus
+                    className={cn("p-3 pointer-events-auto")}
+                  />
+                </PopoverContent>
+              </Popover>
             </div>
             <div className="grid gap-1.5">
               <Label>{t("common.status")}</Label>
               <Select value={status} onValueChange={(v) => setStatus(v as JobStatus)}>
-                <SelectTrigger><SelectValue /></SelectTrigger>
+                <SelectTrigger className={cn(STATUS_TINT[status])}>
+                  <SelectValue />
+                </SelectTrigger>
                 <SelectContent>
                   {STATUS_ORDER.map((s) => (
-                    <SelectItem key={s} value={s}>{t(`tracker.status.${s}`)}</SelectItem>
+                    <SelectItem key={s} value={s}>
+                      <span className="flex items-center gap-2">
+                        <StatusDot status={s} />
+                        {t(`tracker.status.${s}`)}
+                      </span>
+                    </SelectItem>
                   ))}
                 </SelectContent>
               </Select>
@@ -245,7 +306,7 @@ export function JobDialog({ open, onOpenChange, initialStatus = "saved", job, dr
                 </Button>
               )}
             </div>
-            <Textarea id="jd" rows={4} value={jobDescription} onChange={(e) => setJobDescription(e.target.value)} placeholder="Paste the JD here — used for AI Fitness Score & Interview Prep…" />
+            <Textarea id="jd" rows={10} className="min-h-[200px]" value={jobDescription} onChange={(e) => setJobDescription(e.target.value)} placeholder="Paste the JD here — used for AI Fitness Score & Interview Prep…" />
             {fitReasoning && (
               <div className="mt-2 flex gap-3 rounded-md border border-border bg-muted/30 p-3">
                 <FitnessRing score={fitScore} size={44} stroke={5} />
@@ -261,10 +322,10 @@ export function JobDialog({ open, onOpenChange, initialStatus = "saved", job, dr
           </div>
           <div className="grid gap-1.5">
             <Label htmlFor="notes">{t("common.notes")}</Label>
-            <Textarea id="notes" rows={2} value={notes} onChange={(e) => setNotes(e.target.value)} />
+            <Textarea id="notes" rows={5} className="min-h-[120px]" value={notes} onChange={(e) => setNotes(e.target.value)} />
           </div>
         </div>
-        <DialogFooter className="gap-2 sm:justify-between shrink-0 border-t border-border bg-background px-6 py-3">
+        <SheetFooter className="gap-2 sm:justify-between shrink-0 border-t border-border bg-background px-6 py-3">
           <div className="flex gap-1">
             {job && onDelete && (
               <Button variant="ghost" className="text-destructive hover:bg-destructive hover:text-destructive-foreground" onClick={() => { onDelete(); onOpenChange(false); }}>
@@ -286,9 +347,9 @@ export function JobDialog({ open, onOpenChange, initialStatus = "saved", job, dr
             <Button variant="outline" onClick={() => onOpenChange(false)}>{t("common.cancel")}</Button>
             <Button onClick={submit}>{job ? t("common.save") : t("common.add")}</Button>
           </div>
-        </DialogFooter>
-      </DialogContent>
+        </SheetFooter>
+      </SheetContent>
       {job && <CoverLetterStudio open={coverOpen} onOpenChange={setCoverOpen} job={job} />}
-    </Dialog>
+    </Sheet>
   );
 }

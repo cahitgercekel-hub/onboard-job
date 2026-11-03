@@ -411,6 +411,8 @@ export const en = {
     },
     job: {
       editTitle: "Edit application",
+      addTitle: "Add application",
+      pickDate: "Pick a date",
       cvVersionSent: "CV version sent",
       matchScore: "Match score",
     },
