@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { Link } from "react-router-dom";
+import { Link, useLocation } from "react-router-dom";
 import { useTranslation } from "react-i18next";
 import {
   Download, Upload, Trash2, Sun, Moon, Monitor, Languages,
@@ -24,7 +24,8 @@ import { LEGAL } from "@/lib/legal";
 import { buildDataExport, downloadJson, type ExportClient } from "@/lib/dataExport";
 import { clearLocalChats } from "@/lib/localData";
 import { deleteMyAccount } from "@/lib/accountDeletion";
-import { DEMO_AI_MESSAGE, isDemo } from "@/lib/demo/demoMode";
+import { DEMO_AI_MESSAGE, exitDemo, isDemo } from "@/lib/demo/demoMode";
+import { guardDemoUpgrade } from "@/components/assistant/PremiumRail";
 import { ImportCsvDialog } from "@/components/settings/ImportCsvDialog";
 import { CvBaselineSection } from "@/components/settings/CvBaselineSection";
 import { CvVersionsSection } from "@/components/settings/CvVersionsSection";
@@ -59,6 +60,11 @@ export default function Settings() {
   const [importOpen, setImportOpen] = useState(false);
   const [deleteAccountOpen, setDeleteAccountOpen] = useState(false);
 
+  const { hash } = useLocation();
+  useEffect(() => {
+    if (hash) document.getElementById(hash.slice(1))?.scrollIntoView({ behavior: "smooth", block: "start" });
+  }, [hash]);
+
   const planLabel = plan === "free" ? t("settings.planLabelFree") : plan === "pro" ? t("common.plans.pro") : t("common.plans.business");
 
   return (
@@ -67,9 +73,9 @@ export default function Settings() {
 
       <div className="grid gap-6 lg:grid-cols-2">
         {/* 1. Account & Subscription */}
-        <section className="surface-card p-6 flex flex-col">
+        <section className="surface-card p-6 flex flex-col lg:self-start">
           <CardHeader icon={UserIcon} title={t("settings.accountTitle")} />
-          <div className="flex-1">
+          <div>
             <h3 className="text-xl font-semibold text-foreground">{t("common.status")}: {planLabel}</h3>
             <p className="text-sm text-muted-foreground mt-1">
               {plan === "free"
@@ -79,11 +85,11 @@ export default function Settings() {
             <div className="mt-4 space-y-2">
               {plan === "free" && (
                 <Button asChild className="w-full">
-                  <Link to="/billing">{t("settings.upgradeToPro")}</Link>
+                  <Link to="/billing" onClick={guardDemoUpgrade}>{t("settings.upgradeToPro")}</Link>
                 </Button>
               )}
               <Button asChild variant="link" className="w-full text-accent">
-                <Link to="/billing">{t("settings.manageSub")}</Link>
+                <Link to="/billing" onClick={guardDemoUpgrade}>{t("settings.manageSub")}</Link>
               </Button>
             </div>
           </div>
@@ -108,9 +114,11 @@ export default function Settings() {
 
           {user?.email && (
             <div className="mt-6 pt-4 border-t border-border flex items-center justify-between gap-3">
-              <p className="text-xs text-muted-foreground truncate">{t("settings.signedInAs", { email: user.email })}</p>
-              <Button variant="ghost" size="sm" onClick={() => signOut()}>
-                <LogOut className="h-4 w-4" /> {t("settings.signOut")}
+              <p className="text-xs text-muted-foreground truncate">
+                {isDemo() ? t("ux.demo.sessionNoAccount") : t("settings.signedInAs", { email: user.email })}
+              </p>
+              <Button variant="ghost" size="sm" onClick={() => (isDemo() ? exitDemo() : signOut())}>
+                <LogOut className="h-4 w-4" /> {isDemo() ? t("ux.demo.exitDemo") : t("settings.signOut")}
               </Button>
             </div>
           )}
@@ -362,7 +370,7 @@ function PrivacySection() {
   };
 
   return (
-    <section className="surface-card p-6 space-y-6">
+    <section id="privacy" className="surface-card p-6 space-y-6 scroll-mt-6">
       <CardHeader icon={Lock} title={t("settings.privacyTitle")} />
 
       <div className="flex items-start justify-between gap-4">

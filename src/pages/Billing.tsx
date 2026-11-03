@@ -2,6 +2,7 @@ import { Crown, Sparkles, Check } from "lucide-react";
 import { useTranslation } from "react-i18next";
 import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
+import { isDemo } from "@/lib/demo/demoMode";
 import { usePlan, type Plan } from "@/lib/usePlan";
 import { PlanBadge } from "@/components/PlanBadge";
 import { cn } from "@/lib/utils";
@@ -62,7 +63,7 @@ export default function Billing() {
 
   const onClick = (tier: Tier) => {
     if (tier.id === plan) return;
-    toast.info("Billing coming soon — Stripe checkout will go here.");
+    toast.info(isDemo() ? "Not available in the demo." : "Paid plans aren't available yet. ONboard is a free beta.");
   };
 
   return (
@@ -85,15 +86,15 @@ export default function Billing() {
               key={tier.id}
               className={cn(
                 "surface-card p-6 flex flex-col relative transition-all duration-200 border border-border",
-                tier.highlight && "ring-2 ring-accent shadow-lg border-accent/20",
+                tier.highlight && "ring-1 ring-accent/40 border-accent/20",
                 isPro && "bg-gradient-to-b from-accent-soft/20 to-transparent",
                 isCurrent && "bg-muted/10"
               )}
             >
               {tier.highlight && (
-                <div className="absolute -top-3 left-1/2 -translate-x-1/2 px-3 py-0.5 rounded-full text-[10px] font-semibold bg-accent text-accent-foreground shadow-sm">
-                  MOST POPULAR
-                </div>
+                <span className="absolute top-4 right-4 rounded-full border border-accent/30 bg-accent/10 px-2 py-0.5 text-[10px] font-medium text-accent">
+                  Recommended
+                </span>
               )}
               <div className="flex items-center gap-2 mb-1">
                 <h2 className="text-lg font-semibold">{tier.name}</h2>
