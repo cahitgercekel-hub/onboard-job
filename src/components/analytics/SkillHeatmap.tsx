@@ -145,8 +145,9 @@ export function SkillHeatmap({ jobs }: Props) {
                 <Radar
                   name="Your CV"
                   dataKey="Your CV"
-                  stroke="transparent"
-                  fill="transparent"
+                  stroke="hsl(var(--primary))"
+                  strokeOpacity={0}
+                  fill="hsl(var(--primary))"
                   fillOpacity={0}
                   legendType="circle"
                   isAnimationActive={false}

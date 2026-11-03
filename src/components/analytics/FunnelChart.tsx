@@ -13,7 +13,7 @@ function useNodeLabel() {
   return (id: string) =>
     id === FUNNEL_TRACKED ? t("ux.analytics.funnelTracked")
       : id === FUNNEL_NOT_APPLIED ? t("ux.analytics.funnelNotApplied")
-      : t(`tracker.status.${id}`, { defaultValue: id });
+      : t(`tracker.status.${id}`, { defaultValue: id.charAt(0).toUpperCase() + id.slice(1) });
 }
 
 // Labels sit outside the bands: the root to its left, end nodes to their right, and
