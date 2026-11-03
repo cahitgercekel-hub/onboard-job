@@ -13,6 +13,7 @@ import { getPasswordScore } from "@/components/PasswordStrength";
 import { Logo } from "@/components/Logo";
 import { LegalFooterLinks } from "@/pages/legal/LegalLayout";
 import { enterDemo } from "@/lib/demo/demoMode";
+import { WelcomeTour, hasSeenWelcome, markWelcomeSeen } from "@/components/shared/welcome-tour";
 import { toast } from "sonner";
 
 export default function AuthPage() {
@@ -26,6 +27,19 @@ export default function AuthPage() {
   const [password, setPassword] = useState("");
   const [displayName, setDisplayName] = useState("");
   const [busy, setBusy] = useState(false);
+  const [tourOpen, setTourOpen] = useState(false);
+
+  // First visit in this browser while signed out: show the welcome tour once.
+  useEffect(() => {
+    if (!loading && !session && !hasSeenWelcome()) {
+      markWelcomeSeen();
+      setTourOpen(true);
+    }
+  }, [loading, session]);
+
+  const startDemo = () => {
+    if (!enterDemo()) toast.error("Your browser blocks session storage, which the demo needs.");
+  };
 
   useEffect(() => {
     if (!loading && session) navigate(from, { replace: true });
@@ -95,6 +109,7 @@ export default function AuthPage() {
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-background px-4">
+      <WelcomeTour open={tourOpen} onOpenChange={setTourOpen} mode="auth" onTryDemo={startDemo} />
       <div className="w-full max-w-md surface-card p-6 md:p-8">
         <div className="flex items-center gap-3 mb-6">
           <Logo size={64} />
@@ -108,14 +123,12 @@ export default function AuthPage() {
           <Button
             type="button"
             className="w-full"
-            onClick={() => {
-              if (!enterDemo()) toast.error("Your browser blocks session storage, which the demo needs.");
-            }}
+            onClick={startDemo}
           >
             Try the demo — no sign-up
           </Button>
           <p className="mt-2 text-center text-[11px] leading-snug text-muted-foreground">
-            Sample data in your browser tab only. Nothing is sent to our servers; AI tools are off in the demo.
+            Sample data in your browser tab only. Nothing is sent to our servers; AI answers in the demo are pre-written examples.
           </p>
         </div>
 
