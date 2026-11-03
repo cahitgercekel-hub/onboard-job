@@ -138,7 +138,7 @@ export function JobDialog({ open, onOpenChange, initialStatus = "saved", job, dr
           (e.currentTarget as HTMLElement | null)?.focus();
         }}
       >
-        <DialogHeader>
+        <DialogHeader className="px-6 pt-6 pb-3 border-b border-border shrink-0">
           <div className="flex items-center gap-3">
             <CompanyLogo company={company} url={url} size={32} />
             <div className="min-w-0 text-left">
@@ -151,7 +151,7 @@ export function JobDialog({ open, onOpenChange, initialStatus = "saved", job, dr
             </div>
           </div>
         </DialogHeader>
-        <div className="grid gap-3 py-1">
+        <div className="grid gap-3 px-6 py-4 overflow-y-auto min-h-0 flex-1">
           <div className="grid grid-cols-2 gap-3">
             <div className="grid gap-1.5">
               <Label htmlFor="company">{t("common.company")}</Label>
@@ -264,7 +264,7 @@ export function JobDialog({ open, onOpenChange, initialStatus = "saved", job, dr
             <Textarea id="notes" rows={2} value={notes} onChange={(e) => setNotes(e.target.value)} />
           </div>
         </div>
-        <DialogFooter className="gap-2 sm:justify-between">
+        <DialogFooter className="gap-2 sm:justify-between shrink-0 border-t border-border bg-background px-6 py-3">
           <div className="flex gap-1">
             {job && onDelete && (
               <Button variant="ghost" className="text-destructive hover:bg-destructive hover:text-destructive-foreground" onClick={() => { onDelete(); onOpenChange(false); }}>
