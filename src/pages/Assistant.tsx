@@ -538,7 +538,7 @@ export function InterviewPrep() {
         )}
         {result && (
           <div className="grid gap-4">
-          <DemoExampleLabel />
+          <DemoExampleLabel className="justify-self-start" />
           {result.questions.map((q, i) => (
             <div key={i} className="surface-card p-5">
               <div className="flex items-center gap-2 mb-2">
