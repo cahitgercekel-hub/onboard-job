@@ -15,6 +15,7 @@ import { ScrollArea } from "@/components/ui/scroll-area";
 import { buildSkillStats, prettySkill, topMissingSkills, type SkillStat } from "@/lib/skills";
 import type { Job } from "@/lib/types";
 import { toast } from "sonner";
+import { useTranslation } from "react-i18next";
 
 interface Props {
   jobs: Job[];
@@ -27,6 +28,7 @@ interface OptimizedBullet {
 
 export function SkillHeatmap({ jobs }: Props) {
   const { user } = useAuth();
+  const { t } = useTranslation();
   const { requestAi } = useAiAccess();
   const [cvText, setCvText] = useState<string | null>(null);
   const [loadingCv, setLoadingCv] = useState(true);
@@ -100,7 +102,7 @@ export function SkillHeatmap({ jobs }: Props) {
     <div className="surface-card p-3 md:p-5 overflow-hidden flex flex-col h-full">
       <div className="flex items-center justify-between mb-4 flex-wrap gap-2">
         <h2 className="text-sm font-medium text-foreground flex items-center gap-2">
-          <Target className="h-4 w-4 text-accent" /> Skills: job demand vs. your CV
+          <Target className="h-4 w-4 text-accent" /> {t("ux.analytics.skillsTitle")}
         </h2>
         <span className="text-[11px] text-muted-foreground">
           Top {stats.length} skills across {jobs.filter((j) => j.jobDescription).length} Job Postings
