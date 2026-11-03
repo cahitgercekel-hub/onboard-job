@@ -3,6 +3,7 @@ import { useTranslation } from "react-i18next";
 import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
 import { isDemo } from "@/lib/demo/demoMode";
+import i18n from "@/lib/i18n";
 import { usePlan, type Plan } from "@/lib/usePlan";
 import { PlanBadge } from "@/components/PlanBadge";
 import { cn } from "@/lib/utils";
@@ -63,7 +64,7 @@ export default function Billing() {
 
   const onClick = (tier: Tier) => {
     if (tier.id === plan) return;
-    toast.info(isDemo() ? "Not available in the demo." : "Paid plans aren't available yet. ONboard is a free beta.");
+    toast.info(i18n.t(isDemo() ? "ux.demo.notAvailable" : "ux.billing.notAvailable"));
   };
 
   return (
@@ -93,7 +94,7 @@ export default function Billing() {
             >
               {tier.highlight && (
                 <span className="absolute top-4 right-4 rounded-full border border-accent/30 bg-accent/10 px-2 py-0.5 text-[10px] font-medium text-accent">
-                  Recommended
+                  {i18n.t("ux.billing.recommended")}
                 </span>
               )}
               <div className="flex items-center gap-2 mb-1">
