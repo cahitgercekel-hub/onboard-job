@@ -1,4 +1,4 @@
-import { FileEdit, SlidersHorizontal } from "lucide-react";
+import { FileEdit, SlidersHorizontal, Wand2 } from "lucide-react";
 import { PolishTool } from "@/pages/Assistant";
 import { AssistantToolShell } from "@/components/assistant/AssistantToolShell";
 import { useTranslation } from "react-i18next";
@@ -8,6 +8,7 @@ export default function PolishAssistant() {
 
   return (
     <AssistantToolShell
+      icon={Wand2}
       title={t("assistant.tabs.polish")}
       subtitle={t("assistant.polish.subtitle")}
       premiumTools={[

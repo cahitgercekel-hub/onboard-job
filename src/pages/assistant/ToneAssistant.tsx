@@ -1,4 +1,4 @@
-import { Building2, Wand2 } from "lucide-react";
+import { Building2, Wand2, Sparkles } from "lucide-react";
 import { ToneAnalyzer } from "@/pages/Assistant";
 import { AssistantToolShell } from "@/components/assistant/AssistantToolShell";
 import { useTranslation } from "react-i18next";
@@ -8,6 +8,7 @@ export default function ToneAssistant() {
 
   return (
     <AssistantToolShell
+      icon={Sparkles}
       title={t("assistant.tabs.tone")}
       subtitle={t("assistant.tone.subtitle")}
       premiumTools={[

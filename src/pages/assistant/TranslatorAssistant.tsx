@@ -1,4 +1,4 @@
-import { Layers, Briefcase } from "lucide-react";
+import { Layers, Briefcase, Languages } from "lucide-react";
 import { SkillTranslator } from "@/pages/Assistant";
 import { AssistantToolShell } from "@/components/assistant/AssistantToolShell";
 import { useTranslation } from "react-i18next";
@@ -8,6 +8,7 @@ export default function TranslatorAssistant() {
 
   return (
     <AssistantToolShell
+      icon={Languages}
       title={t("assistant.tabs.translate")}
       subtitle={t("assistant.translate.subtitle")}
       premiumTools={[
