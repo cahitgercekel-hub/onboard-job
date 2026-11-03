@@ -5,7 +5,7 @@ import remarkGfm from "remark-gfm";
 import { useTranslation } from "react-i18next";
 import {
   Loader2, Send, Square, Sparkles, X, Briefcase, Bot, FileText,
-  CalendarCheck, Plus, Smile, MessagesSquare, Search, ChevronUp, ChevronDown,
+  CalendarCheck, Plus, MessageSquare, MailCheck, Smile, MessagesSquare, Search, ChevronUp, ChevronDown,
 } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { toast } from "sonner";
@@ -18,8 +18,10 @@ import { Badge } from "@/components/ui/badge";
 import { useJobs } from "@/lib/jobsStore";
 import { supabase } from "@/lib/db";
 import { cn } from "@/lib/utils";
-import { Logo } from "@/components/Logo";
-import { PremiumRail } from "@/components/assistant/PremiumRail";
+import { PremiumRail, readRailCollapsed, writeRailCollapsed } from "@/components/assistant/PremiumRail";
+import { isDemo } from "@/lib/demo/demoMode";
+import { demoChatReply, demoDelay } from "@/lib/demo/demo-examples";
+import { DemoExampleLabel } from "@/components/shared/demo-bits";
 import { usePlan } from "@/lib/usePlan";
 import { useAuth } from "@/lib/auth";
 import { loadChatThread, saveChatThread, clearChatThread, type ChatMsg } from "@/lib/chatStore";
@@ -28,8 +30,6 @@ import { useAiAccess } from "@/lib/aiAccess";
 type Msg = ChatMsg;
 
 const CHAT_URL = `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/career-chat`;
-
-const RAIL_STORAGE_KEY = "jat.premiumRail.collapsed";
 
 export default function ChatAssistant() {
   const { t } = useTranslation();
@@ -53,9 +53,9 @@ export default function ChatAssistant() {
   ], [t]);
 
   const PREMIUM_TOOLS = useMemo(() => [
-    { id: "auto-apply", icon: Bot, title: "Auto-apply Bot", desc: "Automatically apply to relevant jobs daily" },
+    { id: "follow-up-drafts", icon: MailCheck, title: t("ux.assistant.followUpTitle"), desc: t("ux.assistant.followUpDesc") },
     { id: "cv-versions", icon: FileText, title: "Unlimited CV Versions", desc: "Create and store unlimited tailored CVs" },
-  ], []);
+  ], [t]);
 
   const ATTACHED_JOB_KEY = useMemo(
     () => `jat.chat.attachedJob.${user?.id || "anon"}`,
@@ -91,23 +91,11 @@ export default function ChatAssistant() {
   }, [shareCv, SHARE_CV_KEY]);
   const [moreOpen, setMoreOpen] = useState(false);
   const [hydrated, setHydrated] = useState(false);
-  const [railCollapsed, setRailCollapsed] = useState<boolean>(() => {
-    try {
-      return localStorage.getItem(RAIL_STORAGE_KEY) === "1";
-    } catch {
-      return false;
-    }
-  });
+  const [railCollapsed, setRailCollapsed] = useState<boolean>(readRailCollapsed);
   const abortRef = useRef<AbortController | null>(null);
   const scrollRef = useRef<HTMLDivElement>(null);
 
-  useEffect(() => {
-    try {
-      localStorage.setItem(RAIL_STORAGE_KEY, railCollapsed ? "1" : "0");
-    } catch {
-      // ignore
-    }
-  }, [railCollapsed]);
+  useEffect(() => writeRailCollapsed(railCollapsed), [railCollapsed]);
 
   const attachedJob = useMemo(
     () => jobs.find((j) => j.id === attachedJobId) || null,
@@ -251,6 +239,24 @@ export default function ChatAssistant() {
       });
     };
 
+    if (isDemo()) {
+      // Demo: "stream" a pre-written example reply locally; nothing reaches the backend.
+      try {
+        await demoDelay(600);
+        const reply = demoChatReply(text, attachedJob ? { company: attachedJob.company, role: attachedJob.role } : null);
+        const words = reply.split(/(?<=\s)/);
+        for (let i = 0; i < words.length; i += 6) {
+          if (controller.signal.aborted) break;
+          upsert(words.slice(i, i + 6).join(""));
+          await demoDelay(20);
+        }
+      } finally {
+        setIsStreaming(false);
+        abortRef.current = null;
+      }
+      return;
+    }
+
     try {
       const { data: sessionData } = await supabase.auth.getSession();
       const token = sessionData.session?.access_token;
@@ -344,7 +350,7 @@ export default function ChatAssistant() {
         className="grid gap-4 lg:gap-6 h-[calc(100vh-6.5rem)] transition-[grid-template-columns] duration-300"
         style={{
           gridTemplateColumns: railCollapsed
-            ? "1fr 44px"
+            ? "1fr 48px"
             : "1fr 300px",
         }}
       >
@@ -353,7 +359,9 @@ export default function ChatAssistant() {
           {/* Header */}
           <div className="flex items-center justify-between gap-3 px-4 md:px-5 py-4 border-b border-border">
             <div className="flex items-center gap-4 min-w-0">
-              <Logo size={64} className="shrink-0" />
+              <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-accent/15 text-accent">
+                <MessageSquare className="h-5 w-5" aria-hidden="true" />
+              </span>
               <div className="min-w-0">
                 <h1 className="text-base md:text-lg font-semibold leading-tight truncate">{t("assistant.chat.title")}</h1>
                 <p className="text-xs text-muted-foreground leading-tight truncate mt-1">{t("assistant.chat.tagline")}</p>
@@ -502,6 +510,11 @@ export default function ChatAssistant() {
             </div>
           )}
 
+          {isDemo() && (
+            <div role="note" className="text-xs px-4 py-1.5 bg-accent/10 border-b border-accent/20 text-foreground">
+              {t("ux.demo.chatNotice")}
+            </div>
+          )}
           {hasCv === false && shareCv && (
             <div className="text-xs px-4 py-2 bg-warning/10 border-b border-warning/30 text-foreground">
               No baseline CV found. Add one in Settings so the agent knows your background.
