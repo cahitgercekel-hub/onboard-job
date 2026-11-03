@@ -25,6 +25,7 @@ export function LocationCombobox({ id, value, onChange }: Props) {
   const toggle = (name: string) => {
     const has = selected.includes(name);
     onChange(formatLocations(has ? selected.filter((s) => s !== name) : [...selected, name]));
+    setQuery(""); // otherwise the next search is appended to the previous one ("munichheilbr")
   };
   const add = (name: string) => {
     if (!selected.includes(name)) onChange(formatLocations([...selected, name]));

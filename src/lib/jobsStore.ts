@@ -452,9 +452,10 @@ export function useJobs() {
     if (error) toast.error(error.message);
   }, [jobs]);
 
-  const unarchiveJob = useCallback(async (id: string) => {
+  /** `status` overrides the stored previous status (Undo passes it, since its job snapshot predates the archive). */
+  const unarchiveJob = useCallback(async (id: string, status?: JobStatus) => {
     const current = jobs.find((j) => j.id === id);
-    const restoreTo: JobStatus = (current?.previousStatus as JobStatus | null) ?? "saved";
+    const restoreTo: JobStatus = status ?? (current?.previousStatus as JobStatus | null) ?? "saved";
     const { error } = await supabase
       .from("jobs")
       .update({

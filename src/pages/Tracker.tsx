@@ -179,7 +179,7 @@ export default function Tracker() {
           <div className="min-w-0">
             <h1 className="text-xl md:text-2xl font-semibold tracking-tight">{t("tracker.title")}</h1>
             <p className="text-xs md:text-sm text-muted-foreground mt-0.5">
-              <span>{t("tracker.jobs", { count: jobs.length })}</span>
+              <span>{t("tracker.jobs", { count: jobs.filter((j) => j.status !== "archived").length })}</span>
               <span className="hidden md:inline"> · {t("common.dragHint")}</span>
             </p>
           </div>
@@ -414,7 +414,7 @@ export default function Tracker() {
           toast(t("ux.job.archived"), {
             duration: 5000,
             position: "bottom-right",
-            action: { label: t("common.undo"), onClick: () => updateJob(snapshot.id, { status: snapshot.status }) },
+            action: { label: t("common.undo"), onClick: () => unarchiveJob(snapshot.id, snapshot.status) },
           });
         } : undefined}
       />
