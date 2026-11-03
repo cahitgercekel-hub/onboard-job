@@ -3,7 +3,14 @@
 // so each job has its own conversation that persists across reloads and only
 // gets cleared when the user explicitly resets it or wipes their data from Settings.
 
+import { isDemo } from "@/lib/demo/demoMode";
+
 export type ChatMsg = { role: "user" | "assistant"; content: string };
+
+// Demo chats live in sessionStorage so they disappear with the tab, like the rest of the demo data.
+function store(): Storage {
+  return isDemo() ? sessionStorage : localStorage;
+}
 
 const STORAGE_PREFIX = "jat.chat.v1";
 const INDEX_KEY = `${STORAGE_PREFIX}.index`;
@@ -18,12 +25,12 @@ function safeParse<T>(raw: string | null, fallback: T): T {
 }
 
 function readIndex(): string[] {
-  return safeParse<string[]>(localStorage.getItem(INDEX_KEY), []);
+  return safeParse<string[]>(store().getItem(INDEX_KEY), []);
 }
 
 function writeIndex(keys: string[]) {
   try {
-    localStorage.setItem(INDEX_KEY, JSON.stringify(keys));
+    store().setItem(INDEX_KEY, JSON.stringify(keys));
   } catch {
     // ignore
   }
@@ -40,7 +47,7 @@ export function loadChatThread(
   jobId: string | null | undefined,
 ): ChatMsg[] {
   try {
-    return safeParse<ChatMsg[]>(localStorage.getItem(threadKey(userId, jobId)), []);
+    return safeParse<ChatMsg[]>(store().getItem(threadKey(userId, jobId)), []);
   } catch {
     return [];
   }
@@ -54,12 +61,12 @@ export function saveChatThread(
   const key = threadKey(userId, jobId);
   try {
     if (!messages.length) {
-      localStorage.removeItem(key);
+      store().removeItem(key);
       const idx = readIndex().filter((k) => k !== key);
       writeIndex(idx);
       return;
     }
-    localStorage.setItem(key, JSON.stringify(messages));
+    store().setItem(key, JSON.stringify(messages));
     const idx = readIndex();
     if (!idx.includes(key)) {
       idx.push(key);
@@ -76,7 +83,7 @@ export function clearChatThread(
 ) {
   const key = threadKey(userId, jobId);
   try {
-    localStorage.removeItem(key);
+    store().removeItem(key);
     writeIndex(readIndex().filter((k) => k !== key));
   } catch {
     // ignore
@@ -87,12 +94,12 @@ export function clearChatThread(
 export function clearAllChats() {
   try {
     const idx = readIndex();
-    for (const key of idx) localStorage.removeItem(key);
-    localStorage.removeItem(INDEX_KEY);
+    for (const key of idx) store().removeItem(key);
+    store().removeItem(INDEX_KEY);
     // Defensive sweep: catch any orphaned legacy keys with our prefix
-    for (let i = localStorage.length - 1; i >= 0; i--) {
-      const k = localStorage.key(i);
-      if (k && k.startsWith(`${STORAGE_PREFIX}.`)) localStorage.removeItem(k);
+    for (let i = store().length - 1; i >= 0; i--) {
+      const k = store().key(i);
+      if (k && k.startsWith(`${STORAGE_PREFIX}.`)) store().removeItem(k);
     }
   } catch {
     // ignore
