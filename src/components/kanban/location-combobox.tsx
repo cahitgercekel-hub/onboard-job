@@ -53,7 +53,7 @@ export function LocationCombobox({ id, value, onChange }: Props) {
             <CommandInput value={query} onValueChange={setQuery} placeholder={t("ux.job.locationSearch")} />
             <CommandList>
               {results.length === 0 && !q && <CommandEmpty>{t("ux.job.locationNone")}</CommandEmpty>}
-              {q && !exact && (
+              {q && !exact && results.length === 0 && (
                 <CommandGroup>
                   <CommandItem value={`__add__${q}`} onSelect={() => add(q)}>
                     <Plus className="h-4 w-4" />
