@@ -13,12 +13,17 @@ import { getPasswordScore } from "@/components/PasswordStrength";
 import { Logo } from "@/components/Logo";
 import { LegalFooterLinks } from "@/pages/legal/LegalLayout";
 import { enterDemo } from "@/lib/demo/demoMode";
+import { Languages } from "lucide-react";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { usePrefs } from "@/lib/preferences";
+import { LANGUAGES } from "@/lib/i18n";
 import { WelcomeTour, hasSeenWelcome, markWelcomeSeen } from "@/components/shared/welcome-tour";
 import { toast } from "sonner";
 
 export default function AuthPage() {
   const { t } = useTranslation();
   const { session, loading } = useAuth();
+  const { language, setLanguage } = usePrefs();
   const navigate = useNavigate();
   const location = useLocation();
   const from = (location.state as any)?.from || "/";
@@ -38,7 +43,7 @@ export default function AuthPage() {
   }, [loading, session]);
 
   const startDemo = () => {
-    if (!enterDemo()) toast.error("Your browser blocks session storage, which the demo needs.");
+    if (!enterDemo()) toast.error(t("ux.auth.storageBlocked"));
   };
 
   useEffect(() => {
@@ -125,10 +130,10 @@ export default function AuthPage() {
             className="w-full"
             onClick={startDemo}
           >
-            Try the demo — no sign-up
+            {t("ux.auth.tryDemo")}
           </Button>
           <p className="mt-2 text-center text-[11px] leading-snug text-muted-foreground">
-            Sample data in your browser tab only. Nothing is sent to our servers; AI answers in the demo are pre-written examples.
+            {t("ux.auth.demoNote")}
           </p>
         </div>
 
@@ -136,8 +141,7 @@ export default function AuthPage() {
           <GoogleIcon /> {t("auth.googleBtn")}
         </Button>
         <p className="mb-4 text-[11px] leading-snug text-muted-foreground text-center">
-          Google shares only your name, email address and profile picture with ONboard — no access to Gmail, Drive
-          or other Google data.
+          {t("ux.auth.googleNote")}
         </p>
 
         <div className="relative my-4">
@@ -181,21 +185,32 @@ export default function AuthPage() {
             {/* New sign-ups are disabled on the server (Lovable Cloud → Users → Settings → Disable sign-up).
                 Existing accounts can still log in. Restore the sign-up form (with its Terms/Privacy note, see commit 5d355ad) when the beta opens. */}
             <div className="space-y-2 rounded-md border border-border bg-muted/40 p-4 text-sm">
-              <p className="font-medium text-foreground">ONboard is in a closed beta.</p>
+              <p className="font-medium text-foreground">{t("ux.auth.betaTitle")}</p>
               <p className="text-muted-foreground">
-                New sign-ups are not open yet. If you'd like to try it, write to{" "}
+                {t("ux.auth.betaBody")}{" "}
                 <a href="mailto:info@cahitgercekel.com?subject=ONboard%20beta" className="underline underline-offset-2">
                   info@cahitgercekel.com
                 </a>.
               </p>
               <p className="text-xs text-muted-foreground">
-                How ONboard handles data: <Link to="/privacy" className="underline underline-offset-2">Privacy Notice</Link>.
+                {t("ux.auth.betaPrivacy")} <Link to="/privacy" className="underline underline-offset-2">{t("ux.auth.privacyNotice")}</Link>.
               </p>
             </div>
           </TabsContent>
         </Tabs>
 
-        <LegalFooterLinks className="mt-6 border-t border-border pt-4" />
+        <div className="mt-6 border-t border-border pt-4 flex flex-wrap items-center justify-center gap-x-4 gap-y-2">
+          <LegalFooterLinks />
+          <Select value={language} onValueChange={setLanguage}>
+            <SelectTrigger className="h-7 w-auto gap-1.5 border-0 bg-transparent px-2 text-xs text-muted-foreground shadow-none" aria-label={t("ux.auth.language")}>
+              <Languages className="h-3.5 w-3.5" aria-hidden="true" />
+              <SelectValue />
+            </SelectTrigger>
+            <SelectContent>
+              {LANGUAGES.map((l) => <SelectItem key={l.code} value={l.code}>{l.label}</SelectItem>)}
+            </SelectContent>
+          </Select>
+        </div>
       </div>
     </div>
   );

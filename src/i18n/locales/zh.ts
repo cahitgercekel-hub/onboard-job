@@ -327,6 +327,21 @@ export const zh = {
     }
   },
   ux: {
+    auth: {
+      tryDemo: "Try the demo — no sign-up",
+      demoNote: "Sample data in your browser tab only. Nothing is sent to our servers; AI answers in the demo are pre-written examples.",
+      googleNote: "Google shares only your name, email address and profile picture with ONboard — no access to Gmail, Drive or other Google data.",
+      betaTitle: "ONboard is in a closed beta.",
+      betaBody: "New sign-ups are not open yet. If you'd like to try it, write to",
+      betaPrivacy: "How ONboard handles data:",
+      privacyNotice: "Privacy Notice",
+      storageBlocked: "Your browser blocks session storage, which the demo needs.",
+      language: "Language",
+    },
+    card: {
+      openLink: "Open job posting",
+      deleteJob: "Delete job",
+    },
     welcome: {
       dialogLabel: "Welcome tour",
       stepOf: "Step {{n}} of {{total}}",
@@ -360,6 +375,7 @@ export const zh = {
       fillSample: "Fill with sample data",
       sampleFilled: "Sample data filled in.",
       chatNotice: "Demo: replies are pre-written examples, not generated live.",
+      privacyAi: "In the demo, AI tools show pre-written examples. Nothing is sent to an AI provider.",
       autoFilled: "Example output (demo): job filled from a sample posting — review and save.",
     },
     ai: {
