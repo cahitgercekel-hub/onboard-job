@@ -4,8 +4,7 @@ import { Button } from "@/components/ui/button";
 import type { LucideIcon } from "lucide-react";
 import { PremiumRail, type PremiumTool } from "@/components/assistant/PremiumRail";
 import { useTranslation } from "react-i18next";
-import { readRailCollapsed, writeRailCollapsed } from "@/components/assistant/PremiumRail";
-import { DemoUpgradeGuard } from "@/components/assistant/PremiumRail";
+import { readRailCollapsed, writeRailCollapsed, guardDemoUpgrade } from "@/components/assistant/PremiumRail";
 
 export function AssistantToolShell({
   icon: Icon,
@@ -68,7 +67,7 @@ export function AssistantToolShell({
 
         {/* Mobile fallback CTA */}
         <div className="lg:hidden col-span-full">
-          <Link to="/billing" onClick={DemoUpgradeGuard}>
+          <Link to="/billing" onClick={guardDemoUpgrade}>
             <Button className="w-full bg-gradient-premium text-white border-0 hover:opacity-95">
               {t("assistant.upgradeBtn")}
             </Button>
