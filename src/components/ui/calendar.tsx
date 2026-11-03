@@ -11,6 +11,11 @@ function Calendar({ className, classNames, showOutsideDays = true, ...props }: C
   return (
     <DayPicker
       showOutsideDays={showOutsideDays}
+      weekStartsOn={1}
+      formatters={{
+        formatWeekdayName: (date) =>
+          ["Su", "Mo", "Tu", "We", "Th", "Fr", "Sa"][date.getDay()],
+      }}
       className={cn("p-3", className)}
       classNames={{
         months: "flex flex-col sm:flex-row space-y-4 sm:space-x-4 sm:space-y-0",
