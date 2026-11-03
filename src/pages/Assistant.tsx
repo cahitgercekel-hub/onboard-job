@@ -25,6 +25,7 @@ import { isDemo } from "@/lib/demo/demoMode";
 import {
   demoDelay, demoToolResult, DEMO_POLISH_SAMPLE, DEMO_SAMPLE_CV, DEMO_TONE_SAMPLE, DEMO_TRANSLATE_SAMPLE,
 } from "@/lib/demo/demo-examples";
+import { PolishDiffView } from "@/components/assistant/polish-diff-view";
 import { AiOffNote, DemoExampleLabel, DemoSampleButton } from "@/components/shared/demo-bits";
 
 type Tool = "tone" | "translate" | "polish" | "interview" | "cv";
@@ -366,12 +367,13 @@ export function PolishTool() {
   const [language, setLanguage] = useState("English");
   const [businessGerman, setBusinessGerman] = useState(false);
   const [result, setResult] = useState<PolishResult | null>(null);
+  const [source, setSource] = useState("");
   const [loading, setLoading] = useState(false);
 
   const run = async () => {
     if (!text.trim()) return toast.error("Paste some text first.");
     if (!(await requestAi("polish"))) return;
-    setLoading(true); setResult(null);
+    setLoading(true); setResult(null); setSource(text);
     try {
       const r = await runStructured<PolishResult>("polish", { text, language, businessGerman });
       if (typeof r === "string") throw new Error("Unexpected response format");
@@ -432,30 +434,7 @@ export function PolishTool() {
             {t("assistant.polish.empty")}
           </div>
         ) : (
-          <div className="space-y-4">
-            <div className="surface-card p-5 shadow-md ring-1 ring-accent/30 bg-card">
-              <div className="flex items-center justify-between gap-2 mb-3 flex-wrap">
-                <Badge variant="secondary" className="bg-accent/15 text-accent border-accent/20">
-                  <Sparkles className="h-3 w-3" /> {t("assistant.polish.polishedVersion")}
-                </Badge>
-                <DemoExampleLabel />
-              </div>
-              <div className="text-sm text-foreground/90 whitespace-pre-wrap leading-relaxed">{result.polished}</div>
-            </div>
-            
-            <div className="surface-card p-5 bg-muted/40">
-              <div className="text-[11px] font-medium uppercase tracking-wider text-muted-foreground mb-2">
-                {t("assistant.polish.keyChanges")} ({result.changes.length})
-              </div>
-              <ul className="grid sm:grid-cols-2 gap-x-6 gap-y-2">
-                {result.changes.map((c, i) => (
-                  <li key={i} className="text-sm text-foreground/90 flex gap-2">
-                    <span className="text-accent mt-0.5">•</span><span>{c}</span>
-                  </li>
-                ))}
-              </ul>
-            </div>
-          </div>
+          <PolishDiffView original={source} polished={result.polished} changes={result.changes} />
         )}
       </div>
     </div>
