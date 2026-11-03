@@ -700,7 +700,7 @@ export function CvAnalyzer() {
   const rules = useMemo(() => (text.trim() ? ruleCheckCv(text) : null), [text]);
   const finalScores = useMemo(() => (aiResult && rules ? combineScores(aiResult.scores, rules) : null), [aiResult, rules]);
 
-  const limitReached = !isPro && scansUsed >= SCAN_LIMIT;
+  const limitReached = !isPro && !isDemo() && scansUsed >= SCAN_LIMIT;
 
   const run = async () => {
     if (!text.trim()) return toast.error("Paste or upload your CV first.");
@@ -711,7 +711,7 @@ export function CvAnalyzer() {
       const r = await runStructured<CvAiResult>("cv", { cv: text });
       if (typeof r === "string") throw new Error("Unexpected response format");
       setAiResult(r);
-      if (!isPro) { bumpScanCount(); setScansUsed(readScanCount()); }
+      if (!isPro && !isDemo()) { bumpScanCount(); setScansUsed(readScanCount()); }
     } catch (e: any) { toast.error(e.message); }
     finally { setLoading(false); }
   };
