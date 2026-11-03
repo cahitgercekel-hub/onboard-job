@@ -289,6 +289,16 @@ export const en = {
     cv: {
       uploadPdf: "Upload your CV (PDF)",
       scanLimitLabel: "Daily CV scans",
+      tipsList: {
+        noEmail: "Critical: add an email address so recruiters can contact you.",
+        noPhone: "Critical: add a phone number so you aren't skipped for phone screens.",
+        lowMetrics: "Add more metrics. Your CV only has {{count}} numbers/results. Recruiters look for %, € and scale.",
+        weakVerbs: "Replace weak phrases like 'responsible for' with active verbs like 'Led', 'Built' or 'Optimised'.",
+        fewSections: "Standardise your headings. Make sure you have clearly labelled 'Experience', 'Education' and 'Skills' sections.",
+        fancyChars: "ATS warning: remove complex graphics or unusual bullet symbols that can break parsing.",
+        shortCv: "Length warning: your CV has only {{count}} words. Expand on your most impactful results.",
+        longCv: "Length warning: {{count}} words is too long for most roles. Aim for 2 pages (about 900 words).",
+      },
       subtitle: "Score your CV across language, formatting, ATS friendliness, and keywords — with actionable tips.",
       premium: {
         ats: { title: "Detailed ATS Simulation", desc: "Per-section parser report and recruiter heatmap." },
