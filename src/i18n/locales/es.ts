@@ -327,6 +327,23 @@ export const es = {
     }
   },
   ux: {
+    polish: {
+      showChanges: "Show changes",
+      cleanText: "Clean text",
+      viewLabel: "Polished text view",
+      spelling: "Spelling & grammar",
+      style: "Style & clarity",
+      removed: "removed",
+      added: "added",
+      copy: "Copy clean text",
+      copied: "Copied to clipboard",
+    },
+    sidebar: {
+      homeLink: "ONboard — go to Dashboard",
+      viewPlans: "View plans",
+      collapse: "Collapse sidebar",
+      expand: "Expand sidebar",
+    },
     auth: {
       tryDemo: "Try the demo — no sign-up",
       demoNote: "Sample data in your browser tab only. Nothing is sent to our servers; AI answers in the demo are pre-written examples.",

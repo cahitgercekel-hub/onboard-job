@@ -60,6 +60,12 @@ export default {
           foreground: "hsl(var(--premium-foreground))",
           soft: "hsl(var(--premium-soft))",
         },
+        diff: {
+          spelling: "hsl(var(--diff-spelling))",
+          "spelling-soft": "hsl(var(--diff-spelling-soft))",
+          style: "hsl(var(--diff-style))",
+          "style-soft": "hsl(var(--diff-style-soft))",
+        },
         column: {
           saved: "hsl(var(--col-saved))",
           applied: "hsl(var(--col-applied))",

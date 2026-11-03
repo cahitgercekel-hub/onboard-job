@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
-import { NavLink, Outlet } from "react-router-dom";
+import { Link, NavLink, Outlet } from "react-router-dom";
 import {
-  LayoutGrid, BarChart3, Settings as SettingsIcon, Menu,
+  LayoutGrid, BarChart3, Settings as SettingsIcon, Menu, PanelLeftClose, PanelLeftOpen,
   MessageSquare, Sparkles, Languages, Wand2, Target, FileText, CreditCard,
 } from "lucide-react";
 import { useTranslation } from "react-i18next";
@@ -105,16 +105,45 @@ export default function AppLayout() {
     );
   };
 
+  const toggleLabel = collapsed ? t("ux.sidebar.expand") : t("ux.sidebar.collapse");
+  const ActionIcon = collapsed ? PanelLeftOpen : PanelLeftClose;
   const toggleBtn = (
-    <button
-      type="button"
-      onClick={() => setCollapsed((c) => !c)}
-      aria-label="Toggle sidebar"
-      className={cn(iconBtn, "text-sidebar-foreground/80 hover:bg-sidebar-accent/60 hover:text-sidebar-foreground")}
-    >
-      <Menu className="h-4 w-4" />
-    </button>
+    <Tooltip>
+      <TooltipTrigger asChild>
+        <button
+          type="button"
+          onClick={() => setCollapsed((c) => !c)}
+          aria-label={toggleLabel}
+          aria-expanded={!collapsed}
+          className={cn(iconBtn, "group relative text-sidebar-foreground/80 hover:bg-sidebar-accent/60 hover:text-sidebar-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring")}
+        >
+          <Menu className="h-4 w-4 absolute transition-all duration-200 group-hover:opacity-0 group-hover:scale-75 group-focus-visible:opacity-0 group-focus-visible:scale-75" />
+          <ActionIcon className="h-4 w-4 absolute opacity-0 scale-75 transition-all duration-200 group-hover:opacity-100 group-hover:scale-100 group-focus-visible:opacity-100 group-focus-visible:scale-100" />
+        </button>
+      </TooltipTrigger>
+      <TooltipContent side="right">{toggleLabel}</TooltipContent>
+    </Tooltip>
   );
+
+  const planBadge =
+    plan === "free" ? (
+      <Tooltip>
+        <TooltipTrigger asChild>
+          <Link
+            to="/billing"
+            aria-label={t("ux.sidebar.viewPlans")}
+            className="rounded-full transition-opacity hover:opacity-80 hover:[&>span]:bg-sidebar-accent hover:[&>span]:text-sidebar-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+          >
+            <PlanBadge plan={plan} className="cursor-pointer transition-colors" />
+          </Link>
+        </TooltipTrigger>
+        <TooltipContent>{t("ux.sidebar.viewPlans")}</TooltipContent>
+      </Tooltip>
+    ) : (
+      <PlanBadge plan={plan} />
+    );
+
+  const homeLinkClass = "rounded-md focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring";
 
   return (
     <TooltipProvider delayDuration={150}>
@@ -133,14 +162,16 @@ export default function AppLayout() {
               </div>
             ) : (
               <>
-                <Logo size={64} src="/onboard_logo.png" />
+                <Link to="/" aria-label={t("ux.sidebar.homeLink")} className={cn(homeLinkClass, "shrink-0")}>
+                  <Logo size={64} src="/onboard_logo.png" />
+                </Link>
                 <div className="min-w-0 flex-1 flex flex-col justify-between h-[64px] py-1.5 ml-1">
                   <div className="flex items-start">
-                    <PlanBadge plan={plan} />
+                    {planBadge}
                   </div>
-                  <div className="text-[11px] font-medium text-muted-foreground leading-tight">
+                  <Link to="/" tabIndex={-1} aria-hidden="true" className="text-[11px] font-medium text-muted-foreground leading-tight hover:text-sidebar-foreground">
                     {t("app.tagline")}
-                  </div>
+                  </Link>
                 </div>
                 {toggleBtn}
               </>
@@ -203,10 +234,11 @@ export default function AppLayout() {
           {/* Mobile top header */}
           <header className="md:hidden flex items-center border-b border-border px-4 h-12 bg-card">
             <div className="flex items-center gap-2">
-              <Logo size={28} />
-              <div className="text-sm font-semibold flex items-center gap-1.5">
-                {t("app.name")} <PlanBadge plan={plan} />
-              </div>
+              <Link to="/" aria-label={t("ux.sidebar.homeLink")} className={cn(homeLinkClass, "flex items-center gap-2")}>
+                <Logo size={28} />
+                <span className="text-sm font-semibold">{t("app.name")}</span>
+              </Link>
+              {planBadge}
             </div>
           </header>
 
