@@ -58,9 +58,13 @@ export function JobDialog({ open, onOpenChange, initialStatus = "saved", job, on
   const [cvVersionId, setCvVersionId] = useState<string>(job?.cvVersionId ?? "");
   const [scoring, setScoring] = useState(false);
   const [coverOpen, setCoverOpen] = useState(false);
+  const [demoFit, setDemoFit] = useState<{ score: number; reasoning: string } | null>(null);
+  const fitScore = demoFit?.score ?? job?.fitnessScore;
+  const fitReasoning = demoFit?.reasoning ?? job?.fitnessReasoning;
 
   useEffect(() => {
     if (!open) return;
+    setDemoFit(null);
     setCompany(job?.company ?? "");
     setRole(job?.role ?? "");
     setUrl(job?.url ?? "");
@@ -87,6 +91,7 @@ export function JobDialog({ open, onOpenChange, initialStatus = "saved", job, on
         const ex = demoFitness(job.company, job.role);
         const { error } = await supabase.from("jobs").update({ fitness_score: ex.score, fitness_reasoning: ex.reasoning }).eq("id", job.id);
         if (error) throw error;
+        setDemoFit(ex);
         toast.success(`${t("ux.demo.exampleLabel")}: ${t("ux.job.matchScore")} ${ex.score}`);
         return;
       }
@@ -238,15 +243,15 @@ export function JobDialog({ open, onOpenChange, initialStatus = "saved", job, on
               )}
             </div>
             <Textarea id="jd" rows={4} value={jobDescription} onChange={(e) => setJobDescription(e.target.value)} placeholder="Paste the JD here — used for AI Fitness Score & Interview Prep…" />
-            {job?.fitnessReasoning && (
+            {fitReasoning && (
               <div className="mt-2 flex gap-3 rounded-md border border-border bg-muted/30 p-3">
-                <FitnessRing score={job.fitnessScore} size={44} stroke={5} />
+                <FitnessRing score={fitScore} size={44} stroke={5} />
                 <div className="min-w-0 flex-1">
                   <div className="flex flex-wrap items-center gap-2 mb-0.5">
                     <span className="text-[11px] font-medium text-muted-foreground uppercase tracking-wide">{t("ux.job.matchScore")}</span>
                     <DemoExampleLabel />
                   </div>
-                  <p className="text-xs text-foreground leading-relaxed">{job.fitnessReasoning}</p>
+                  <p className="text-xs text-foreground leading-relaxed">{fitReasoning}</p>
                 </div>
               </div>
             )}
