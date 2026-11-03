@@ -29,6 +29,12 @@ export function editDistance(a: string, b: string): number {
   return prev[n];
 }
 
+/** Common agreement / article swaps that exceed edit distance 2 but are grammar fixes. */
+const GRAMMAR_PAIRS = new Set([
+  "is|are", "was|were", "has|have", "do|does", "a|an", "this|these", "that|those", "its|it's", "your|you're", "their|they're", "there|their",
+]);
+const isGrammarPair = (x: string, y: string) => GRAMMAR_PAIRS.has(`${x}|${y}`) || GRAMMAR_PAIRS.has(`${y}|${x}`);
+
 /** Spelling & grammar if every changed word is a small edit, or only punctuation/case changed. */
 export function classifyChange(original: string, next: string): ChangeKind {
   const a = tokenize(original).filter((t) => !isSpace(t));
@@ -38,7 +44,7 @@ export function classifyChange(original: string, next: string): ChangeKind {
   // Only punctuation added/removed/changed.
   if (aw.length === bw.length && aw.every((w, i) => w.toLowerCase() === bw[i].toLowerCase())) return "spelling";
   if (aw.length !== bw.length || aw.length === 0) return "style";
-  const small = aw.every((w, i) => editDistance(w.toLowerCase(), bw[i].toLowerCase()) <= 2);
+  const small = aw.every((w, i) => editDistance(w.toLowerCase(), bw[i].toLowerCase()) <= 2 || isGrammarPair(w.toLowerCase(), bw[i].toLowerCase()));
   return small ? "spelling" : "style";
 }
 
