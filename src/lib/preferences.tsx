@@ -1,6 +1,7 @@
 import { createContext, useCallback, useContext, useEffect, useMemo, useState, type ReactNode } from "react";
 import { useTranslation } from "react-i18next";
 import { format as fmt } from "date-fns";
+import { isDemo } from "@/lib/demo/demoMode";
 
 export type Theme = "light" | "dark" | "system";
 export type DateFormat = "DD.MM.YYYY" | "MM/DD/YYYY";
@@ -41,7 +42,7 @@ function applyTheme(theme: Theme) {
 }
 
 export function PreferencesProvider({ children }: { children: ReactNode }) {
-  const [prefs, setPrefs] = useState<Prefs>(() => readPrefs());
+  const [prefs, setPrefs] = useState<Prefs>(() => (isDemo() ? { ...readPrefs(), language: "en" } : readPrefs()));
   const { i18n } = useTranslation();
 
   useEffect(() => {
@@ -58,16 +59,23 @@ export function PreferencesProvider({ children }: { children: ReactNode }) {
     if (i18n.language !== prefs.language) i18n.changeLanguage(prefs.language);
   }, [prefs.language, i18n]);
 
-  const persist = (next: Prefs) => {
-    setPrefs(next);
-    localStorage.setItem(STORAGE, JSON.stringify(next));
+  // In the demo the language only applies to this tab: it is kept in state and never saved.
+  const persist = (patch: Partial<Prefs>) => {
+    if (isDemo() && patch.language !== undefined) {
+      const language = patch.language;
+      setPrefs((p) => ({ ...p, language }));
+      return;
+    }
+    const stored = { ...readPrefs(), ...patch };
+    localStorage.setItem(STORAGE, JSON.stringify(stored));
+    setPrefs((p) => (isDemo() ? { ...stored, language: p.language } : stored));
   };
 
-  const setTheme = useCallback((theme: Theme) => persist({ ...readPrefs(), theme }), []);
-  const setLanguage = useCallback((language: string) => persist({ ...readPrefs(), language }), []);
-  const setDateFormat = useCallback((dateFormat: DateFormat) => persist({ ...readPrefs(), dateFormat }), []);
-  const setGhostingDays = useCallback((ghostingDays: number) => persist({ ...readPrefs(), ghostingDays }), []);
-  const setThirdPartyLogos = useCallback((thirdPartyLogos: boolean) => persist({ ...readPrefs(), thirdPartyLogos }), []);
+  const setTheme = useCallback((theme: Theme) => persist({ theme }), []);
+  const setLanguage = useCallback((language: string) => persist({ language }), []);
+  const setDateFormat = useCallback((dateFormat: DateFormat) => persist({ dateFormat }), []);
+  const setGhostingDays = useCallback((ghostingDays: number) => persist({ ghostingDays }), []);
+  const setThirdPartyLogos = useCallback((thirdPartyLogos: boolean) => persist({ thirdPartyLogos }), []);
 
   const formatDate = useCallback(
     (iso: string) => {

@@ -29,6 +29,8 @@ const AiAccessContext = createContext<Ctx>({
   requestAi: async () => false,
 });
 
+const DEMO_EXAMPLE_FEATURES = new Set<AiFeature>(["tone", "translate", "polish", "interview", "cv_review", "chat", "extract", "fitness"]);
+
 const ackKey = (userId: string) => `jat.ai.ack.${AI_NOTICE_VERSION}.${userId}`;
 
 function readAcks(userId: string): string[] {
@@ -96,6 +98,8 @@ export function AiAccessProvider({ children }: { children: ReactNode }) {
   const requestAi = useCallback(async (feature: AiFeature) => {
     if (!user) return false;
     if (isDemo()) {
+      // Demo: these tools show pre-written examples locally; the rest stay unavailable.
+      if (DEMO_EXAMPLE_FEATURES.has(feature)) return true;
       toast.info(DEMO_AI_MESSAGE);
       return false;
     }
