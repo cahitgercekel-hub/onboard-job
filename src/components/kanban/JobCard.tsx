@@ -10,6 +10,7 @@ import { FitnessRing } from "@/components/FitnessRing";
 import { useCvVersions } from "@/lib/cvVersionsStore";
 import { CompanyLogo } from "@/components/CompanyLogo";
 import { useTranslation } from "react-i18next";
+import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
 
 interface Props {
   job: Job;
@@ -69,17 +70,16 @@ export function JobCard({ job, onClick, onArchive: _onArchive, onDelete, overlay
       )}
     >
       {/* Top: logo + title + match ring */}
-      <div className="flex items-start gap-3">
-        <CompanyLogo company={job.company} url={job.url} size={36} />
-        <div className="min-w-0 flex-1">
-          <div className="text-sm font-semibold text-foreground leading-tight line-clamp-2">{job.role}</div>
-          <div className="text-xs font-medium text-foreground/80 truncate mt-1">{job.company}</div>
-        </div>
-        <div className="w-10 h-10 shrink-0 flex items-center justify-center" title={t("analytics.avgMatchScore")}>
-          {(job.fitnessScore ?? null) !== null && (
+      {/* Title uses the full card width (up to 2 lines); logo, company and score share the row below. */}
+      <div className="text-sm font-semibold text-foreground leading-snug line-clamp-2 break-words" title={job.role}>{job.role}</div>
+      <div className="mt-1.5 flex items-center gap-2">
+        <CompanyLogo company={job.company} url={job.url} size={24} />
+        <div className="min-w-0 flex-1 text-xs font-medium text-foreground/80 leading-snug break-words">{job.company}</div>
+        {(job.fitnessScore ?? null) !== null && (
+          <div className="shrink-0" title={t("ux.job.matchScore")}>
             <FitnessRing score={job.fitnessScore} variant="sm" />
-          )}
-        </div>
+          </div>
+        )}
       </div>
 
       {/* Tag pills */}
@@ -139,39 +139,46 @@ export function JobCard({ job, onClick, onArchive: _onArchive, onDelete, overlay
 
       {/* Footer: divider + status + actions */}
       <div className="mt-2.5 pt-2 border-t border-border flex items-center justify-between gap-2 text-[11px]">
-        <span className="inline-flex items-center gap-1 text-success font-medium truncate">
+        <span className="inline-flex items-center gap-1 text-success font-medium min-w-0">
           {job.dateApplied ? <Check className="h-3 w-3 shrink-0" /> : null}
-          <span className={cn("truncate", !job.dateApplied && "text-muted-foreground font-normal")}>{statusLabel}</span>
+          <span className={cn("whitespace-nowrap", !job.dateApplied && "text-muted-foreground font-normal")}>{statusLabel}</span>
         </span>
-        <div className="flex items-center gap-2 shrink-0">
+        <div className="flex items-center gap-0.5 shrink-0">
           {job.url && (
-            <a
-              href={job.url}
-              target="_blank"
-              rel="noopener noreferrer nofollow"
-              onClick={(e) => {
-                e.stopPropagation();
-                e.preventDefault();
-                window.open(job.url, "_blank", "noopener,noreferrer");
-              }}
-              className="inline-flex items-center gap-1 text-accent hover:text-accent/80 font-medium transition-colors"
-            >
-              <ExternalLink className="h-3 w-3" /> {t("common.link")}
-            </a>
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <a
+                  href={job.url}
+                  target="_blank"
+                  rel="noopener noreferrer nofollow"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    e.preventDefault();
+                    window.open(job.url, "_blank", "noopener,noreferrer");
+                  }}
+                  className="inline-flex h-7 w-7 items-center justify-center rounded-md text-accent hover:bg-accent/10 transition-colors"
+                  aria-label={t("ux.card.openLink")}
+                >
+                  <ExternalLink className="h-3.5 w-3.5" />
+                </a>
+              </TooltipTrigger>
+              <TooltipContent>{t("ux.card.openLink")}</TooltipContent>
+            </Tooltip>
           )}
           {onDelete && (
-            <>
-              {job.url && <span className="text-border">·</span>}
-              <button
-                type="button"
-                onClick={(e) => { e.stopPropagation(); onDelete(); }}
-                className="inline-flex items-center gap-1 text-destructive hover:text-destructive/80 font-medium transition-colors"
-                aria-label={t("common.delete")}
-                title={t("common.delete")}
-              >
-                <Trash2 className="h-3 w-3" /> {t("common.delete")}
-              </button>
-            </>
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <button
+                  type="button"
+                  onClick={(e) => { e.stopPropagation(); onDelete(); }}
+                  className="inline-flex h-7 w-7 items-center justify-center rounded-md text-destructive hover:bg-destructive/10 transition-colors"
+                  aria-label={t("ux.card.deleteJob")}
+                >
+                  <Trash2 className="h-3.5 w-3.5" />
+                </button>
+              </TooltipTrigger>
+              <TooltipContent>{t("ux.card.deleteJob")}</TooltipContent>
+            </Tooltip>
           )}
         </div>
       </div>

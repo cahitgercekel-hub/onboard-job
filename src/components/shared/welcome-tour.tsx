@@ -39,8 +39,12 @@ export function WelcomeTour({ open, onOpenChange, mode, onTryDemo }: Props) {
   const { t } = useTranslation();
   const [step, setStep] = useState(0);
 
+  // Marked seen only once the visitor closes, skips or finishes it (a reload before that shows it again).
   const change = (next: boolean) => {
-    if (!next) setStep(0);
+    if (!next) {
+      setStep(0);
+      markWelcomeSeen();
+    }
     onOpenChange(next);
   };
 

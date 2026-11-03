@@ -17,7 +17,7 @@ import { Languages } from "lucide-react";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { usePrefs } from "@/lib/preferences";
 import { LANGUAGES } from "@/lib/i18n";
-import { WelcomeTour, hasSeenWelcome, markWelcomeSeen } from "@/components/shared/welcome-tour";
+import { WelcomeTour, hasSeenWelcome } from "@/components/shared/welcome-tour";
 import { toast } from "sonner";
 
 export default function AuthPage() {
@@ -37,7 +37,6 @@ export default function AuthPage() {
   // First visit in this browser while signed out: show the welcome tour once.
   useEffect(() => {
     if (!loading && !session && !hasSeenWelcome()) {
-      markWelcomeSeen();
       setTourOpen(true);
     }
   }, [loading, session]);
