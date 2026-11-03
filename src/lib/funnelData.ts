@@ -34,6 +34,8 @@ export interface SankeyData {
 
 // Brand colors for active progressions (HSL strings — read from CSS vars at render time)
 const COLORS: Record<string, string> = {
+  tracked: "hsl(var(--primary))",
+  not_applied: "hsl(var(--col-saved))",
   saved: "hsl(var(--col-saved))",
   applied: "hsl(var(--col-applied))",
   interviewing: "hsl(var(--col-interviewing))",
@@ -69,6 +71,14 @@ function terminalLabel(job: Job): string | null {
   return null; // still active in pipeline
 }
 
+// Node ids for the funnel root and the never-applied branch.
+export const FUNNEL_TRACKED = "tracked";
+export const FUNNEL_NOT_APPLIED = "not_applied";
+
+/**
+ * Funnel starting from every tracked job (closed postings excluded). Jobs never applied to get
+ * their own "Not applied yet" branch, so Tracked = Not applied yet + Applied, matching the status cards.
+ */
 export function buildFunnelData(jobs: Job[]): SankeyData {
   const linkMap = new Map<string, number>();
   const usedNodes = new Set<string>();
@@ -82,33 +92,25 @@ export function buildFunnelData(jobs: Job[]): SankeyData {
   };
 
   for (const j of jobs) {
-    // Phase 2: completely exclude "Closed" jobs from the funnel calculations
     if (j.status === "archived" && j.archiveType === "closed") continue;
     const peak = highestStage(j);
     const peakRank = RANK[peak];
 
-    // Every job's journey starts at "Saved", then progresses up to its peak.
-    const chain: ("saved" | "applied" | "interviewing" | "offer")[] = ["saved"];
-    if (peakRank >= 2) chain.push("applied");
+    if (peakRank < 2) {
+      inc(FUNNEL_TRACKED, FUNNEL_NOT_APPLIED);
+      continue;
+    }
+
+    const chain: string[] = [FUNNEL_TRACKED, "applied"];
     if (peakRank >= 3) chain.push("interviewing");
     if (peakRank >= 4) chain.push("offer");
-
-    for (let i = 0; i < chain.length - 1; i++) {
-      inc(STAGE_LABEL[chain[i]], STAGE_LABEL[chain[i + 1]]);
-    }
+    for (let i = 0; i < chain.length - 1; i++) inc(chain[i], chain[i + 1]);
 
     const term = terminalLabel(j);
-    if (term) {
-      // Drop-off connects from the peak stage directly to the terminal node.
-      inc(STAGE_LABEL[peak], term);
-    }
-
-    // Always make sure peak node exists even with no outgoing links
-    usedNodes.add(STAGE_LABEL[peak]);
+    if (term) inc(STAGE_LABEL[peak], term);
   }
 
-  // Order: positive funnel first (top), terminal drop-offs last (bottom).
-  const orderedNodes = ["saved", "applied", "interviewing", "offer", "rejected", "ghosted"]
+  const orderedNodes = [FUNNEL_TRACKED, FUNNEL_NOT_APPLIED, "applied", "interviewing", "offer", "rejected", "ghosted"]
     .filter((n) => usedNodes.has(n));
 
   const nodes: SankeyNode[] = orderedNodes.map((id) => ({

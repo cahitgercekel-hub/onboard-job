@@ -1,43 +1,49 @@
 import { useMemo } from "react";
 import { ResponsiveSankey } from "@nivo/sankey";
 import type { Job } from "@/lib/types";
-import { buildFunnelData } from "@/lib/funnelData";
+import { buildFunnelData, FUNNEL_NOT_APPLIED, FUNNEL_TRACKED } from "@/lib/funnelData";
 import { useTranslation } from "react-i18next";
 
 interface Props {
   jobs: Job[];
 }
 
-// Custom layer that renders each node's label as two stacked lines:
-//   value (count) on top, stage name below — outside the node bar.
-function NodeLabelsLayer({ nodes }: any) {
+function useNodeLabel() {
   const { t } = useTranslation();
+  return (id: string) =>
+    id === FUNNEL_TRACKED ? t("ux.analytics.funnelTracked")
+      : id === FUNNEL_NOT_APPLIED ? t("ux.analytics.funnelNotApplied")
+      : t(`tracker.status.${id}`, { defaultValue: id.charAt(0).toUpperCase() + id.slice(1) });
+}
+
+// Labels sit outside the bands: the root to its left, end nodes to their right, and
+// middle nodes just above their bar (with a halo so links never reduce contrast).
+function NodeLabelsLayer({ nodes }: { nodes: ReadonlyArray<{ id: string; x0: number; x1: number; y0: number; y1: number; value?: number; sourceLinks?: unknown[]; targetLinks?: unknown[] }> }) {
+  const labelFor = useNodeLabel();
   return (
     <g>
-      {nodes.map((node: any) => {
-        // Heuristic: nodes on the right half get labels to the right; otherwise left.
-        // Nivo passes node.x0/x1; align "start" pushes terminals near their source.
-        const padding = 10;
-        const isRightSide = node.x1 > node.layout?.width / 2 || node.depth > 0 && node.sourceLinks?.length === 0;
-        const x = isRightSide ? node.x1 + padding : node.x0 - padding;
-        const anchor = isRightSide ? "start" : "end";
-        const y = (node.y0 + node.y1) / 2;
+      {nodes.map((node) => {
         const value = Math.round(node.value || 0);
-
-        // Map internal node ID (e.g. "saved") to translation key
-        const label = t(`tracker.status.${node.id}`, { defaultValue: node.id });
-
+        const text = `${value} ${labelFor(node.id)}`;
+        const isRoot = (node.targetLinks?.length ?? 0) === 0;
+        const isLeaf = (node.sourceLinks?.length ?? 0) === 0;
+        const midY = (node.y0 + node.y1) / 2;
+        const x = isRoot ? node.x0 - 8 : isLeaf ? node.x1 + 8 : (node.x0 + node.x1) / 2;
+        const y = isRoot || isLeaf ? midY : node.y0 - 8;
+        const anchor = isRoot ? "end" : isLeaf ? "start" : "middle";
         return (
           <text
             key={node.id}
             x={x}
             y={y}
             textAnchor={anchor}
-            dominantBaseline="middle"
-            style={{ fill: "hsl(var(--foreground))", fontSize: 11, fontWeight: 500, pointerEvents: "none" }}
+            dominantBaseline={isRoot || isLeaf ? "middle" : "auto"}
+            style={{
+              fill: "hsl(var(--foreground))", fontSize: 12, fontWeight: 600, pointerEvents: "none",
+              paintOrder: "stroke", stroke: "hsl(var(--card))", strokeWidth: 4, strokeLinejoin: "round",
+            }}
           >
-            <tspan x={x} dy="-0.5em" style={{ fontSize: 13, fontWeight: 700 }}>{value}</tspan>
-            <tspan x={x} dy="1.2em" style={{ fill: "hsl(var(--muted-foreground))", textTransform: "capitalize" }}>{label}</tspan>
+            {text}
           </text>
         );
       })}
@@ -47,6 +53,7 @@ function NodeLabelsLayer({ nodes }: any) {
 
 export function FunnelChart({ jobs }: Props) {
   const { t } = useTranslation();
+  const labelFor = useNodeLabel();
   const data = useMemo(() => buildFunnelData(jobs), [jobs]);
 
   if (data.nodes.length === 0 || data.links.length === 0) {
@@ -58,10 +65,11 @@ export function FunnelChart({ jobs }: Props) {
   }
 
   return (
+    <>
     <div className="w-full h-[320px] md:h-[440px]">
       <ResponsiveSankey
         data={data}
-        margin={{ top: 28, right: 130, bottom: 28, left: 110 }}
+        margin={{ top: 32, right: 150, bottom: 24, left: 120 }}
         align="start"
         sort="auto"
         colors={(node: any) => node.nodeColor || "hsl(var(--muted-foreground))"}
@@ -69,7 +77,7 @@ export function FunnelChart({ jobs }: Props) {
         nodeHoverOpacity={1}
         nodeThickness={18}
         nodeInnerPadding={3}
-        nodeSpacing={24}
+        nodeSpacing={36}
         nodeBorderWidth={0}
         nodeBorderRadius={4}
         linkOpacity={0.55}
@@ -94,7 +102,7 @@ export function FunnelChart({ jobs }: Props) {
         }}
         nodeTooltip={({ node }: any) => (
           <div className="px-2 py-1">
-            <div className="font-semibold">{t(`tracker.status.${node.id}`, { defaultValue: node.id })}</div>
+            <div className="font-semibold">{labelFor(node.id)}</div>
             <div className="text-muted-foreground">
               {t("tracker.jobs", { count: Math.round((node.value as number) || 0) })}
             </div>
@@ -109,7 +117,7 @@ export function FunnelChart({ jobs }: Props) {
           return (
             <div className="px-2 py-1">
               <div className="font-semibold">
-                {t(`tracker.status.${link.source.id}`, { defaultValue: link.source.id })} → {t(`tracker.status.${link.target.id}`, { defaultValue: link.target.id })}
+                {labelFor(link.source.id)} → {labelFor(link.target.id)}
               </div>
               <div className="text-muted-foreground">
                 {t("tracker.jobs", { count: link.value })} · {pct}% conversion
@@ -119,6 +127,8 @@ export function FunnelChart({ jobs }: Props) {
         }}
       />
     </div>
+    <p className="mt-2 text-[11px] text-muted-foreground">{t("ux.analytics.funnelNote")}</p>
+    </>
   );
 }
 

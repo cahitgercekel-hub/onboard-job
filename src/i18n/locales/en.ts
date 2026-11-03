@@ -287,6 +287,18 @@ export const en = {
       result: "Result"
     },
     cv: {
+      uploadPdf: "Upload your CV (PDF)",
+      scanLimitLabel: "Daily CV scans",
+      tipsList: {
+        noEmail: "Critical: add an email address so recruiters can contact you.",
+        noPhone: "Critical: add a phone number so you aren't skipped for phone screens.",
+        lowMetrics: "Add more metrics. Your CV only has {{count}} numbers/results. Recruiters look for %, € and scale.",
+        weakVerbs: "Replace weak phrases like 'responsible for' with active verbs like 'Led', 'Built' or 'Optimised'.",
+        fewSections: "Standardise your headings. Make sure you have clearly labelled 'Experience', 'Education' and 'Skills' sections.",
+        fancyChars: "ATS warning: remove complex graphics or unusual bullet symbols that can break parsing.",
+        shortCv: "Length warning: your CV has only {{count}} words. Expand on your most impactful results.",
+        longCv: "Length warning: {{count}} words is too long for most roles. Aim for 2 pages (about 900 words).",
+      },
       subtitle: "Score your CV across language, formatting, ATS friendliness, and keywords — with actionable tips.",
       premium: {
         ats: { title: "Detailed ATS Simulation", desc: "Per-section parser report and recruiter heatmap." },
@@ -331,5 +343,73 @@ export const en = {
         careerPivot: "Suggest a career pivot"
       }
     }
+  },
+  ux: {
+    welcome: {
+      dialogLabel: "Welcome tour",
+      stepOf: "Step {{n}} of {{total}}",
+      step1Title: "Welcome to ONboard",
+      step1Body: "Track every job application on one board, and see where your search stalls.",
+      step2Title: "How it works",
+      card1Title: "The board is the core",
+      card1Body: "Add a job in seconds and drag it from Saved to Offer.",
+      card2Title: "AI is optional",
+      card2Body: "AI tools are off by default and only run when you click. In the demo, AI answers are pre-written examples.",
+      card3Title: "Your data, your call",
+      card3Body: "Export or delete your data any time. Demo data stays in this browser tab.",
+      step3Title: "Where to start",
+      start1: "Open a job card",
+      start2: "Drag a card to Interviewing",
+      start3: "Open Analytics to see your funnel",
+      tryDemo: "Try the demo — no sign-up",
+      haveAccount: "I have an account",
+      startExploring: "Start exploring",
+      back: "Back",
+      next: "Next",
+      skip: "Skip",
+    },
+    demo: {
+      takeTour: "Take the tour",
+      exitDemo: "Exit demo",
+      footer: "Demo data · this browser tab only",
+      sessionNoAccount: "Demo session — no account",
+      notAvailable: "Not available in the demo.",
+      exampleLabel: "Example output (demo)",
+      fillSample: "Fill with sample data",
+      sampleFilled: "Sample data filled in.",
+      chatNotice: "Demo: replies are pre-written examples, not generated live.",
+      autoFilled: "Example output (demo): job filled from a sample posting — review and save.",
+    },
+    ai: {
+      offNote: "AI features are turned off, so nothing is sent until you allow it. Turn them on in",
+      offNoteLink: "Settings → Privacy & data",
+      offNoteAfter: "or press the button to review what would be sent first.",
+      pickInterviewJob: "Pick an interviewing job first.",
+    },
+    billing: {
+      notAvailable: "Paid plans aren't available yet. ONboard is a free beta.",
+      recommended: "Recommended",
+    },
+    job: {
+      editTitle: "Edit application",
+      cvVersionSent: "CV version sent",
+      matchScore: "Match score",
+    },
+    analytics: {
+      cvComparison: "CV version comparison",
+      cvComparisonSub: "Interview rate per CV version",
+      skillsTitle: "Skills: job demand vs. your CV",
+      roleBar_one: "{{count}} job · {{avg}}% avg match",
+      roleBar_other: "{{count}} jobs · {{avg}}% avg match",
+      roleBarNoScore_one: "{{count}} job",
+      roleBarNoScore_other: "{{count}} jobs",
+      funnelTracked: "All tracked",
+      funnelNotApplied: "Not applied yet",
+      funnelNote: "Each stage counts every job that reached it, so Applied also includes jobs that later moved on. Closed postings are left out.",
+    },
+    assistant: {
+      followUpTitle: "Follow-up drafts",
+      followUpDesc: "Drafts follow-up emails for you to review. Nothing is sent without your approval.",
+    },
   },
 };

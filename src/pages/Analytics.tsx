@@ -100,7 +100,7 @@ export default function Analytics() {
           <BarChart3 className="h-4 w-4 text-accent" /> {t("analytics.chartTitle")}
         </h2>
         <div className="w-full h-[260px] md:h-[360px]">
-          <ResponsiveContainer width="100%" height="100%">
+          <ResponsiveContainer width="100%" height="100%" initialDimension={{ width: 320, height: 260 }}>
             <BarChart data={data} margin={{ top: 8, right: 8, left: 0, bottom: 8 }}>
               <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" vertical={false} />
               <XAxis dataKey="name" tick={{ fill: "hsl(var(--muted-foreground))", fontSize: 11 }} axisLine={{ stroke: "hsl(var(--border))" }} tickLine={false} interval={0} />
@@ -162,7 +162,7 @@ export default function Analytics() {
           </p>
         ) : (
           <div className="w-full h-[260px] md:h-[360px]">
-            <ResponsiveContainer width="100%" height="100%">
+            <ResponsiveContainer width="100%" height="100%" initialDimension={{ width: 320, height: 260 }}>
               <ScatterChart margin={{ top: 8, right: 16, left: 0, bottom: 8 }}>
                 <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" />
                 <XAxis

@@ -1,4 +1,4 @@
-import { Mic, MessageSquare } from "lucide-react";
+import { Mic, MessageSquare, Target } from "lucide-react";
 import { InterviewPrep } from "@/pages/Assistant";
 import { AssistantToolShell } from "@/components/assistant/AssistantToolShell";
 import { useTranslation } from "react-i18next";
@@ -8,6 +8,7 @@ export default function InterviewAssistant() {
 
   return (
     <AssistantToolShell
+      icon={Target}
       title={t("assistant.tabs.interview")}
       subtitle={t("assistant.interview.subtitle")}
       premiumTools={[

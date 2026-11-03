@@ -21,6 +21,11 @@ import { useJobs } from "@/lib/jobsStore";
 import { cn } from "@/lib/utils";
 import { usePlan } from "@/lib/usePlan";
 import { useAiAccess } from "@/lib/aiAccess";
+import { isDemo } from "@/lib/demo/demoMode";
+import {
+  demoDelay, demoToolResult, DEMO_POLISH_SAMPLE, DEMO_SAMPLE_CV, DEMO_TONE_SAMPLE, DEMO_TRANSLATE_SAMPLE,
+} from "@/lib/demo/demo-examples";
+import { AiOffNote, DemoExampleLabel, DemoSampleButton } from "@/components/shared/demo-bits";
 
 type Tool = "tone" | "translate" | "polish" | "interview" | "cv";
 
@@ -30,6 +35,11 @@ interface InterviewResult { questions: { question: string; situation: string; ta
 interface CvAiResult { scores: { language: number; formatting: number; ats: number; keywords: number }; tips: string[]; strongKeywords: string[]; }
 
 async function runStructured<T>(tool: Tool, payload: Record<string, unknown>): Promise<T | string> {
+  if (isDemo()) {
+    // Demo: show a pre-written example; nothing is sent to the backend.
+    await demoDelay();
+    return demoToolResult(tool, payload) as T;
+  }
   const { data, error } = await supabase.functions.invoke("career-assistant", { body: { tool, payload } });
   if (error) {
     const msg = (error as any)?.context?.error || error.message;
@@ -134,6 +144,7 @@ export function ToneAnalyzer() {
   return (
     <div className="grid lg:grid-cols-2 gap-5 min-h-[560px] h-full">
       <div className="flex flex-col gap-3 h-full">
+        <DemoSampleButton disabled={loading} onFill={() => { setCompany(DEMO_TONE_SAMPLE.company); setDraft(DEMO_TONE_SAMPLE.draft); }} />
         <div className="grid gap-1.5">
           <Label htmlFor="company">{t("assistant.tone.targetCompany")}</Label>
           <Input id="company" value={company} onChange={(e) => setCompany(e.target.value)} placeholder="e.g. Deutsche Bank, Stripe, BMW" />
@@ -149,6 +160,7 @@ export function ToneAnalyzer() {
           {loading ? <Loader2 className="h-4 w-4 animate-spin mr-2" /> : <Wand2 className="h-4 w-4 mr-2" />}
           {t("assistant.tone.analyzeBtn")}
         </Button>
+        <AiOffNote />
       </div>
 
       <div className="min-h-[260px] h-full">
@@ -162,6 +174,7 @@ export function ToneAnalyzer() {
           </div>
         ) : (
           <div className="space-y-4">
+            <DemoExampleLabel />
             <div className="grid sm:grid-cols-2 gap-3">
               <div className="surface-card p-4">
                 <div className="text-[11px] font-medium uppercase tracking-wider text-muted-foreground flex items-center gap-1.5">
@@ -285,6 +298,7 @@ export function SkillTranslator() {
   return (
     <div className="grid lg:grid-cols-2 gap-5 min-h-[560px] h-full">
       <div className="flex flex-col gap-3 h-full">
+        <DemoSampleButton disabled={loading} onFill={() => { setExperience(DEMO_TRANSLATE_SAMPLE.experience); setJobDescription(DEMO_TRANSLATE_SAMPLE.jobDescription); }} />
         <div className="flex flex-col gap-1.5 flex-1 min-h-[200px]">
           <Label htmlFor="exp">{t("assistant.translate.experienceLabel")}</Label>
           <Textarea id="exp" value={experience} onChange={(e) => setExperience(e.target.value)} placeholder={t("assistant.translate.experiencePlaceholder")} className="flex-1 min-h-[200px] resize-none" />
@@ -300,6 +314,7 @@ export function SkillTranslator() {
           {loading ? <Loader2 className="h-4 w-4 animate-spin mr-2" /> : <Briefcase className="h-4 w-4 mr-2" />}
           {t("assistant.translate.translateBtn")}
         </Button>
+        <AiOffNote />
       </div>
 
       <div className="min-h-[260px] h-full">
@@ -313,7 +328,10 @@ export function SkillTranslator() {
           </div>
         ) : (
           <div className="space-y-4">
-            <div className="text-sm font-semibold text-foreground px-1">{t("assistant.translate.suggestedBullets")}</div>
+            <div className="flex items-center justify-between gap-2 px-1">
+              <div className="text-sm font-semibold text-foreground">{t("assistant.translate.suggestedBullets")}</div>
+              <DemoExampleLabel />
+            </div>
             {result.bullets.map((b, i) => (
               <div key={i} className="surface-card overflow-hidden border-l-4 border-l-accent shadow-sm">
                 <div className="p-4 bg-card">
@@ -365,6 +383,7 @@ export function PolishTool() {
   return (
     <div className="grid lg:grid-cols-2 gap-5 min-h-[560px] h-full">
       <div className="flex flex-col gap-3 h-full">
+        <DemoSampleButton disabled={loading} onFill={() => { setText(DEMO_POLISH_SAMPLE); setLanguage("English"); }} />
         <div className="flex items-end justify-between gap-3 flex-wrap">
           <Label htmlFor="polish-text" className="mb-0">{t("assistant.polish.textLabel")}</Label>
           <div className="flex items-end gap-2 ml-auto">
@@ -400,6 +419,7 @@ export function PolishTool() {
           {loading ? <Loader2 className="h-4 w-4 animate-spin mr-2" /> : <Sparkles className="h-4 w-4 mr-2" />}
           {t("assistant.polish.polishBtn")}
         </Button>
+        <AiOffNote />
       </div>
 
       <div className="min-h-[260px] h-full">
@@ -414,10 +434,11 @@ export function PolishTool() {
         ) : (
           <div className="space-y-4">
             <div className="surface-card p-5 shadow-md ring-1 ring-accent/30 bg-card">
-              <div className="flex items-center gap-2 mb-3">
+              <div className="flex items-center justify-between gap-2 mb-3 flex-wrap">
                 <Badge variant="secondary" className="bg-accent/15 text-accent border-accent/20">
                   <Sparkles className="h-3 w-3" /> {t("assistant.polish.polishedVersion")}
                 </Badge>
+                <DemoExampleLabel />
               </div>
               <div className="text-sm text-foreground/90 whitespace-pre-wrap leading-relaxed">{result.polished}</div>
             </div>
@@ -453,8 +474,10 @@ export function InterviewPrep() {
   const [loading, setLoading] = useState(false);
 
   const run = async () => {
-    const job = interviewJobs.find((j) => j.id === selectedId);
-    if (!job) return toast.error("Select a job first.");
+    const job = interviewJobs.find((j) => j.id === selectedId)
+      ?? (isDemo() ? interviewJobs[0] : undefined);
+    if (!job) return toast.error(t("ux.ai.pickInterviewJob"));
+    if (job.id !== selectedId) setSelectedId(job.id);
     if (!(await requestAi("interview"))) return;
     setLoading(true); setResult(null);
     try {
@@ -472,6 +495,7 @@ export function InterviewPrep() {
     <div className="grid lg:grid-cols-2 gap-5 min-h-[560px] h-full">
       {/* LEFT — picker + button */}
       <div className="flex flex-col gap-3 h-full">
+        <DemoSampleButton disabled={loading || interviewJobs.length === 0} onFill={() => setSelectedId(interviewJobs[0]?.id ?? "")} />
         <div className="grid gap-1.5">
           <Label className="text-xs">{t("assistant.interview.pickJob")}</Label>
           {interviewJobs.length === 0 ? (
@@ -490,10 +514,14 @@ export function InterviewPrep() {
           )}
         </div>
         <div className="flex-1" />
-        <Button onClick={run} disabled={loading || !selectedId} className="mt-auto w-full h-11 text-sm font-semibold bg-gradient-premium text-white border-0 hover:opacity-95 disabled:opacity-50">
+        <Button onClick={run} disabled={loading || (!isDemo() && interviewJobs.length === 0)} className="mt-auto w-full h-11 text-sm font-semibold bg-gradient-premium text-white border-0 hover:opacity-95 disabled:opacity-50">
           {loading ? <Loader2 className="h-4 w-4 animate-spin mr-2" /> : <MessageSquare className="h-4 w-4 mr-2" />}
           {t("assistant.interview.generate")}
         </Button>
+        {!isDemo() && interviewJobs.length > 0 && !selectedId && (
+          <p className="text-xs text-muted-foreground">{t("ux.ai.pickInterviewJob")}</p>
+        )}
+        <AiOffNote />
       </div>
 
       {/* RIGHT — results / placeholder */}
@@ -510,6 +538,7 @@ export function InterviewPrep() {
         )}
         {result && (
           <div className="grid gap-4">
+          <DemoExampleLabel className="justify-self-start" />
           {result.questions.map((q, i) => (
             <div key={i} className="surface-card p-5">
               <div className="flex items-center gap-2 mb-2">
@@ -671,7 +700,7 @@ export function CvAnalyzer() {
   const rules = useMemo(() => (text.trim() ? ruleCheckCv(text) : null), [text]);
   const finalScores = useMemo(() => (aiResult && rules ? combineScores(aiResult.scores, rules) : null), [aiResult, rules]);
 
-  const limitReached = !isPro && scansUsed >= SCAN_LIMIT;
+  const limitReached = !isPro && !isDemo() && scansUsed >= SCAN_LIMIT;
 
   const run = async () => {
     if (!text.trim()) return toast.error("Paste or upload your CV first.");
@@ -682,7 +711,7 @@ export function CvAnalyzer() {
       const r = await runStructured<CvAiResult>("cv", { cv: text });
       if (typeof r === "string") throw new Error("Unexpected response format");
       setAiResult(r);
-      if (!isPro) { bumpScanCount(); setScansUsed(readScanCount()); }
+      if (!isPro && !isDemo()) { bumpScanCount(); setScansUsed(readScanCount()); }
     } catch (e: any) { toast.error(e.message); }
     finally { setLoading(false); }
   };
@@ -722,6 +751,7 @@ export function CvAnalyzer() {
     <div className="grid lg:grid-cols-2 gap-5 min-h-[640px] h-full">
       {/* LEFT — Input */}
       <div className="flex flex-col gap-4 h-full">
+        <DemoSampleButton disabled={loading} onFill={() => setText(DEMO_SAMPLE_CV)} />
         <div className="surface-card p-4 flex flex-col flex-1 min-h-[200px]">
           <Label htmlFor="cv-text" className="text-sm font-semibold mb-2 block">{t("assistant.cv.paste")}</Label>
           <Textarea
@@ -758,13 +788,16 @@ export function CvAnalyzer() {
 
         <div className="surface-card p-4">
           <div className="flex items-center justify-between mb-2 text-xs">
-            <span className="text-muted-foreground">
+            <span className="text-muted-foreground w-full">
               {isPro ? (
                 <span className="inline-flex items-center gap-1 text-premium font-medium">
                   <Sparkles className="h-3 w-3" /> {t("assistant.cv.unlimitedScans")}
                 </span>
               ) : (
-                t("assistant.cv.scanLimitLabel", { used: scansUsed, limit: SCAN_LIMIT })
+                <span className="inline-flex w-full items-center justify-between gap-2">
+                  <span>{t("assistant.cv.scanLimitLabel")}</span>
+                  <span className="tabular-nums font-medium text-foreground">{scansUsed}/{SCAN_LIMIT}</span>
+                </span>
               )}
             </span>
           </div>
@@ -784,6 +817,7 @@ export function CvAnalyzer() {
           {loading ? <Loader2 className="h-4 w-4 animate-spin mr-2" /> : <Target className="h-4 w-4 mr-2" />}
           {t("assistant.cv.analyze")}
         </Button>
+        <AiOffNote />
       </div>
 
       {/* RIGHT — Results */}
@@ -800,6 +834,7 @@ export function CvAnalyzer() {
         )}
         {aiResult && finalScores && (
           <>
+            <DemoExampleLabel className="self-start" />
             <div className="grid grid-cols-2 gap-3">
               <ScoreGauge label={t("assistant.cv.language")} score={finalScores.language} />
               <ScoreGauge label={t("assistant.cv.formatting")} score={finalScores.formatting} />

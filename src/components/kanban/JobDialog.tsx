@@ -3,7 +3,10 @@ import { useTranslation } from "react-i18next";
 import { Sparkles, Loader2, Mail } from "lucide-react";
 import { supabase } from "@/lib/db";
 import { useAiAccess } from "@/lib/aiAccess";
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
+import { isDemo } from "@/lib/demo/demoMode";
+import { demoDelay, demoFitness } from "@/lib/demo/demo-examples";
+import { DemoExampleLabel } from "@/components/shared/demo-bits";
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
@@ -55,9 +58,13 @@ export function JobDialog({ open, onOpenChange, initialStatus = "saved", job, on
   const [cvVersionId, setCvVersionId] = useState<string>(job?.cvVersionId ?? "");
   const [scoring, setScoring] = useState(false);
   const [coverOpen, setCoverOpen] = useState(false);
+  const [demoFit, setDemoFit] = useState<{ score: number; reasoning: string } | null>(null);
+  const fitScore = demoFit?.score ?? job?.fitnessScore;
+  const fitReasoning = demoFit?.reasoning ?? job?.fitnessReasoning;
 
   useEffect(() => {
     if (!open) return;
+    setDemoFit(null);
     setCompany(job?.company ?? "");
     setRole(job?.role ?? "");
     setUrl(job?.url ?? "");
@@ -78,6 +85,16 @@ export function JobDialog({ open, onOpenChange, initialStatus = "saved", job, on
     if (!(await requestAi("fitness"))) return;
     setScoring(true);
     try {
+      if (isDemo()) {
+        // Demo: pre-written example score, saved to the in-tab demo data only.
+        await demoDelay();
+        const ex = demoFitness(job.company, job.role);
+        const { error } = await supabase.from("jobs").update({ fitness_score: ex.score, fitness_reasoning: ex.reasoning }).eq("id", job.id);
+        if (error) throw error;
+        setDemoFit(ex);
+        toast.success(`${t("ux.demo.exampleLabel")}: ${t("ux.job.matchScore")} ${ex.score}`);
+        return;
+      }
       const { data, error } = await supabase.functions.invoke("calculate-fitness", { body: { jobId: job.id } });
       if (error) throw error;
       if ((data as any)?.error) throw new Error((data as any).error);
@@ -110,11 +127,25 @@ export function JobDialog({ open, onOpenChange, initialStatus = "saved", job, on
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="sm:max-w-[560px] max-h-[90vh] overflow-y-auto">
+      <DialogContent
+        className="sm:max-w-[560px] max-h-[90vh] overflow-y-auto"
+        onOpenAutoFocus={(e) => {
+          // Focus the dialog itself instead of selecting the Company field's text.
+          e.preventDefault();
+          (e.currentTarget as HTMLElement | null)?.focus();
+        }}
+      >
         <DialogHeader>
           <div className="flex items-center gap-3">
             <CompanyLogo company={company} url={url} size={32} />
-            <DialogTitle>{job ? t("common.edit") : t("common.add")}</DialogTitle>
+            <div className="min-w-0 text-left">
+              <DialogTitle>{job ? t("ux.job.editTitle") : t("common.add")}</DialogTitle>
+              {job ? (
+                <DialogDescription className="truncate">{job.company}</DialogDescription>
+              ) : (
+                <DialogDescription className="sr-only">{t("common.add")}</DialogDescription>
+              )}
+            </div>
           </div>
         </DialogHeader>
         <div className="grid gap-3 py-1">
@@ -185,7 +216,7 @@ export function JobDialog({ open, onOpenChange, initialStatus = "saved", job, on
             </div>
           </div>
           <div className="grid gap-1.5">
-            <Label>{t("assistant.tabs.cv")}</Label>
+            <Label>{t("ux.job.cvVersionSent")}</Label>
             <Select
               value={cvVersionId || "__none__"}
               onValueChange={(v) => setCvVersionId(v === "__none__" ? "" : v)}
@@ -212,12 +243,15 @@ export function JobDialog({ open, onOpenChange, initialStatus = "saved", job, on
               )}
             </div>
             <Textarea id="jd" rows={4} value={jobDescription} onChange={(e) => setJobDescription(e.target.value)} placeholder="Paste the JD here — used for AI Fitness Score & Interview Prep…" />
-            {job?.fitnessReasoning && (
+            {fitReasoning && (
               <div className="mt-2 flex gap-3 rounded-md border border-border bg-muted/30 p-3">
-                <FitnessRing score={job.fitnessScore} size={44} stroke={5} />
+                <FitnessRing score={fitScore} size={44} stroke={5} />
                 <div className="min-w-0 flex-1">
-                  <div className="text-[11px] font-medium text-muted-foreground uppercase tracking-wide mb-0.5">{t("analytics.fitnessTitle")}</div>
-                  <p className="text-xs text-foreground leading-relaxed">{job.fitnessReasoning}</p>
+                  <div className="flex flex-wrap items-center gap-2 mb-0.5">
+                    <span className="text-[11px] font-medium text-muted-foreground uppercase tracking-wide">{t("ux.job.matchScore")}</span>
+                    <DemoExampleLabel />
+                  </div>
+                  <p className="text-xs text-foreground leading-relaxed">{fitReasoning}</p>
                 </div>
               </div>
             )}

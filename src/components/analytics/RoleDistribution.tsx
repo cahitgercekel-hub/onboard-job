@@ -25,11 +25,14 @@ export function RoleDistribution({ jobs, selected, onSelect }: Props) {
     return t("analytics.insightVolume", { category: top.category, avg });
   }, [stats, t]);
 
-  const data = stats.map((s) => ({
+  const data = [...stats].sort((a, b) => b.count - a.count).map((s) => ({
     name: s.category,
     count: s.count,
     avgScore: s.avgScore ?? 0,
     hasScore: s.avgScore != null,
+    label: s.avgScore != null
+      ? t("ux.analytics.roleBar", { count: s.count, avg: s.avgScore })
+      : t("ux.analytics.roleBarNoScore", { count: s.count }),
   }));
 
   return (
@@ -52,8 +55,8 @@ export function RoleDistribution({ jobs, selected, onSelect }: Props) {
       ) : (
         <>
           <div className="w-full" style={{ height: Math.max(180, data.length * 40) }}>
-            <ResponsiveContainer width="100%" height="100%">
-              <BarChart data={data} layout="vertical" margin={{ top: 4, right: 40, left: 0, bottom: 4 }}>
+            <ResponsiveContainer width="100%" height="100%" initialDimension={{ width: 320, height: 180 }}>
+              <BarChart data={data} layout="vertical" margin={{ top: 4, right: 170, left: 0, bottom: 4 }}>
                 <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" horizontal={false} />
                 <XAxis type="number" allowDecimals={false} tick={{ fill: "hsl(var(--muted-foreground))", fontSize: 11 }} axisLine={{ stroke: "hsl(var(--border))" }} tickLine={false} />
                 <YAxis dataKey="name" type="category" width={140} tick={{ fill: "hsl(var(--muted-foreground))", fontSize: 11 }} axisLine={{ stroke: "hsl(var(--border))" }} tickLine={false} />
@@ -98,9 +101,8 @@ export function RoleDistribution({ jobs, selected, onSelect }: Props) {
                     );
                   })}
                   <LabelList
-                    dataKey="avgScore"
+                    dataKey="label"
                     position="right"
-                    formatter={(v: number) => (v > 0 ? `${v}%` : "—")}
                     style={{ fill: "hsl(var(--muted-foreground))", fontSize: 10 }}
                   />
                 </Bar>

@@ -8,6 +8,10 @@ import { Sparkles, Loader2 } from "lucide-react";
 import { toast } from "sonner";
 import { supabase } from "@/lib/db";
 import { useAiAccess } from "@/lib/aiAccess";
+import { useTranslation } from "react-i18next";
+import { isDemo } from "@/lib/demo/demoMode";
+import { demoDelay, demoExtract, DEMO_EXTRACT_SAMPLE_TEXT } from "@/lib/demo/demo-examples";
+import { DemoExampleLabel, DemoSampleButton } from "@/components/shared/demo-bits";
 import {
   APPLICATION_TYPES,
   INDUSTRIES,
@@ -25,25 +29,35 @@ interface Props {
 }
 
 export function AutoAddDialog({ open, onOpenChange, onExtracted }: Props) {
+  const { t } = useTranslation();
   const { requestAi } = useAiAccess();
   const [text, setText] = useState("");
   const [url, setUrl] = useState("");
   const [loading, setLoading] = useState(false);
 
   const run = async () => {
-    if (!text.trim() || text.trim().length < 30) {
+    if (!isDemo() && (!text.trim() || text.trim().length < 30)) {
       return toast.error("Paste a job description (at least a few sentences).");
     }
     if (!(await requestAi("extract"))) return;
     setLoading(true);
     try {
-      const { data, error } = await supabase.functions.invoke("career-assistant", {
-        body: { tool: "extract", payload: { text, url: url.trim() || undefined } },
-      });
-      if (error) throw new Error((error as any)?.context?.error || error.message);
-      if ((data as any)?.error) throw new Error((data as any).error);
+      let raw: unknown;
+      if (isDemo()) {
+        // Demo: pre-written example extraction; nothing is sent to the backend.
+        if (!text.trim()) setText(DEMO_EXTRACT_SAMPLE_TEXT);
+        await demoDelay();
+        raw = demoExtract();
+      } else {
+        const { data, error } = await supabase.functions.invoke("career-assistant", {
+          body: { tool: "extract", payload: { text, url: url.trim() || undefined } },
+        });
+        if (error) throw new Error((error as any)?.context?.error || error.message);
+        if ((data as any)?.error) throw new Error((data as any).error);
+        raw = (data as any).extracted;
+      }
 
-      const ex = (data as any).extracted as {
+      const ex = raw as {
         company?: string;
         role?: string;
         applicationType?: string;
@@ -76,7 +90,7 @@ export function AutoAddDialog({ open, onOpenChange, onExtracted }: Props) {
         jobDescription: ex.jobDescription?.trim() || undefined,
         notes: ex.notes?.trim() || undefined,
       });
-      toast.success("Job auto-filled — review and save.");
+      toast.success(isDemo() ? t("ux.demo.autoFilled") : "Job auto-filled — review and save.");
       onOpenChange(false);
     } catch (e: any) {
       toast.error(e.message || "Auto-add failed");
@@ -98,6 +112,12 @@ export function AutoAddDialog({ open, onOpenChange, onExtracted }: Props) {
           </DialogDescription>
         </DialogHeader>
         <div className="grid gap-3 py-1">
+          {isDemo() && (
+            <div className="flex flex-wrap items-center justify-between gap-2">
+              <DemoSampleButton disabled={loading} onFill={() => setText(DEMO_EXTRACT_SAMPLE_TEXT)} />
+              <DemoExampleLabel />
+            </div>
+          )}
           <div className="grid gap-1.5">
             <Label htmlFor="auto-url">Job URL <span className="text-muted-foreground font-normal">(optional)</span></Label>
             <Input

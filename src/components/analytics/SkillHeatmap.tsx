@@ -15,6 +15,7 @@ import { ScrollArea } from "@/components/ui/scroll-area";
 import { buildSkillStats, prettySkill, topMissingSkills, type SkillStat } from "@/lib/skills";
 import type { Job } from "@/lib/types";
 import { toast } from "sonner";
+import { useTranslation } from "react-i18next";
 
 interface Props {
   jobs: Job[];
@@ -27,6 +28,7 @@ interface OptimizedBullet {
 
 export function SkillHeatmap({ jobs }: Props) {
   const { user } = useAuth();
+  const { t } = useTranslation();
   const { requestAi } = useAiAccess();
   const [cvText, setCvText] = useState<string | null>(null);
   const [loadingCv, setLoadingCv] = useState(true);
@@ -100,7 +102,7 @@ export function SkillHeatmap({ jobs }: Props) {
     <div className="surface-card p-3 md:p-5 overflow-hidden flex flex-col h-full">
       <div className="flex items-center justify-between mb-4 flex-wrap gap-2">
         <h2 className="text-sm font-medium text-foreground flex items-center gap-2">
-          <Target className="h-4 w-4 text-accent" /> Skill Heatmap
+          <Target className="h-4 w-4 text-accent" /> {t("ux.analytics.skillsTitle")}
         </h2>
         <span className="text-[11px] text-muted-foreground">
           Top {stats.length} skills across {jobs.filter((j) => j.jobDescription).length} Job Postings
@@ -118,7 +120,7 @@ export function SkillHeatmap({ jobs }: Props) {
       ) : (
         <>
           <div className="w-full h-[300px] md:h-[360px]">
-            <ResponsiveContainer width="100%" height="100%">
+            <ResponsiveContainer width="100%" height="100%" initialDimension={{ width: 320, height: 300 }}>
               <RadarChart data={chartData} outerRadius="78%">
                 <PolarGrid stroke="hsl(var(--border))" />
                 <PolarAngleAxis
@@ -128,7 +130,7 @@ export function SkillHeatmap({ jobs }: Props) {
                 <PolarRadiusAxis
                   angle={90}
                   domain={[0, 100]}
-                  tick={{ fill: "hsl(var(--muted-foreground))", fontSize: 10 }}
+                  tick={false}
                   axisLine={false}
                 />
                 <Radar
@@ -138,12 +140,28 @@ export function SkillHeatmap({ jobs }: Props) {
                   fill="hsl(var(--accent))"
                   fillOpacity={0.35}
                 />
+                {/* CV coverage is yes/no per skill, so draw it as markers: a filled polygon
+                    collapses to a stray line from the centre when only one skill is covered. */}
                 <Radar
                   name="Your CV"
                   dataKey="Your CV"
                   stroke="hsl(var(--primary))"
+                  strokeOpacity={0}
                   fill="hsl(var(--primary))"
-                  fillOpacity={0.25}
+                  fillOpacity={0}
+                  legendType="circle"
+                  isAnimationActive={false}
+                  dot={(props: { cx?: number; cy?: number; value?: number; index?: number }) => (
+                    <circle
+                      key={props.index}
+                      cx={props.cx}
+                      cy={props.cy}
+                      r={(props.value ?? 0) > 0 ? 5 : 0}
+                      fill="hsl(var(--primary))"
+                      stroke="hsl(var(--card))"
+                      strokeWidth={2}
+                    />
+                  )}
                 />
                 <Legend wrapperStyle={{ fontSize: 11 }} />
                 <Tooltip

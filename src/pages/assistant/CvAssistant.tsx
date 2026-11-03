@@ -1,4 +1,4 @@
-import { Target, Infinity as InfinityIcon } from "lucide-react";
+import { Target, Infinity as InfinityIcon, FileText } from "lucide-react";
 import { CvAnalyzer } from "@/pages/Assistant";
 import { AssistantToolShell } from "@/components/assistant/AssistantToolShell";
 import { useTranslation } from "react-i18next";
@@ -8,6 +8,7 @@ export default function CvAssistant() {
 
   return (
     <AssistantToolShell
+      icon={FileText}
       title={t("assistant.tabs.cv")}
       subtitle={t("assistant.cv.subtitle")}
       premiumTools={[

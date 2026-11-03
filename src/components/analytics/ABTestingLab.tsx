@@ -4,6 +4,7 @@ import {
 } from "recharts";
 import { FlaskConical } from "lucide-react";
 import { useCvVersions } from "@/lib/cvVersionsStore";
+import { useTranslation } from "react-i18next";
 import type { Job } from "@/lib/types";
 
 interface Props {
@@ -44,6 +45,7 @@ const PALETTE = [
 
 export function ABTestingLab({ jobs }: Props) {
   const { versions } = useCvVersions();
+  const { t } = useTranslation();
 
   const rows: VersionRow[] = useMemo(() => {
     return versions.map((v, i) => {
@@ -67,9 +69,12 @@ export function ABTestingLab({ jobs }: Props) {
   return (
     <div className="surface-card p-3 md:p-5 overflow-hidden">
       <div className="flex items-center justify-between mb-4 flex-wrap gap-2">
-        <h2 className="text-sm font-medium text-foreground flex items-center gap-2">
-          <FlaskConical className="h-4 w-4 text-accent" /> A/B Testing Lab
-        </h2>
+        <div>
+          <h2 className="text-sm font-medium text-foreground flex items-center gap-2">
+            <FlaskConical className="h-4 w-4 text-accent" /> {t("ux.analytics.cvComparison")}
+          </h2>
+          <p className="text-[11px] text-muted-foreground mt-0.5">{t("ux.analytics.cvComparisonSub")}</p>
+        </div>
         <span className="text-[11px] text-muted-foreground">
           {rows.length} {rows.length === 1 ? "version" : "versions"} · {taggedTotal} tagged applications
         </span>
@@ -86,7 +91,7 @@ export function ABTestingLab({ jobs }: Props) {
       ) : (
         <>
           <div className="w-full h-[260px] md:h-[320px]">
-            <ResponsiveContainer width="100%" height="100%">
+            <ResponsiveContainer width="100%" height="100%" initialDimension={{ width: 320, height: 260 }}>
               <BarChart data={rows} margin={{ top: 8, right: 8, left: 0, bottom: 8 }}>
                 <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" vertical={false} />
                 <XAxis
@@ -136,19 +141,19 @@ export function ABTestingLab({ jobs }: Props) {
             </ResponsiveContainer>
           </div>
 
-          <div className="mt-4 grid sm:grid-cols-2 lg:grid-cols-3 gap-2">
+          <div className="mt-4 grid sm:grid-cols-2 gap-2">
             {rows.map((r) => (
-              <div key={r.id} className="rounded-md border border-border bg-card/50 px-3 py-2 flex items-center justify-between">
-                <div className="min-w-0">
-                  <div className="text-xs font-medium text-foreground truncate flex items-center gap-1.5">
-                    <span className="h-2 w-2 rounded-full shrink-0" style={{ background: r.color }} />
-                    {r.name}
+              <div key={r.id} className="rounded-md border border-border bg-card/50 px-3 py-2 flex items-start justify-between gap-3">
+                <div className="min-w-0 flex-1">
+                  <div className="text-xs font-medium text-foreground flex items-start gap-1.5 break-words">
+                    <span className="h-2 w-2 rounded-full shrink-0 mt-1" style={{ background: r.color }} />
+                    <span className="min-w-0">{r.name}</span>
                   </div>
                   <div className="text-[11px] text-muted-foreground">
                     {r.reachedInterview}/{r.applied} → interview
                   </div>
                 </div>
-                <div className="text-base font-semibold text-foreground shrink-0">{r.rate}%</div>
+                <div className="text-base font-semibold text-foreground shrink-0 tabular-nums">{r.rate}%</div>
               </div>
             ))}
           </div>

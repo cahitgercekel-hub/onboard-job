@@ -51,7 +51,7 @@ const JOBS: SampleJob[] = [
   { company: "Fourth Coffee", role: "Operations Analyst", status: "archived", appliedDaysAgo: 45, updatedDaysAgo: 25, type: "Full-time", industry: "Other", model: "Hybrid", location: "Hamburg", skills: "Excel, SQL, operations", previous: "applied", archiveType: "closed" },
 ];
 
-const CV_TEXT = `Alex Doe — Data Analyst (sample CV for the ONboard demo)
+export const CV_TEXT = `Alex Doe — Data Analyst (sample CV for the ONboard demo)
 
 Summary
 Data analyst with 2 years of experience turning raw data into dashboards and decisions. Comfortable with SQL, Python (pandas, numpy) and stakeholder communication.

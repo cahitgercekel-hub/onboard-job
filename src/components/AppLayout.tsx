@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { NavLink, Outlet } from "react-router-dom";
 import {
   LayoutGrid, BarChart3, Settings as SettingsIcon, Menu,
@@ -11,11 +11,21 @@ import { Logo } from "@/components/Logo";
 import { PlanBadge } from "@/components/PlanBadge";
 import { usePlan } from "@/lib/usePlan";
 import { exitDemo, isDemo } from "@/lib/demo/demoMode";
+import { WelcomeTour, hasSeenWelcome, markWelcomeSeen } from "@/components/shared/welcome-tour";
 
 export default function AppLayout() {
   const { t } = useTranslation();
   const [collapsed, setCollapsed] = useState(false);
   const { plan } = usePlan();
+  const [tourOpen, setTourOpen] = useState(false);
+
+  // First visit straight into the demo: show the welcome tour once.
+  useEffect(() => {
+    if (isDemo() && !hasSeenWelcome()) {
+      markWelcomeSeen();
+      setTourOpen(true);
+    }
+  }, []);
 
 
   const trackerNav = [
@@ -168,7 +178,7 @@ export default function AppLayout() {
                 collapsed && "invisible"
               )}
             >
-              {t("app.syncedStatus", { defaultValue: "Synced to your account." })}
+              {isDemo() ? t("ux.demo.footer") : t("app.syncedStatus", { defaultValue: "Synced to your account." })}
             </div>
           </div>
 
@@ -181,9 +191,14 @@ export default function AppLayout() {
                 <strong>Demo mode</strong> — sample data that stays in this browser tab and disappears when you close it.
                 Nothing is sent to our servers.
               </span>
-              <button type="button" onClick={() => exitDemo()} className="font-medium underline underline-offset-2">
-                Exit demo
-              </button>
+              <span className="flex items-center gap-4">
+                <button type="button" onClick={() => setTourOpen(true)} className="font-medium underline underline-offset-2">
+                  {t("ux.demo.takeTour")}
+                </button>
+                <button type="button" onClick={() => exitDemo()} className="font-medium underline underline-offset-2">
+                  {t("ux.demo.exitDemo")}
+                </button>
+              </span>
             </div>
           )}
           {/* Mobile top header */}
@@ -226,6 +241,7 @@ export default function AppLayout() {
           </nav>
         </div>
       </div>
+      <WelcomeTour open={tourOpen} onOpenChange={setTourOpen} mode="app" />
     </TooltipProvider>
   );
 }

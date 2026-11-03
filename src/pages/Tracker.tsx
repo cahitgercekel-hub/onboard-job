@@ -321,7 +321,7 @@ export default function Tracker() {
         {/* AI Job Match panel hidden for now */}
         <div className="flex-1 min-w-0 overflow-x-auto snap-x snap-mandatory md:snap-none">
           <DndContext sensors={sensors} onDragStart={onDragStart} onDragEnd={onDragEnd} onDragCancel={() => setActiveId(null)}>
-            <div className="flex gap-4 px-4 py-4 md:p-6 min-h-full">
+            <div className="flex gap-4 xl:gap-3 px-4 py-4 md:p-6 xl:px-4 min-h-full">
               {STATUS_ORDER.map((status) => (
                 <KanbanColumn
                   key={status}

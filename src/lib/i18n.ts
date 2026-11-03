@@ -1,6 +1,7 @@
 import i18n from "i18next";
 import { initReactI18next } from "react-i18next";
 import LanguageDetector from "i18next-browser-languagedetector";
+import { isDemo } from "./demo/demoMode";
 
 import { en } from "../i18n/locales/en";
 import { de } from "../i18n/locales/de";
@@ -18,18 +19,22 @@ const resources = {
   zh: { translation: zh },
 };
 
+// The demo always starts in English and never writes the saved language preference.
+const demo = isDemo();
+
 i18n
   .use(LanguageDetector)
   .use(initReactI18next)
   .init({
     resources,
+    ...(demo ? { lng: "en" } : {}),
     fallbackLng: "en",
     supportedLngs: ["en", "de", "tr", "es", "fr", "zh"],
     interpolation: { escapeValue: false },
     detection: {
       order: ["localStorage", "navigator"],
       lookupLocalStorage: "jat.lang",
-      caches: ["localStorage"],
+      caches: demo ? [] : ["localStorage"],
     },
   });
 
