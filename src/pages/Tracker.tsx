@@ -458,7 +458,7 @@ function withNulls(data: Partial<Job>): Partial<Job> {
   const keys = ["url", "dateApplied", "applicationType", "industry", "workModel", "location", "jobDescription", "notes", "cvVersionId"] as const;
   const out: Record<string, unknown> = { ...data };
   for (const k of keys) if (out[k] === undefined) out[k] = null;
-  return out as Partial<Job>;
+  return out as unknown as Partial<Job>;
 }
 
 function DateRangeField({ label, value, onChange }: { label: string; value?: Date; onChange: (d: Date | undefined) => void }) {
