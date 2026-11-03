@@ -62,6 +62,12 @@
     --col-offer-soft: 150 60% 90%;
     --col-rejected-soft: 0 80% 94%;
 
+    /* Inline text-diff highlights (Grammar & Polish) */
+    --diff-spelling: 0 70% 42%;
+    --diff-spelling-soft: 0 85% 93%;
+    --diff-style: 215 75% 42%;
+    --diff-style-soft: 215 90% 93%;
+
     --shadow-sm: 0 1px 2px hsl(222 25% 12% / 0.04), 0 1px 3px hsl(222 25% 12% / 0.06);
     --shadow-md: 0 4px 14px hsl(222 25% 12% / 0.06), 0 2px 4px hsl(222 25% 12% / 0.04);
     --shadow-lg: 0 16px 40px hsl(222 25% 12% / 0.10);
@@ -107,6 +113,11 @@
     --col-interviewing-soft: 38 35% 22%;
     --col-offer-soft: 142 25% 20%;
     --col-rejected-soft: 0 30% 22%;
+
+    --diff-spelling: 0 85% 72%;
+    --diff-spelling-soft: 0 40% 22%;
+    --diff-style: 215 90% 72%;
+    --diff-style-soft: 215 40% 22%;
 
     --sidebar-background: 30 8% 12%;
     --sidebar-foreground: 40 15% 85%;
